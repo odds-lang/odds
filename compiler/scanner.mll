@@ -15,48 +15,48 @@ rule token = parse
 | [' ' '\n' '\r'] { token lexbuf }
 
 (* Comments *)
-| "/*"		{ comment lexbuf }
+| "/*"    { comment lexbuf }
 
 (* Punctuation *)
-| '('		{ LPAREN }  | ')'		{ RPAREN }
-| '<'		{ LCAR }	| '>'		{ RCAR } (* Also relational operators *)
-| '['		{ LBRACK }	| ']'		{ RBRACK }
-| ';'		{ SEMI }    | ':'		{ COLON }
-| ','		{ COMMA }	| '|'		{ VBAR }
+| '('   { LPAREN }  | ')'   { RPAREN }
+| '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
+| '['   { LBRACK }  | ']'   { RBRACK }
+| ';'   { SEMI }    | ':'   { COLON }
+| ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)
-| '+'		{ PLUS }    | '-'		{ MINUS }
-| '*'		{ TIMES }   | '/'		{ DIVIDE }
-| '%'		{ MOD }
+| '+'   { PLUS }    | '-'   { MINUS }
+| '*'   { TIMES }   | '/'   { DIVIDE }
+| '%'   { MOD }
 
 (* Relational Operators *)
-| "=="		{ EQ }		| "!="		{ NEQ }
-| "<="		{ LEQ }		| ">="		{ GEQ }
+| "=="    { EQ }    | "!="    { NEQ }
+| "<="    { LEQ }   | ">="    { GEQ }
 
 (* Logical Operators & Keywords*)
-| "&&"		{ AND }		| "||"		{ OR }
-| "!"		{ NOT }
+| "&&"    { AND }   | "||"    { OR }
+| "!"     { NOT }
 
 (* Assignment Operator *)
-| '='		{ ASN }
+| '='   { ASN }
 
 (* Conditional Operators *)
-| "if"		{ IF }		| "then"	{ THEN }
-| "else"	{ ELSE }
+| "if"    { IF }    | "then"  { THEN }
+| "else"  { ELSE }
 
 (* Declarative Keywords *)
-| "set"		{ SET }		| "state"	{ STATE }
+| "set"   { SET }   | "state" { STATE }
 
 (* Function Symbols & Keywords *)
-| "->"		{ FDELIM }	(*| "=>"		{ FRTYPE }*)
-| "return"	{ RETURN }
+| "->"      { FDELIM }  (*| "=>"    { FRTYPE }*)
+| "return"  { RETURN }
 
 (*
 (* Type Keywords *)
-| "int"		{ INT }		| "float"	{ FLOAT }
-| "string"	{ STRING }	| "dist"	{ DIST }
-| "list"	{ LIST }	| "void"	{ VOID }
-| "bool"	{ BOOL }
+| "int"   { INT }   | "float" { FLOAT }
+| "string"  { STRING }  | "dist"  { DIST }
+| "list"  { LIST }  | "void"  { VOID }
+| "bool"  { BOOL }
 *)
 
 (* End-of-File *)
@@ -73,5 +73,5 @@ rule token = parse
 (* To Do - List Literals - Do they even go here? *)
 
 and comment = parse
-| "*/"		{ token lexbuf }
-| _			{ comment lexbuf }
+| "*/"    { token lexbuf }
+| _       { comment lexbuf }
