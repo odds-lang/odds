@@ -48,20 +48,22 @@ rule token = parse
 | "set"		{ SET }		| "state"	{ STATE }
 
 (* Function Symbols & Keywords *)
-| "->"		{ FDELIM }	| "=>"		{ FRTYPE }
+| "->"		{ FDELIM }	(*| "=>"		{ FRTYPE }*)
 | "return"	{ RETURN }
 
+(*
 (* Type Keywords *)
 | "int"		{ INT }		| "float"	{ FLOAT }
 | "string"	{ STRING }	| "dist"	{ DIST }
 | "list"	{ LIST }	| "void"	{ VOID }
 | "bool"	{ BOOL }
+*)
 
 (* End-of-File *)
 | eof { EOF }
 
 (* Identifiers *)
-| ['a'-'z' 'A'-'Z'] ['a'-'z' 'A'-'Z' '_']* as lxm { ID(lxm) }
+| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }
 
 (* Literals *)
 | '-'?num+ as intlit { INT_LITERAL(int_of_string intlit) }
