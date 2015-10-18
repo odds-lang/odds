@@ -12,7 +12,7 @@ let num = ['0'-'9']
 rule token = parse
   
 (* Whitespace *)
-| [' ' '\n' '\r'] { token lexbuf }
+| [' ' '\n' '\r']    { token lexbuf }
 
 (* Comments *)
 | "/*"    { comment lexbuf }
