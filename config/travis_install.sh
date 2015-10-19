@@ -25,6 +25,7 @@ echo OPAM versions
 opam --version
 opam --git-version
 
-opam init
-opam install ${OPAM_DEPENDS}
+# install dependencies
+#opam init
+#opam install ${OPAM_DEPENDS} 
 eval `opam config env`
