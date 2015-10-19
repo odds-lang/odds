@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 INPUT_FILES="scanner/*_input.txt"
 echo "# Running scanner tests..."
