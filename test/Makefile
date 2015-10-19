@@ -7,8 +7,9 @@ test: build
 build:
 	cd scanner; make
 
-parent:
+all:
 	cd ..; make
+	make test
 
 .PHONY: clean
 clean:
