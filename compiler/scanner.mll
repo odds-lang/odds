@@ -5,7 +5,7 @@
  * COMS4115
  *)
 
-{ open Parser }
+{ open Tokens }
 
 let num = ['0'-'9']
 
