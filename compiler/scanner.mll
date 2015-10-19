@@ -27,7 +27,7 @@ rule token = parse
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
-| '%'   { MOD }
+| '%'   { MOD }     | "**"  { POWER }
 
 (* Relational Operators *)
 | "=="    { EQ }    | "!="    { NEQ }
@@ -63,9 +63,9 @@ rule token = parse
 | eof { EOF }
 
 (* Literals *)
-| '-'?num+ as intlit { INT_LITERAL(int_of_string intlit) }
-| '-'?num* '.' num+ as floatlit { FLOAT_LITERAL(float_of_string floatlit) }
-| '"' ( ([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
+| num+ as intlit { INT_LITERAL(int_of_string intlit) }
+| num* '.' num+ as floatlit { FLOAT_LITERAL(float_of_string floatlit) }
+| '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
 | "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
 (* To Do - List Literals - Do they even go here? *)
 
