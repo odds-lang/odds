@@ -1,4 +1,4 @@
-# Edit this for your own project dependencies
+# Project dependencies
 OPAM_DEPENDS=""
 
 # this will default to the version specified in .travis.yml
