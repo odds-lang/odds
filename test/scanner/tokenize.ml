@@ -12,7 +12,7 @@ let stringify = function
   (* Arithmetic Operators *)
   | PLUS -> "PLUS"     | MINUS -> "MINUS"
   | TIMES -> "TIMES"   | DIVIDE -> "DIVIDE"
-  | MOD -> "MOD"
+  | MOD -> "MOD"       | POWER -> "POWER" 
 
   (* Relational Operators *)
   | EQ -> "EQ"    | NEQ -> "NEQ"

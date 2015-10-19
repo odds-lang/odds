@@ -1,0 +1,6 @@
+/*
+ * I am writing a comment
+ * "Hello"
+ * None of this should be tokenized.
+ * set a = 4
+ */

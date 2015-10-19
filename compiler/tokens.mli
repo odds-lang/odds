@@ -9,7 +9,7 @@ type token =
 (* Arithmetic Operators *)
 | PLUS    | MINUS
 | TIMES   | DIVIDE
-| MOD
+| MOD     | POWER
 
 (* Relational Operators *)
 | EQ    | NEQ
