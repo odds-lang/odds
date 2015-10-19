@@ -3,10 +3,9 @@
 [build image]: https://travis-ci.org/alexandramedway/plt.svg?branch=master
 [build link]: https://travis-ci.org/alexandramedway/plt
 
-https://travis-ci.org/alexandramedway/plt.svg?branch=test_scan_compare
-
 The repository for our PLT project, Fall 2015.
 
+Contributors:
 - Alexandra Medway (afm2134)
 - Alex Kalicki (avk2116)
 - Danny Echickson (dje2125)
