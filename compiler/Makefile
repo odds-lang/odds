@@ -1,19 +1,26 @@
 # Odds: compiler Makefile
 #  - builds and manages all compiler components
 
-OBJS = scanner.cmo
+OCAMLC=ocamlc
+OCAMLLEX=ocamllex
+OBJS=scanner.cmo
+
+default: scanner
+
+all:
+	cd ..; make all
 
 scanner: $(OBJS)
-	ocamlc -o scanner $(OBJS)
+	$(OCAMLC) -o scanner $(OBJS)
 
 scanner.ml: scanner.mll
-	ocamllex scanner.mll
+	$(OCAMLLEX) scanner.mll
 
 %.cmo: %.ml
-	ocamlc -c $<
+	$(OCAMLC) -c $<
 
 %.cmi: %.mli
-	ocamlc -c $<
+	$(OCAMLC) -c $<
 
 .PHONY: clean
 clean:
