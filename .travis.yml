@@ -1,0 +1,13 @@
+sudo: required
+language: c
+env:
+    - OCAML_VERSION=4.01.0 OPAM_VERSION=1.2.0
+notifications:
+    email:
+        - afm2134@columbia.edu
+        - avk2116@columbia.edu
+        - dje2125@columbia.edu
+        - lfw2114@columbia.edu
+before_script:
+    - bash -ex config/travis_install.sh
+script: make test
