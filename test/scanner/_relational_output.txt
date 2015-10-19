@@ -1,0 +1,4 @@
+EQ
+NEQ
+LEQ
+GEQ
