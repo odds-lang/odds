@@ -1,17 +1,6 @@
 (* equivalent to parser.mli when we write that *)
 open Tokens
 
-let stringify = function
-  | PLUS -> "PLUS"
-  | MINUS -> "MINUS"
-  | TIMES -> "TIMES"
-  | DIVIDE -> "DIVIDE"
-  | ASSIGN -> "ASSIGN"
-  | SEQUENCER -> "SEQUENCER"
-  | LITERAL(int) -> "LITERAL"
-  | VARIABLE(int) -> "VARIABLE"
-  | EOF -> "EOF"
-
 let _ = 
   let lexbuf = Lexing.from_channel stdin in
   let rec print_tokens = function
@@ -21,50 +10,49 @@ let _ =
       print_tokens (Scanner.token lexbuf) in
   print_tokens (Scanner.token lexbuf)
 
-
 let stringify = function
 (* Punctuation *)
-| LPAREN ->  | RPAREN ->
-| LCAR ->    | RCAR ->
-| LBRACK ->  | RBRACK ->
-| SEMI ->    | COLON ->
-| COMMA ->   | VBAR ->
+| LPAREN -> "LPAREN"  | RPAREN -> "RPAREN"
+| LCAR -> "LCAR"      | RCAR -> "RCAR"
+| LBRACK -> "LBRACK"  | RBRACK -> "RBRACK"
+| SEMI -> "SEMI"      | COLON -> "COLON"
+| COMMA -> "COMMA"    | VBAR -> "VBAR"
 
 (* Arithmetic Operators *)
-| PLUS ->    | MINUS ->
-| TIMES ->   | DIVIDE ->
-| MOD ->
+| PLUS -> "PLUS"     | MINUS -> "MINUS"
+| TIMES -> "TIMES"   | DIVIDE -> "DIVIDE"
+| MOD -> "MOD"
 
 (* Relational Operators *)
-| EQ ->    | NEQ ->
-| LEQ ->   | GEQ ->
+| EQ -> "EQ"    | NEQ -> "NEQ"
+| LEQ -> "LEQ"  | GEQ -> "GEQ"
 
 (* Logical Operators & Keywords*)
-| AND ->   | OR ->
-| NOT ->
+| AND -> "AND"   | OR -> "OR"
+| NOT -> "NOT"
 
 (* Assignment Operator *)
-| ASN ->
+| ASN -> "ASN"
 
 (* Conditional Operators *)
-| IF ->    | THEN ->
-| ELSE ->
+| IF -> "IF"    | THEN -> "THEN"
+| ELSE -> "ELSE"
 
 (* Declarative Keywords *)
-| SET ->   | STATE ->
+| SET -> "SET"   | STATE -> "STATE"
 
 (* Function Symbols & Keywords *)
-| FDELIM ->  (*| FRTYPE *)
-| RETURN ->
+| FDELIM -> "FDELIM"  (*| FRTYPE *)
+| RETURN -> "RETURN"
 
 (* End-of-File *)
-| EOF ->
+| EOF -> "EOF"
 
 (* Identifiers *)
-| ID of (string) ->
+| ID of (string) -> "ID"
 
 (* Literals *)
-| INT_LITERAL of (int) ->
-| FLOAT_LITERAL of (float) ->
-| STRING_LITERAL of (string) ->
-| BOOL_LITERAL of (bool)
+| INT_LITERAL of (int) -> "INT_LITERAL"
+| FLOAT_LITERAL of (float) -> "FLOAT_LITERAL"
+| STRING_LITERAL of (string) -> "STRING_LITERAL"
+| BOOL_LITERAL of (bool) -> "BOOL_LITERAL"
