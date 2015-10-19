@@ -40,13 +40,13 @@ let stringify = function
   | EOF -> "EOF"
 
   (* Identifiers *)
-  | ID of (string) -> "ID"
+  | ID(string) -> "ID"
 
   (* Literals *)
-  | INT_LITERAL of (int) -> "INT_LITERAL"
-  | FLOAT_LITERAL of (float) -> "FLOAT_LITERAL"
-  | STRING_LITERAL of (string) -> "STRING_LITERAL"
-  | BOOL_LITERAL of (bool) -> "BOOL_LITERAL"
+  | INT_LITERAL(int) -> "INT_LITERAL"
+  | FLOAT_LITERAL(float) -> "FLOAT_LITERAL"
+  | STRING_LITERAL(string) -> "STRING_LITERAL"
+  | BOOL_LITERAL(bool) -> "BOOL_LITERAL"
 
 let _ = 
   let lexbuf = Lexing.from_channel stdin in
