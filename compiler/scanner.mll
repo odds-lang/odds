@@ -67,7 +67,7 @@ rule token = parse
 | num* '.' num+ as floatlit { FLOAT_LITERAL(float_of_string floatlit) }
 | '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
 | "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
-| "void" as voidlit { VOID_LITERAL(voidlit) }
+| "void" { VOID_LITERAL }
 (* To Do - List Literals - Do they even go here? *)
 
 (* Identifiers *)

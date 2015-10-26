@@ -44,4 +44,4 @@ type token =
 | FLOAT_LITERAL of (float)
 | STRING_LITERAL of (string)
 | BOOL_LITERAL of (bool)
-| VOID_LITERAL of (string)
+| VOID_LITERAL
