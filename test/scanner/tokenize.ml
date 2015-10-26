@@ -6,7 +6,7 @@ let stringify = function
   | LPAREN -> "LPAREN"  | RPAREN -> "RPAREN"
   | LCAR -> "LCAR"      | RCAR -> "RCAR"
   | LBRACK -> "LBRACK"  | RBRACK -> "RBRACK"
-  | SEMI -> "SEMI"      | COLON -> "COLON"
+  | SEMI -> "SEMI"      (*| COLON -> "COLON"*)
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
 
   (* Arithmetic Operators *)
@@ -47,6 +47,7 @@ let stringify = function
   | FLOAT_LITERAL(float) -> "FLOAT_LITERAL"
   | STRING_LITERAL(string) -> "STRING_LITERAL"
   | BOOL_LITERAL(bool) -> "BOOL_LITERAL"
+  | VOID_LITERAL(string) -> "VOID_LITERAL"
 
 let _ = 
   let lexbuf = Lexing.from_channel stdin in
