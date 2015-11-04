@@ -23,4 +23,4 @@ type expr =                      (* Expressions *)
 type stmt =         (* Statements *)
   | Expr of expr    (* set foo = bar + 3 *)
 
-type program = stmt
+type program = stmt list

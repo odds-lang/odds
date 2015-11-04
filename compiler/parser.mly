@@ -8,9 +8,9 @@
  *  - Lilly Wang
  *)
 
-{% open Ast %}
+%{ open Ast %}
 
-%token LPAREN RPAREN
+%token EOF LPAREN RPAREN
 %token PLUS MINUS TIMES DIVIDE MOD POWER
 %token <int> INT_LITERAL
 
@@ -25,7 +25,11 @@
 %%
 
 program:
-  stmt EOF  { $1 }
+  | stmt_list EOF    { $1 }
+
+stmt_list:
+  | /* nothing */    { [] }
+  | stmt_list stmt   { $2 :: $1 }
 
 stmt:
   | expr    { Expr($1) }
