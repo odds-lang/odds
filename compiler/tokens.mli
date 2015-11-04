@@ -3,7 +3,7 @@ type token =
 | LPAREN  | RPAREN
 | LCAR    | RCAR
 | LBRACK  | RBRACK
-| SEMI    | COLON
+| SEMI    (*| COLON *)
 | COMMA   | VBAR
 
 (* Arithmetic Operators *)
@@ -44,3 +44,4 @@ type token =
 | FLOAT_LITERAL of (float)
 | STRING_LITERAL of (string)
 | BOOL_LITERAL of (bool)
+| VOID_LITERAL
