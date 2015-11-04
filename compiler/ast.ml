@@ -13,6 +13,8 @@ type op =    (* Operators *)
   | Sub      (* - *)
   | Mult     (* * *)
   | Div      (* / *)
+  | Mod      (* % *)
+  | Pow      (* ** *)
 
 type expr =                      (* Expressions *)
   | Literal of int               (* 42 *)

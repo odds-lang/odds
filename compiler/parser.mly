@@ -1,0 +1,41 @@
+(*
+ * COMS4115: Odds parser
+ *
+ * Authors:
+ *  - Alex Kalicki
+ *  - Alexandra Medway
+ *  - Daniel Echikson
+ *  - Lilly Wang
+ *)
+
+{% open Ast %}
+
+%token LPAREN RPAREN
+%token PLUS MINUS TIMES DIVIDE MOD POWER
+%token <int> INT_LITERAL
+
+/* Precedence and associativity of each operator */
+%left PLUS MINUS
+%left TIMES DIVIDE MOD
+%left POWER
+
+%start program                /* Start symbol */
+%type <Ast.program> program   /* Type returned by a program */
+
+%%
+
+program:
+  stmt EOF  { $1 }
+
+stmt:
+  | expr    { Expr($1) }
+
+expr:
+  | INT_LITERAL           { Literal($1) }
+  | expr PLUS expr        { Binop($1, Add, $3) }
+  | expr MINUS expr       { Binop($1, Sub, $3) }
+  | expr TIMES expr       { Binop($1, Mult, $3) }
+  | expr DIVIDE expr      { Binop($1, Div, $3) }
+  | expr MOD expr         { Binop($1, Mod, $3) }
+  | expr POWER expr       { Binop($1, Pow, $3) }
+  | LPAREN expr RPAREN    { $2 }
