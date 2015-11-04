@@ -10,8 +10,8 @@
 
 %{ open Ast %}
 
-%token EOF LPAREN RPAREN
-%token PLUS MINUS TIMES DIVIDE MOD POWER
+%token STATE EOF
+%token LPAREN RPAREN PLUS MINUS TIMES DIVIDE MOD POWER
 %token <int> INT_LITERAL
 
 /* Precedence and associativity of each operator */
@@ -32,7 +32,7 @@ stmt_list:
   | stmt_list stmt   { $2 :: $1 }
 
 stmt:
-  | expr    { Expr($1) }
+  | STATE expr    { Expr($1) }
 
 expr:
   | INT_LITERAL           { Literal($1) }
