@@ -1,8 +1,11 @@
 (*
- * Odds scanner
+ * COMS4115: Odds scanner
  *
- * Authors: Alex Kalicki, Alexandra Medway, Daniel Echikson, Lilly Wang
- * COMS4115
+ * Authors:
+ *  - Alex Kalicki
+ *  - Alexandra Medway
+ *  - Daniel Echikson
+ *  - Lilly Wang
  *)
 
 { open Tokens }
