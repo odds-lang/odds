@@ -1,0 +1,17 @@
+[
+	Expr(Binop(Int_lit(1), Add, Float_lit(2.1)));
+	Expr(Binop(Int_lit(1), Sub, Float_lit(2.1)));
+	Expr(Binop(Int_lit(1), Mult, Float_lit(2.1)));
+	Expr(Binop(Int_lit(1), Div, Float_lit(2.1)));
+	Expr(Binop(Int_lit(1), Mod, Float_lit(2.1)));
+	Expr(Binop(Int_lit(1), Pow, Float_lit(2.1)));
+	Expr(
+		Binop(
+			Binop(Int_lit(1), Mult, Int_lit(2)),
+			Add,
+			Binop(Int_lit(3), Pow, Int_lit(4))
+		)
+	);
+	Expr(Binop(Binop(Binop(Int_lit(1), Div, Int_lit(2)), Mod, Int_lit(3)), Mod, Int_lit(4)));
+	Expr(Binop(Binop(Int_lit(1), Add, Int_lit(2)), Sub, Binop(Int_lit(3), Div, Int_lit(4))))
+]
