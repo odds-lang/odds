@@ -10,6 +10,15 @@
 
 open Ast
 open Printf
-open String
 
+let func_to_text f arg = match f with
+  | "print" -> sprintf "print(\"%s\")" arg
+  | _ -> "" (* f(args) *)
 
+let op_to_text op = match op with
+  | Add -> "+"
+  | Sub -> "-"
+  | Mult -> "*"
+  | Div -> "/"
+  | Mod -> "%"
+  | Pow -> "**"
