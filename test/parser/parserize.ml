@@ -1,4 +1,4 @@
-open Ast
+open Ast 
 
 let rec eval = function
   | Int_lit(x) -> "Int_lit(" ^ string_of_int x ^ ")"
@@ -15,14 +15,14 @@ let rec eval = function
       | Mod -> "Binop(" ^ v1 ^ ", Mod, " ^ v2 ^ ")"
       | Pow -> "Binop(" ^ v1 ^ ", Pow, " ^ v2 ^ ")"
 
-let rec eval_stmts = function 
-  | [] -> ""
+let rec eval_stmts acc = function 
+  | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
   | stmt :: tl -> match stmt with
     | Expr(e) ->
-      let e1 = eval e in "Expr(" ^ e1 ^ ")"
+      let e1 = eval e in eval_stmts (("Expr(" ^ e1 ^ ")") :: acc) tl
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let expr = Parser.program Scanner.token lexbuf in
-  let result = eval_stmts expr in
+  let result = eval_stmts [] expr in
   print_endline result

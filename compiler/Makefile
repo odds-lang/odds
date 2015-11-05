@@ -4,7 +4,7 @@
 OCAMLC=ocamlc
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
-OBJS=scanner.cmo parser.cmo
+OBJS=parser.cmo scanner.cmo
 
 default: scanner parser
 

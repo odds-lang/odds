@@ -51,7 +51,7 @@ rule token = parse
 | "set"   { SET }   | "state" { STATE }
 
 (* Function Symbols & Keywords *)
-| "=>"      { FDELIM }
+| "->"      { FDELIM }
 | "return"  { RETURN }
 
 (* End-of-File *)
