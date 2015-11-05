@@ -10,11 +10,42 @@
 
 %{ open Ast %}
 
-%token STATE EOF
-%token LPAREN RPAREN PLUS MINUS TIMES DIVIDE MOD POWER
+/* Punctuation */
+%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK SEMI COMMA VBAR
+
+/* Arithmetic Operators */
+%token PLUS MINUS TIMES DIVIDE MOD POWER
+
+/* Relational Operators */
+%token EQ NEQ LEQ GEQ
+
+/* Logical Operators & Keywords*/
+%token AND OR NOT
+
+/* Assignment Operator */
+%token ASN
+
+/* Conditional Operators */
+%token IF THEN ELSE
+
+/* Declarative Keywords */
+%token SET STATE
+
+/* Function Symbols & Keywords */
+%token FDELIM RETURN
+
+/* End-of-File */
+%token EOF
+
+/* Identifiers */
+%token <string> ID
+
+/* Literals */
 %token <int> INT_LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> STRING_LITERAL
+%token <bool> BOOL_LITERAL
+%token VOID_LITERAL
 
 /* Precedence and associativity of each operator */
 %left PLUS MINUS
