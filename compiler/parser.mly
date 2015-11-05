@@ -34,7 +34,7 @@ stmt_list:
   | stmt_list stmt   { $2 :: $1 }
 
 stmt:
-  | STATE expr    { Expr($1) }
+  | STATE expr    { State($1) }
 
 literal:
   | INT_LITERAL           { Int_Lit($1) }

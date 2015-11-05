@@ -22,3 +22,14 @@ let op_to_text op = match op with
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
+
+let py_file = open_out "out.py"
+
+in let rec process_stmt_list stmt_list = match stmt_list with
+  | stmt :: remaining_stmts -> ignore(process_stmt stmt);
+      process_stmt_list remaining_stmts
+  | [] -> close_out py_file
+
+and process_stmt stmt = match stmt with
+  | State(expr) -> generate_expr(expr)
+
