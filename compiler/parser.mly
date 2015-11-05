@@ -1,4 +1,4 @@
-(*
+/*
  * COMS4115: Odds parser
  *
  * Authors:
@@ -6,15 +6,46 @@
  *  - Alexandra Medway
  *  - Daniel Echikson
  *  - Lilly Wang
- *)
+ */
 
 %{ open Ast %}
 
-%token STATE EOF
-%token LPAREN RPAREN PLUS MINUS TIMES DIVIDE MOD POWER
+/* Punctuation */
+%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK SEMI COMMA VBAR
+
+/* Arithmetic Operators */
+%token PLUS MINUS TIMES DIVIDE MOD POWER
+
+/* Relational Operators */
+%token EQ NEQ LEQ GEQ
+
+/* Logical Operators & Keywords*/
+%token AND OR NOT
+
+/* Assignment Operator */
+%token ASN
+
+/* Conditional Operators */
+%token IF THEN ELSE
+
+/* Declarative Keywords */
+%token SET STATE
+
+/* Function Symbols & Keywords */
+%token FDELIM RETURN
+
+/* End-of-File */
+%token EOF
+
+/* Identifiers */
+%token <string> ID
+
+/* Literals */
 %token <int> INT_LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> STRING_LITERAL
+%token <bool> BOOL_LITERAL
+%token VOID_LITERAL
 
 /* Precedence and associativity of each operator */
 %left PLUS MINUS
@@ -34,15 +65,10 @@ stmt_list:
   | stmt_list stmt   { $2 :: $1 }
 
 stmt:
-  | STATE expr    { Expr($1) }
-
-literal:
-  | INT_LITERAL           { Int_Lit($1) }
-  | FLOAT_LITERAL         { Float_lit($1) }
-  | STRING_LITERAL        { String_lit($1) }
+  | STATE expr    { Expr($2) }
 
 expr:
-  | literal
+  | literal               { $1 }
   | MINUS expr            { Unop(Sub, $2) }
   | expr PLUS expr        { Binop($1, Add, $3) }
   | expr MINUS expr       { Binop($1, Sub, $3) }
@@ -51,3 +77,8 @@ expr:
   | expr MOD expr         { Binop($1, Mod, $3) }
   | expr POWER expr       { Binop($1, Pow, $3) }
   | LPAREN expr RPAREN    { $2 }
+
+literal:
+  | INT_LITERAL           { Int_lit($1) }
+  | FLOAT_LITERAL         { Float_lit($1) }
+  | STRING_LITERAL        { String_lit($1) }
