@@ -18,7 +18,7 @@ let rec eval = function
 let rec eval_stmts acc = function 
   | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
   | stmt :: tl -> match stmt with
-    | Expr(e) ->
+    | State(e) ->
       let e1 = eval e in eval_stmts (("Expr(" ^ e1 ^ ")") :: acc) tl
 
 let _ =
