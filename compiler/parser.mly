@@ -13,6 +13,7 @@
 %token STATE EOF
 %token LPAREN RPAREN PLUS MINUS TIMES DIVIDE MOD POWER
 %token <int> INT_LITERAL
+%token <float> FLOAT_LIT
 
 /* Precedence and associativity of each operator */
 %left PLUS MINUS
@@ -36,6 +37,7 @@ stmt:
 
 expr:
   | INT_LITERAL           { Literal($1) }
+  | FLOAT_LIT             { Literal($1) }
   | expr PLUS expr        { Binop($1, Add, $3) }
   | expr MINUS expr       { Binop($1, Sub, $3) }
   | expr TIMES expr       { Binop($1, Mult, $3) }
