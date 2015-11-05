@@ -6,13 +6,10 @@ OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
 OBJS=parser.cmo scanner.cmo
 
-default: scanner parser
+default: $(OBJS)
 
 all:
 	cd ..; make all
-
-scanner: $(OBJS)
-parser: $(OBJS)
 
 scanner.ml: scanner.mll
 	$(OCAMLLEX) scanner.mll
