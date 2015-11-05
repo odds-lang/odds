@@ -13,5 +13,12 @@
 		)
 	);
 	Expr(Binop(Binop(Binop(Int_lit(1), Div, Int_lit(2)), Mod, Int_lit(3)), Mod, Int_lit(4)));
-	Expr(Binop(Binop(Int_lit(1), Add, Int_lit(2)), Sub, Binop(Int_lit(3), Div, Int_lit(4))))
+	Expr(Binop(Binop(Int_lit(1), Add, Int_lit(2)), Sub, Binop(Int_lit(3), Div, Int_lit(4))));
+	Expr(
+		Binop(
+			Int_lit(1),
+			Mult,
+			Binop(Int_lit(2), Add, Int_lit(3))
+		)
+	)
 ]
