@@ -65,10 +65,10 @@ stmt_list:
   | stmt_list stmt   { $2 :: $1 }
 
 stmt:
-  | STATE expr    { State($1) }
+  | STATE expr    { State($2) }
 
 literal:
-  | INT_LITERAL           { Int_Lit($1) }
+  | INT_LITERAL           { Int_lit($1) }
   | FLOAT_LITERAL         { Float_lit($1) }
   | STRING_LITERAL        { String_lit($1) }
 

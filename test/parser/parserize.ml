@@ -15,7 +15,7 @@ let rec eval = function
       | Mod -> "Binop(" ^ v1 ^ ", Mod, " ^ v2 ^ ")"
       | Pow -> "Binop(" ^ v1 ^ ", Pow, " ^ v2 ^ ")"
 
-let rec eval_stmts acc = function 
+let rec eval_stmts acc = function
   | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
   | stmt :: tl -> match stmt with
     | State(e) ->

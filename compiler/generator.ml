@@ -30,14 +30,15 @@ let rec exp_to_text exp = match exp with
   | Int_lit(i) -> string_of_int(i)
   | Float_lit(f) -> string_of_float(f)
   | String_lit(s) -> sprintf "\"%s\"" s
-  | Binop(e1, op, e2) -> 
-      sprintf "%s %s %s" (exp_to_text e1) (exp_to_op op) (exp_to_text e2)
+  | Binop(e1, op, e2) ->
+      sprintf "%s %s %s" (exp_to_text e1) (op_to_text op) (exp_to_text e2)
   | Unop(op, e) -> sprintf "%s %s" (op_to_text op) (exp_to_text e)
 
-(* Entry Point *)
+(* write program to a .py file *)
 let py_file = open_out "out.py"
 
-in let rec process_stmt_list stmt_list = match stmt_list with
+(* entry point for code generation *)
+let rec process_stmt_list stmt_list = match stmt_list with
   | stmt :: remaining_stmts -> ignore(process_stmt stmt);
       process_stmt_list remaining_stmts
   | [] -> close_out py_file
