@@ -22,16 +22,16 @@ rule token = parse
 
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
-(*| '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
+| '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACK }  | ']'   { RBRACK }
 | ';'   { SEMI }
-| ','   { COMMA }   | '|'   { VBAR }*)
+| ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
 | '%'   { MOD }     | "**"  { POWER }
-(*
+
 (* Relational Operators *)
 | "=="    { EQ }    | "!="    { NEQ }
 | "<="    { LEQ }   | ">="    { GEQ }
@@ -48,11 +48,11 @@ rule token = parse
 | "else"  { ELSE }
 
 (* Declarative Keywords *)
-| "set"   { SET }  *) | "state" { STATE }
+| "set"   { SET }   | "state" { STATE }
 
 (* Function Symbols & Keywords *)
-(*| "->"      { FDELIM }
-| "return"  { RETURN }*)
+| "=>"      { FDELIM }
+| "return"  { RETURN }
 
 (* End-of-File *)
 | eof { EOF }
@@ -61,12 +61,12 @@ rule token = parse
 | num+ as intlit { INT_LITERAL(int_of_string intlit) }
 | num* '.' num+ as floatlit { FLOAT_LITERAL(float_of_string floatlit) }
 | '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
-(*| "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
-| "void" { VOID_LITERAL }*)
+| "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
+| "void" { VOID_LITERAL }
 (* To Do - List Literals - Do they even go here? *)
 
 (* Identifiers *)
-(*| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }*)
+| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }
 
 and comment = parse
 | "*/"    { token lexbuf }
