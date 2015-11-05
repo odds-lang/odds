@@ -1,11 +1,14 @@
 (*
- * Odds scanner
+ * COMS4115: Odds scanner
  *
- * Authors: Alex Kalicki, Alexandra Medway, Daniel Echikson, Lilly Wang
- * COMS4115
+ * Authors:
+ *  - Alex Kalicki
+ *  - Alexandra Medway
+ *  - Daniel Echikson
+ *  - Lilly Wang
  *)
 
-{ open Tokens }
+{ open Parser }
 
 let num = ['0'-'9']
 
@@ -21,7 +24,7 @@ rule token = parse
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACK }  | ']'   { RBRACK }
-| ';'   { SEMI }    (* | ':'   { COLON } *)
+| ';'   { SEMI }
 | ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)
@@ -48,16 +51,8 @@ rule token = parse
 | "set"   { SET }   | "state" { STATE }
 
 (* Function Symbols & Keywords *)
-| "->"      { FDELIM }  (*| "=>"    { FRTYPE }*)
+| "->"      { FDELIM }
 | "return"  { RETURN }
-
-(*
-(* Type Keywords *)
-| "int"   { INT }   | "float" { FLOAT }
-| "string"  { STRING }  | "dist"  { DIST }
-| "list"  { LIST }  | "void"  { VOID }
-| "bool"  { BOOL }
-*)
 
 (* End-of-File *)
 | eof { EOF }
