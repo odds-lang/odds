@@ -21,9 +21,9 @@ type expr =                      (* Expressions *)
   | Float_lit of float           (* 42.0 *)
   | String_lit of string         (* "Hello, world" *)
   | Binop of expr * op * expr    (* a + b *)
-  | Unop of op * expr
+  | Unop of op * expr            (* -5 *)
 
 type stmt =         (* Statements *)
-  | Expr of expr    (* set foo = bar + 3 *)
+  | State of expr    (* set foo = bar + 3 *)
 
 type program = stmt list
