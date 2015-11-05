@@ -18,7 +18,8 @@ let rec eval = function
 let rec eval_stmts = function 
   | [] -> ""
   | stmt :: tl -> match stmt with
-    | Expr(e) -> eval e
+    | Expr(e) ->
+      let e1 = eval e in "Expr(" ^ e1 ^ ")"
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in

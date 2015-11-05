@@ -28,10 +28,10 @@ rule token = parse
 | ','   { COMMA }   | '|'   { VBAR }*)
 
 (* Arithmetic Operators *)
-(*| '+'   { PLUS }    | '-'   { MINUS }
+| '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
 | '%'   { MOD }     | "**"  { POWER }
-
+(*
 (* Relational Operators *)
 | "=="    { EQ }    | "!="    { NEQ }
 | "<="    { LEQ }   | ">="    { GEQ }
