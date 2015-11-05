@@ -26,3 +26,4 @@ let _ =
   let expr = Parser.program Scanner.token lexbuf in
   let result = eval_stmts [] expr in
   print_endline result
+  
