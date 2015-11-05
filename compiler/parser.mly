@@ -1,4 +1,4 @@
-(*
+/*
  * COMS4115: Odds parser
  *
  * Authors:
@@ -6,7 +6,7 @@
  *  - Alexandra Medway
  *  - Daniel Echikson
  *  - Lilly Wang
- *)
+ */
 
 %{ open Ast %}
 
@@ -34,15 +34,10 @@ stmt_list:
   | stmt_list stmt   { $2 :: $1 }
 
 stmt:
-  | STATE expr    { Expr($1) }
-
-literal:
-  | INT_LITERAL           { Int_Lit($1) }
-  | FLOAT_LITERAL         { Float_lit($1) }
-  | STRING_LITERAL        { String_lit($1) }
+  | STATE expr    { Expr($2) }
 
 expr:
-  | literal
+  | literal               { $1 }
   | MINUS expr            { Unop(Sub, $2) }
   | expr PLUS expr        { Binop($1, Add, $3) }
   | expr MINUS expr       { Binop($1, Sub, $3) }
@@ -51,3 +46,8 @@ expr:
   | expr MOD expr         { Binop($1, Mod, $3) }
   | expr POWER expr       { Binop($1, Pow, $3) }
   | LPAREN expr RPAREN    { $2 }
+
+literal:
+  | INT_LITERAL           { Int_lit($1) }
+  | FLOAT_LITERAL         { Float_lit($1) }
+  | STRING_LITERAL        { String_lit($1) }

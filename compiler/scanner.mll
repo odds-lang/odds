@@ -8,7 +8,7 @@
  *  - Lilly Wang
  *)
 
-{ open Tokens }
+{ open Parser }
 
 let num = ['0'-'9']
 
@@ -22,13 +22,13 @@ rule token = parse
 
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
-| '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
+(*| '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACK }  | ']'   { RBRACK }
-| ';'   { SEMI }    (* | ':'   { COLON } *)
-| ','   { COMMA }   | '|'   { VBAR }
+| ';'   { SEMI }
+| ','   { COMMA }   | '|'   { VBAR }*)
 
 (* Arithmetic Operators *)
-| '+'   { PLUS }    | '-'   { MINUS }
+(*| '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
 | '%'   { MOD }     | "**"  { POWER }
 
@@ -48,19 +48,11 @@ rule token = parse
 | "else"  { ELSE }
 
 (* Declarative Keywords *)
-| "set"   { SET }   | "state" { STATE }
+| "set"   { SET }  *) | "state" { STATE }
 
 (* Function Symbols & Keywords *)
-| "->"      { FDELIM }  (*| "=>"    { FRTYPE }*)
-| "return"  { RETURN }
-
-(*
-(* Type Keywords *)
-| "int"   { INT }   | "float" { FLOAT }
-| "string"  { STRING }  | "dist"  { DIST }
-| "list"  { LIST }  | "void"  { VOID }
-| "bool"  { BOOL }
-*)
+(*| "->"      { FDELIM }
+| "return"  { RETURN }*)
 
 (* End-of-File *)
 | eof { EOF }
@@ -69,12 +61,12 @@ rule token = parse
 | num+ as intlit { INT_LITERAL(int_of_string intlit) }
 | num* '.' num+ as floatlit { FLOAT_LITERAL(float_of_string floatlit) }
 | '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
-| "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
-| "void" { VOID_LITERAL }
+(*| "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
+| "void" { VOID_LITERAL }*)
 (* To Do - List Literals - Do they even go here? *)
 
 (* Identifiers *)
-| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }
+(*| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }*)
 
 and comment = parse
 | "*/"    { token lexbuf }
