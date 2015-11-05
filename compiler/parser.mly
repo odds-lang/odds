@@ -13,6 +13,8 @@
 %token STATE EOF
 %token LPAREN RPAREN PLUS MINUS TIMES DIVIDE MOD POWER
 %token <int> INT_LITERAL
+%token <float> FLOAT_LITERAL
+%token <string> STRING_LITERAL
 
 /* Precedence and associativity of each operator */
 %left PLUS MINUS
@@ -34,8 +36,14 @@ stmt_list:
 stmt:
   | STATE expr    { Expr($1) }
 
+literal:
+  | INT_LITERAL           { Int_Lit($1) }
+  | FLOAT_LITERAL         { Float_lit($1) }
+  | STRING_LITERAL        { String_lit($1) }
+
 expr:
-  | INT_LITERAL           { Literal($1) }
+  | literal
+  | MINUS expr            { Unop(Sub, $2) }
   | expr PLUS expr        { Binop($1, Add, $3) }
   | expr MINUS expr       { Binop($1, Sub, $3) }
   | expr TIMES expr       { Binop($1, Mult, $3) }

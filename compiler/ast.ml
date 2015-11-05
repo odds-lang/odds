@@ -17,8 +17,11 @@ type op =    (* Operators *)
   | Pow      (* ** *)
 
 type expr =                      (* Expressions *)
-  | Literal of int               (* 42 *)
+  | Int_lit of int               (* 42 *)
+  | Float_lit of float           (* 42.0 *)
+  | String_lit of string         (* "Hello, world" *)
   | Binop of expr * op * expr    (* a + b *)
+  | Unop of op * expr
 
 type stmt =         (* Statements *)
   | Expr of expr    (* set foo = bar + 3 *)
