@@ -1,5 +1,5 @@
 [
     Expr(Int_lit(42)) ;
     Expr(Float_lit(42.1)) ;
-    Expr(String_lit(forty-one))
+    Expr(String_lit(forty-two))
 ]
