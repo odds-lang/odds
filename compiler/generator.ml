@@ -19,14 +19,17 @@ let rec txt_of_expr expr = match expr with
   | Binop(e1, op, e2) ->
       sprintf "%s %s %s" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Unop(op, e) -> sprintf "%s %s" (txt_of_op op) (txt_of_expr e)
+  | Call(f, args) -> txt_of_func_call f args
   | _ -> ""
 
-and txt_of_func f arg = match f with
-  | "print" -> sprintf "print(%s)" arg
-  | _ -> "" (* f(args) *)
+and txt_of_func_call f args = match f with
+  | "print" -> sprintf "print(%s)" (txt_of_args args)
+  | _ ->  sprintf "%s(%s)" f (txt_of_args args)
 
-and txt_of_args arg_list = 
-    String.concat ", " (List.map txt_of_expr arg_list)
+and txt_of_args arg_list = match arg_list with
+  | [] -> ""
+  | [arg] -> txt_of_expr arg
+  | _ -> String.concat ", " (List.map txt_of_expr arg_list)
 
 and txt_of_op op = match op with
   | Add -> "+"
@@ -46,5 +49,5 @@ let rec process_stmt_list stmt_list = match stmt_list with
   | [] -> close_out py_file
 
 and process_stmt stmt = match stmt with
-  | State(expr) -> ""
+  | State(expr) -> 
 
