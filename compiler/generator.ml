@@ -11,28 +11,30 @@
 open Ast
 open Printf
 
-(* WILL REMOVE AND ADD TO SAST *)
-let func_to_text f arg = match f with
+let rec exp_to_text exp = match exp with
+  | Int_lit(i) -> string_of_int(i)
+  | Float_lit(f) -> string_of_float(f)
+  | String_lit(s) -> sprintf "\"%s\"" s
+  | Id(e) -> e
+  | Binop(e1, op, e2) ->
+      sprintf "%s %s %s" (exp_to_text e1) (op_to_text op) (exp_to_text e2)
+  | Unop(op, e) -> sprintf "%s %s" (op_to_text op) (exp_to_text e)
+  | _ -> ""
+
+and func_to_text f arg = match f with
   | "print" -> sprintf "print(%s)" arg
   | _ -> "" (* f(args) *)
 
-(* WILL REMOVE AND ADD TO SAST *)
-let op_to_text op = match op with
+and args_to_txt arg_list = 
+    String.concat ", " (List.map exp_to_text arg_list)
+
+and op_to_text op = match op with
   | Add -> "+"
   | Sub -> "-"
   | Mult -> "*"
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
-
-(* WILL REMOVE AND ADD TO SAST *)
-let rec exp_to_text exp = match exp with
-  | Int_lit(i) -> string_of_int(i)
-  | Float_lit(f) -> string_of_float(f)
-  | String_lit(s) -> sprintf "\"%s\"" s
-  | Binop(e1, op, e2) ->
-      sprintf "%s %s %s" (exp_to_text e1) (op_to_text op) (exp_to_text e2)
-  | Unop(op, e) -> sprintf "%s %s" (op_to_text op) (exp_to_text e)
 
 (* write program to a .py file *)
 let py_file = open_out "out.py"
