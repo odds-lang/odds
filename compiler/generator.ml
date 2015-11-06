@@ -49,5 +49,5 @@ let rec process_stmt_list stmt_list = match stmt_list with
   | [] -> close_out py_file
 
 and process_stmt stmt = match stmt with
-  | State(expr) -> 
+  | State(expr) -> fprintf py_file "%s\n" (txt_of_expr expr)
 
