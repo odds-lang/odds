@@ -41,7 +41,7 @@ and txt_of_op op = match op with
 (* entry point for code generation *)
 let rec process_stmt_list stmt_list prog_str = match stmt_list with
   | stmt :: remaining_stmts -> 
-      let new_prog_str = prog_str ^ (process_stmt stmt) in
+      let new_prog_str = (process_stmt stmt) ^ prog_str in
       process_stmt_list remaining_stmts new_prog_str
   | [] -> prog_str
 
