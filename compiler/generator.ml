@@ -20,7 +20,6 @@ let rec txt_of_expr expr = match expr with
       sprintf "%s %s %s" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Unop(op, e) -> sprintf "%s %s" (txt_of_op op) (txt_of_expr e)
   | Call(f, args) -> txt_of_func_call f args
-  | _ -> ""
 
 and txt_of_func_call f args = match f with
   | "print" -> sprintf "print(%s)" (txt_of_args args)
@@ -39,15 +38,21 @@ and txt_of_op op = match op with
   | Mod -> "%"
   | Pow -> "**"
 
-(* write program to a .py file *)
-let py_file = open_out "out.py"
-
 (* entry point for code generation *)
-let rec process_stmt_list stmt_list = match stmt_list with
-  | stmt :: remaining_stmts -> ignore(process_stmt stmt);
-      process_stmt_list remaining_stmts
-  | [] -> close_out py_file
+let rec process_stmt_list stmt_list prog_str = match stmt_list with
+  | stmt :: remaining_stmts -> 
+      let new_prog_str = prog_str ^ (process_stmt stmt) in
+      process_stmt_list remaining_stmts new_prog_str
+  | [] -> prog_str
 
 and process_stmt stmt = match stmt with
-  | State(expr) -> fprintf py_file "%s\n" (txt_of_expr expr)
+  | State(expr) -> sprintf "%s\n" (txt_of_expr expr);;
+
+(* Do Compilation - Temporary: will eventually be its own file *)
+let lexbuf = Lexing.from_channel stdin in
+let program = Parser.program Scanner.token lexbuf in
+let out_file = open_out "out.py" in
+fprintf out_file "%s" (process_stmt_list program ""); close_out out_file
+
+
 
