@@ -11,14 +11,14 @@
 open Ast
 open Printf
 
-let rec txt_of_exp exp = match exp with
+let rec txt_of_expr expr = match expr with
   | Int_lit(i) -> string_of_int(i)
   | Float_lit(f) -> string_of_float(f)
   | String_lit(s) -> sprintf "\"%s\"" s
   | Id(e) -> e
   | Binop(e1, op, e2) ->
-      sprintf "%s %s %s" (txt_of_exp e1) (txt_of_op op) (txt_of_exp e2)
-  | Unop(op, e) -> sprintf "%s %s" (txt_of_op op) (txt_of_exp e)
+      sprintf "%s %s %s" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
+  | Unop(op, e) -> sprintf "%s %s" (txt_of_op op) (txt_of_expr e)
   | _ -> ""
 
 and txt_of_func f arg = match f with
@@ -26,7 +26,7 @@ and txt_of_func f arg = match f with
   | _ -> "" (* f(args) *)
 
 and txt_of_args arg_list = 
-    String.concat ", " (List.map txt_of_exp arg_list)
+    String.concat ", " (List.map txt_of_expr arg_list)
 
 and txt_of_op op = match op with
   | Add -> "+"
