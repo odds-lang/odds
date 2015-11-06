@@ -39,20 +39,19 @@ and txt_of_op op = match op with
   | Pow -> "**"
 
 (* entry point for code generation *)
-let rec process_stmt_list stmt_list prog_str = match stmt_list with
+let rec process_stmt_list stmt_list prog_list = match stmt_list with
   | stmt :: remaining_stmts -> 
-      let new_prog_str = (process_stmt stmt) ^ prog_str in
-      process_stmt_list remaining_stmts new_prog_str
-  | [] -> prog_str
+      process_stmt_list remaining_stmts (process_stmt stmt :: prog_list)
+  | [] -> String.concat "\n" (List.rev prog_list)
 
 and process_stmt stmt = match stmt with
-  | State(expr) -> sprintf "%s\n" (txt_of_expr expr);;
+  | State(expr) -> sprintf "%s" (txt_of_expr expr);;
 
 (* Do Compilation - Temporary: will eventually be its own file *)
 let lexbuf = Lexing.from_channel stdin in
 let program = Parser.program Scanner.token lexbuf in
 let out_file = open_out "out.py" in
-fprintf out_file "%s" (process_stmt_list program ""); close_out out_file
+fprintf out_file "%s" (process_stmt_list program []); close_out out_file
 
 
 
