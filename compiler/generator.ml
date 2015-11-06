@@ -45,13 +45,13 @@ let rec process_stmt_list stmt_list prog_list = match stmt_list with
   | [] -> String.concat "\n" (List.rev prog_list)
 
 and process_stmt stmt = match stmt with
-  | State(expr) -> sprintf "%s" (txt_of_expr expr);;
+  | State(expr) -> sprintf "%s" (txt_of_expr expr)
 
-(* Do Compilation - Temporary: will eventually be its own file *)
-let lexbuf = Lexing.from_channel stdin in
-let program = Parser.program Scanner.token lexbuf in
-let out_file = open_out "out.py" in
-fprintf out_file "%s" (process_stmt_list program []); close_out out_file
-
-
+and writeToFile file_name prog_string =
+  let file = open_out (file_name ^ ".py") in
+    fprintf file "%s" prog_string
+    
+and gen_program file_name prog =
+  let pythonString = process_stmt_list prog [] in 
+  writeToFile file_name pythonString;;
 
