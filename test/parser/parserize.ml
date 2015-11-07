@@ -1,29 +1,35 @@
 open Ast 
 
-let rec eval = function
+let txt_of_op = function
+  | Add -> "Add"
+  | Sub -> "Sub"
+  | Mult -> "Mult"
+  | Div -> "Div"
+  | Mod -> "Mod"
+  | Pow -> "Pow"
+
+let rec txt_of_expr = function
   | Int_lit(x) -> "Int_lit(" ^ string_of_int x ^ ")"
   | Float_lit(x) -> "Float_lit(" ^ string_of_float x ^ ")"
   | String_lit(x) -> "String_lit(" ^ x ^ ")"
-  | Unop(op, e1) ->
-    let v1 = eval e1 in "Unop(Sub, " ^ v1 ^ ")"
+  | Id(x) -> "Id(" ^ x ^ ")"
+  | Unop(op, e1) -> let v1 = txt_of_expr e1 and op1 = txt_of_op op in
+    "Unop(" ^ op1 ^ ", " ^ v1 ^ ")"
   | Binop(e1, op, e2) ->
-    let v1 = eval e1 and v2 = eval e2 in match op with
-      | Add -> "Binop(" ^ v1 ^ ", Add, " ^ v2 ^ ")"
-      | Sub -> "Binop(" ^ v1 ^ ", Sub, " ^ v2 ^ ")"
-      | Mult -> "Binop(" ^ v1 ^ ", Mult, " ^ v2 ^ ")"
-      | Div -> "Binop(" ^ v1 ^ ", Div, " ^ v2 ^ ")"
-      | Mod -> "Binop(" ^ v1 ^ ", Mod, " ^ v2 ^ ")"
-      | Pow -> "Binop(" ^ v1 ^ ", Pow, " ^ v2 ^ ")"
+    let v1 = txt_of_expr e1 and op1 = txt_of_op op and v2 = txt_of_expr e2 in
+    "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"
+  | Call(f, args) -> let args1 = List.map txt_of_expr args in
+    "Call(Id(" ^ f ^ "), [" ^ String.concat " ; " args1 ^ "])"
 
-let rec eval_stmts acc = function
+let rec txt_of_stmt = function
+  | State(expr) -> let e = txt_of_expr expr in "State(" ^ e ^ ")"
+
+let rec txt_of_stmts acc = function
   | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
-  | stmt :: tl -> match stmt with
-    | State(e) ->
-      let e1 = eval e in eval_stmts (("State(" ^ e1 ^ ")") :: acc) tl
+  | stmt :: tl -> txt_of_stmts (txt_of_stmt stmt :: acc) tl
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let expr = Parser.program Scanner.token lexbuf in
-  let result = eval_stmts [] expr in
+  let result = txt_of_stmts [] expr in
   print_endline result
-  
