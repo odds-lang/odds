@@ -6,6 +6,8 @@ OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
 OBJS=parser.cmo scanner.cmo
 
+default: generator
+
 generator: $(OBJS)
 	ocamlc -o generator generator.ml
 
@@ -37,4 +39,3 @@ scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
 ast.cmi : 
 parser.cmi : ast.cmi
-sast.cmi : ast.cmi

@@ -18,7 +18,7 @@ let rec exp_to_text exp = match exp with
   | Id(e) -> e
   | Binop(e1, op, e2) ->
       sprintf "%s %s %s" (exp_to_text e1) (op_to_text op) (exp_to_text e2)
-  | Unop(op, e) -> sprintf "%s %s" (op_to_text op) (exp_to_text e)
+  | Unop(op, e) -> sprintf "%s%s" (op_to_text op) (exp_to_text e)
   | _ -> ""
 
 and func_to_text f arg = match f with
