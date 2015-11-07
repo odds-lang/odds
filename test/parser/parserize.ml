@@ -15,15 +15,15 @@ let rec eval = function
       | Mod -> "Binop(" ^ v1 ^ ", Mod, " ^ v2 ^ ")"
       | Pow -> "Binop(" ^ v1 ^ ", Pow, " ^ v2 ^ ")"
 
+let rec eval_stmt = function
+  | State(expr) -> let e = eval expr in "State(" ^ e ^ ")"
+
 let rec eval_stmts acc = function
   | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
-  | stmt :: tl -> match stmt with
-    | State(e) ->
-      let e1 = eval e in eval_stmts (("State(" ^ e1 ^ ")") :: acc) tl
+  | stmt :: tl -> eval_stmts (eval_stmt stmt :: acc) tl
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let expr = Parser.program Scanner.token lexbuf in
   let result = eval_stmts [] expr in
   print_endline result
-  

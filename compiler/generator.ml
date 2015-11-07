@@ -11,7 +11,15 @@
 open Ast
 open Printf
 
-let rec txt_of_expr expr = match expr with
+let txt_of_op = function
+  | Add -> "+"
+  | Sub -> "-"
+  | Mult -> "*"
+  | Div -> "/"
+  | Mod -> "%"
+  | Pow -> "**"
+
+let rec txt_of_expr = function
   | Int_lit(i) -> string_of_int(i)
   | Float_lit(f) -> string_of_float(f)
   | String_lit(s) -> sprintf "\"%s\"" s
@@ -25,32 +33,20 @@ and txt_of_func_call f args = match f with
   | "print" -> sprintf "print(%s)" (txt_of_args args)
   | _ ->  sprintf "%s(%s)" f (txt_of_args args)
 
-and txt_of_args arg_list = match arg_list with
+and txt_of_args = function
   | [] -> ""
   | [arg] -> txt_of_expr arg
-  | _ -> String.concat ", " (List.map txt_of_expr arg_list)
+  | _ as arg_list -> String.concat ", " (List.map txt_of_expr arg_list)
 
-and txt_of_op op = match op with
-  | Add -> "+"
-  | Sub -> "-"
-  | Mult -> "*"
-  | Div -> "/"
-  | Mod -> "%"
-  | Pow -> "**"
-
-(* entry point for code generation *)
-let rec process_stmt_list stmt_list prog_list = match stmt_list with
-  | stmt :: remaining_stmts -> 
-      process_stmt_list remaining_stmts (process_stmt stmt :: prog_list)
-  | [] -> String.concat "\n" (List.rev prog_list)
-
-and process_stmt stmt = match stmt with
+let process_stmt = function
   | State(expr) -> sprintf "%s" (txt_of_expr expr)
 
-and writeToFile file_name prog_string =
-  let file = open_out (file_name ^ ".py") in
-    fprintf file "%s" prog_string
-    
-and gen_program file_name prog =
-  let pythonString = process_stmt_list prog [] in 
-  writeToFile file_name pythonString
+let rec process_stmts acc = function
+  | [] -> String.concat "\n" acc
+  | stmt :: tl -> process_stmts (process_stmt stmt :: acc) tl
+
+(* entry point for code generation *)
+let gen_program output_file program =
+  let code = process_stmts [] program in 
+  let file = open_out output_file in
+  fprintf file "%s\n" code; close_out file

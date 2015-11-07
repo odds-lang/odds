@@ -8,17 +8,15 @@
  *  - Lilly Wang
  *)
 
-type action = Ast | Gen
-let lexbuf = String.sub Sys.argv.(2) 0 (String.length(Sys.argv.(2)) - 3)
+type action = Ast | Compile | Help
+
 let _ =
   let action =
-    List.assoc Sys.argv.(1) [("-a", Ast); ("-g", Gen);] in
-    let lexbuf = Lexing.from_channel stdin in 
-    let output_file = String.sub Sys.argv.(2) 0 (String.length(Sys.argv.(2)) - 3) in
-    let program = Parser.program Scanner.token lexbuf in 
-      match action with
-      | Ast ->
-        print_string("Todo, add pretty printer for AST")
-      | Gen ->
-        Generator.gen_program output_file program
-
+    List.assoc Sys.argv.(1) [("-a", Ast); ("-c", Compile); ("-h", Help)] in
+  let lexbuf = Lexing.from_channel stdin in 
+  let output_file = Sys.argv.(2) in
+  let program = Parser.program Scanner.token lexbuf in 
+  match action with
+    | Ast -> print_endline "TODO: Add pretty printer for AST"
+    | Compile -> Generator.gen_program output_file program
+    | Help -> print_endline "TODO: Add help prompt for compiler"
