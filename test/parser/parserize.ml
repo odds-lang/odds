@@ -19,7 +19,7 @@ let rec eval_stmts acc = function
   | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
   | stmt :: tl -> match stmt with
     | State(e) ->
-      let e1 = eval e in eval_stmts (("Expr(" ^ e1 ^ ")") :: acc) tl
+      let e1 = eval e in eval_stmts (("State(" ^ e1 ^ ")") :: acc) tl
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
