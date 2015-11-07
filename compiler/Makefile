@@ -4,7 +4,7 @@
 OCAMLC=ocamlc
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
-OBJS=parser.cmo scanner.cmo generator.cmo
+OBJS=parser.cmo scanner.cmo generator.cmo odds.cmo
 
 odds: $(OBJS)
 	ocamlc -g -o odds $(OBJS)
