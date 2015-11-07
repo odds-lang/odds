@@ -1,7 +1,7 @@
 # Odds [![Build Status][build image]][build link]
 
-[build image]: https://travis-ci.org/alexandramedway/plt.svg?branch=master
-[build link]: https://travis-ci.org/alexandramedway/plt
+[build image]: https://travis-ci.org/alexandramedway/odds.svg?branch=master
+[build link]: https://travis-ci.org/alexandramedway/odds
 
 The repository for our PLT project, Fall 2015.
 

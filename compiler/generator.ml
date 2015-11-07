@@ -18,7 +18,7 @@ let rec txt_of_expr expr = match expr with
   | Id(e) -> e
   | Binop(e1, op, e2) ->
       sprintf "%s %s %s" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
-  | Unop(op, e) -> sprintf "%s %s" (txt_of_op op) (txt_of_expr e)
+  | Unop(op, e) -> sprintf "%s%s" (txt_of_op op) (txt_of_expr e)
   | Call(f, args) -> txt_of_func_call f args
 
 and txt_of_func_call f args = match f with
@@ -53,5 +53,4 @@ and writeToFile file_name prog_string =
     
 and gen_program file_name prog =
   let pythonString = process_stmt_list prog [] in 
-  writeToFile file_name pythonString;;
-
+  writeToFile file_name pythonString

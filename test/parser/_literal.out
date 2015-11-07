@@ -1,5 +1,5 @@
 [
-    Expr(Int_lit(42)) ;
-    Expr(Float_lit(42.1)) ;
-    Expr(String_lit(forty-two))
+    State(Int_lit(42)) ;
+    State(Float_lit(42.1)) ;
+    State(String_lit(forty-two))
 ]
