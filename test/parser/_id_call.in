@@ -3,3 +3,4 @@ state myvar
 state print(40 + 2)
 state print("fourty-two")
 state myfunc(arg1, arg2)
+state prec(myvar, 2 * (2 + 3))
