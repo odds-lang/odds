@@ -58,27 +58,37 @@
 %%
 
 program:
-  | stmt_list EOF    { $1 }
+  | stmt_list EOF               { $1 }
 
 stmt_list:
-  | /* nothing */    { [] }
-  | stmt_list stmt   { $2 :: $1 }
+  | /* nothing */               { [] }
+  | stmt_list stmt              { $2 :: $1 }
 
+args_opt:
+  | /* nothing */               { [] }
+  | args_list                   { List.rev $1 }
+
+args_list:
+  | expr                        { [$1] }
+  | args_list COMMA expr        { $3 :: $1 }
+ 
 stmt:
-  | STATE expr    { Expr($2) }
-
-expr:
-  | literal               { $1 }
-  | MINUS expr            { Unop(Sub, $2) }
-  | expr PLUS expr        { Binop($1, Add, $3) }
-  | expr MINUS expr       { Binop($1, Sub, $3) }
-  | expr TIMES expr       { Binop($1, Mult, $3) }
-  | expr DIVIDE expr      { Binop($1, Div, $3) }
-  | expr MOD expr         { Binop($1, Mod, $3) }
-  | expr POWER expr       { Binop($1, Pow, $3) }
-  | LPAREN expr RPAREN    { $2 }
+  | STATE expr                  { State($2) }
 
 literal:
-  | INT_LITERAL           { Int_lit($1) }
-  | FLOAT_LITERAL         { Float_lit($1) }
-  | STRING_LITERAL        { String_lit($1) }
+  | INT_LITERAL                 { Int_lit($1) }
+  | FLOAT_LITERAL               { Float_lit($1) }
+  | STRING_LITERAL              { String_lit($1) }
+
+expr:
+  | literal                     { $1 }
+  | ID LPAREN args_opt RPAREN   { Call($1, $3)}
+  | ID                          { Id($1) }
+  | MINUS expr                  { Unop(Sub, $2) }
+  | expr PLUS expr              { Binop($1, Add, $3) }
+  | expr MINUS expr             { Binop($1, Sub, $3) }
+  | expr TIMES expr             { Binop($1, Mult, $3) }
+  | expr DIVIDE expr            { Binop($1, Div, $3) }
+  | expr MOD expr               { Binop($1, Mod, $3) }
+  | expr POWER expr             { Binop($1, Pow, $3) }
+  | LPAREN expr RPAREN          { $2 }
