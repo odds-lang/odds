@@ -4,12 +4,12 @@
 OCAMLC=ocamlc
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
-OBJS=parser.cmo scanner.cmo
+OBJS=parser.cmo scanner.cmo generator.cmo
 
 default: generator
 
 generator: $(OBJS)
-	ocamlc -o generator generator.ml
+	ocamlc -g -o generator $(OBJS)
 
 all:
 	cd ..; make all
