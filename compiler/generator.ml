@@ -25,7 +25,7 @@ let rec txt_of_expr = function
   | String_lit(s) -> sprintf "\"%s\"" s
   | Id(e) -> e
   | Binop(e1, op, e2) ->
-      sprintf "%s %s %s" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
+      sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Unop(op, e) -> sprintf "%s%s" (txt_of_op op) (txt_of_expr e)
   | Call(f, args) -> txt_of_func_call f args
 
