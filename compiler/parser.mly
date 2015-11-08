@@ -74,6 +74,7 @@ args_list:
  
 stmt:
   | STATE expr                  { State($2) }
+  | SET ID ASN expr             { Set($2, $4) }
 
 expr:
   | literal                     { $1 }
