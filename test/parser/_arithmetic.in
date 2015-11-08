@@ -4,6 +4,8 @@ state 1 * 2.1
 state 1 / 2.1
 state 1 % 2.1
 state 1 ** 2.1
+state -42
+state 1 + -43
 state 1 * 2 + 3 ** 4
 state 1 / 2 % 3 % 4
 state 1 + 2 - 3 / 4
