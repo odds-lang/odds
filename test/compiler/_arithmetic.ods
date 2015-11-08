@@ -1,0 +1,26 @@
+state 1 + 2.1
+state 1 - 2.1
+state 1 * 2.1
+state 1 / 2.1
+state 1 % 2.1
+state 1 ** 2.1
+state -42
+state 42
+state 1 + -43
+state 1 * 2 + 3 ** 4
+state 1 / 2 % 3 % 4
+state 1 + 2 - 3 / 4
+state 1 * (2 + 3)
+state print(1 + 2.1)
+state print(1 - 2.1)
+state print(1 * 2.1)
+state print(1 / 2.1)
+state print(1 % 2.1)
+state print(1 ** 2.1)
+state print(-42)
+state print(42)
+state print(1 + -43)
+state print(1 * 2 + 3 ** 4)
+state print(1 / 2 % 3 % 4)
+state print(1 + 2 - 3 / 4)
+state print(1 * (2 + 3))
