@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 
 INPUT_FILES="compiler/*.ods"
-TMP_FILE=$(mktemp "compiled.tmp")
+TMP_FILE=$(mktemp "compiled.XXXXX")
 printf "${CYAN}Running compiler tests...\n${NC}"
 
 for input_file in $INPUT_FILES; do
