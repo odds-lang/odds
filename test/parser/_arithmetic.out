@@ -1,17 +1,19 @@
 [
-	State(Binop(Int_lit(1), Add, Float_lit(2.1)));
-	State(Binop(Int_lit(1), Sub, Float_lit(2.1)));
-	State(Binop(Int_lit(1), Mult, Float_lit(2.1)));
-	State(Binop(Int_lit(1), Div, Float_lit(2.1)));
-	State(Binop(Int_lit(1), Mod, Float_lit(2.1)));
-	State(Binop(Int_lit(1), Pow, Float_lit(2.1)));
+	State(Binop(Int_lit(1), Add, Float_lit(2.1))) ;
+	State(Binop(Int_lit(1), Sub, Float_lit(2.1))) ;
+	State(Binop(Int_lit(1), Mult, Float_lit(2.1))) ;
+	State(Binop(Int_lit(1), Div, Float_lit(2.1))) ;
+	State(Binop(Int_lit(1), Mod, Float_lit(2.1))) ;
+	State(Binop(Int_lit(1), Pow, Float_lit(2.1))) ;
+	State(Unop(Sub, Int_lit(42))) ;
+	State(Binop(Int_lit(1), Add, Unop(Sub, Int_lit(43)))) ;
 	State(
 		Binop(
 			Binop(Int_lit(1), Mult, Int_lit(2)),
 			Add,
 			Binop(Int_lit(3), Pow, Int_lit(4))
 		)
-	);
+	) ;
 	State(
 		Binop(
 			Binop(
@@ -22,14 +24,14 @@
 			Mod,
 			Int_lit(4)
 		)
-	);
+	) ;
 	State(
 		Binop(
 			Binop(Int_lit(1), Add, Int_lit(2)),
 			Sub,
 			Binop(Int_lit(3), Div, Int_lit(4))
 		)
-	);
+	) ;
 	State(
 		Binop(
 			Int_lit(1),
