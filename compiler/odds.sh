@@ -5,6 +5,9 @@ if [ "$#" -ne 3 ]; then
   exit 1
 fi
 
-cat $1 | ./odds $2 $3
+MYDIR="$(dirname "$(which "$0")")"
+ODDS_FILE="$MYDIR/odds"
+
+cat $1 | $ODDS_FILE $2 $3
 
 exit 0
