@@ -75,11 +75,6 @@ args_list:
 stmt:
   | STATE expr                  { State($2) }
 
-literal:
-  | INT_LITERAL                 { Int_lit($1) }
-  | FLOAT_LITERAL               { Float_lit($1) }
-  | STRING_LITERAL              { String_lit($1) }
-
 expr:
   | literal                     { $1 }
   | ID LPAREN args_opt RPAREN   { Call($1, $3)}
@@ -92,3 +87,8 @@ expr:
   | expr MOD expr               { Binop($1, Mod, $3) }
   | expr POWER expr             { Binop($1, Pow, $3) }
   | LPAREN expr RPAREN          { $2 }
+
+literal:
+  | INT_LITERAL                 { Int_lit($1) }
+  | FLOAT_LITERAL               { Float_lit($1) }
+  | STRING_LITERAL              { String_lit($1) }

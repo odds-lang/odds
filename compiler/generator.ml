@@ -11,26 +11,7 @@
 open Ast
 open Printf
 
-let rec txt_of_expr expr = match expr with
-  | Int_lit(i) -> string_of_int(i)
-  | Float_lit(f) -> string_of_float(f)
-  | String_lit(s) -> sprintf "\"%s\"" s
-  | Id(e) -> e
-  | Binop(e1, op, e2) ->
-      sprintf "%s %s %s" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
-  | Unop(op, e) -> sprintf "%s%s" (txt_of_op op) (txt_of_expr e)
-  | Call(f, args) -> txt_of_func_call f args
-
-and txt_of_func_call f args = match f with
-  | "print" -> sprintf "print(%s)" (txt_of_args args)
-  | _ ->  sprintf "%s(%s)" f (txt_of_args args)
-
-and txt_of_args arg_list = match arg_list with
-  | [] -> ""
-  | [arg] -> txt_of_expr arg
-  | _ -> String.concat ", " (List.map txt_of_expr arg_list)
-
-and txt_of_op op = match op with
+let txt_of_op = function
   | Add -> "+"
   | Sub -> "-"
   | Mult -> "*"
@@ -38,18 +19,34 @@ and txt_of_op op = match op with
   | Mod -> "%"
   | Pow -> "**"
 
+let rec txt_of_expr = function
+  | Int_lit(i) -> string_of_int(i)
+  | Float_lit(f) -> string_of_float(f)
+  | String_lit(s) -> sprintf "\"%s\"" s
+  | Id(e) -> e
+  | Binop(e1, op, e2) ->
+      sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
+  | Unop(op, e) -> sprintf "(%s%s)" (txt_of_op op) (txt_of_expr e)
+  | Call(f, args) -> txt_of_func_call f args
+
+and txt_of_func_call f args = match f with
+  | "print" -> sprintf "print(%s)" (txt_of_args args)
+  | _ ->  sprintf "%s(%s)" f (txt_of_args args)
+
+and txt_of_args = function
+  | [] -> ""
+  | [arg] -> txt_of_expr arg
+  | _ as arg_list -> String.concat ", " (List.map txt_of_expr arg_list)
+
+let process_stmt = function
+  | State(expr) -> sprintf "%s" (txt_of_expr expr)
+
+let rec process_stmts acc = function
+  | [] -> String.concat "\n" acc
+  | stmt :: tl -> process_stmts (process_stmt stmt :: acc) tl
+
 (* entry point for code generation *)
-let rec process_stmt_list stmt_list prog_list = match stmt_list with
-  | stmt :: remaining_stmts -> 
-      process_stmt_list remaining_stmts (process_stmt stmt :: prog_list)
-  | [] -> String.concat "\n" (List.rev prog_list)
-
-and process_stmt stmt = match stmt with
-  | State(expr) -> sprintf "%s" (txt_of_expr expr);;
-
-(* Do Compilation - Temporary: will eventually be its own file *)
-let lexbuf = Lexing.from_channel stdin in
-let program = Parser.program Scanner.token lexbuf in
-let out_file = open_out "out.py" in
-fprintf out_file "%s" (process_stmt_list program []); close_out out_file
-
+let gen_program output_file program =
+  let code = process_stmts [] program in 
+  let file = open_out output_file in
+  fprintf file "%s\n" code; close_out file
