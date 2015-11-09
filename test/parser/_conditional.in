@@ -1,0 +1,6 @@
+state if true then 42 else 43
+state if false then 42 else 43
+state if 42 then "pass" else "fail"
+state if 0 then "pass" else "fail"
+state if 5 - 5 then true else false
+state if true then 40 + 2 else 5 * 5

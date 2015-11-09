@@ -32,6 +32,7 @@ type expr =                      (* Expressions *)
   | Unop of op * expr            (* -5 *)
   | Binop of expr * op * expr    (* a + b *)
   | Call of string * expr list   (* add(1, 2) *)
+  | If of expr * expr * expr     (* if true then 42 else 43 *)
 
 type stmt =          (* Statements *)
   | State of expr    (* set foo = bar + 3 *)

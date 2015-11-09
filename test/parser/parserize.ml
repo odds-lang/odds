@@ -28,6 +28,9 @@ let rec txt_of_expr = function
     "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"
   | Call(f, args) -> let args1 = List.map txt_of_expr args in
     "Call(" ^ f ^ ", [" ^ String.concat " ; " args1 ^ "])"
+  | If(e1, e2, e3) ->
+      let v1 = txt_of_expr e1 and v2 = txt_of_expr e2 and v3 = txt_of_expr e3 in
+    "If(" ^ v1 ^ ", " ^ v2 ^ ", " ^ v3 ^ ")"
 
 let rec txt_of_stmt = function
   | State(expr) -> let e = txt_of_expr expr in "State(" ^ e ^ ")"

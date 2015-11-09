@@ -1,0 +1,20 @@
+[
+    State(If(Bool_lit(true), Int_lit(42), Int_lit(43))) ;
+    State(If(Bool_lit(false), Int_lit(42), Int_lit(43))) ;
+    State(If(Int_lit(42), String_lit(pass), String_lit(fail))) ;
+    State(If(Int_lit(0), String_lit(pass), String_lit(fail))) ;
+    State(
+        If(
+            Binop(Int_lit(5), Sub, Int_lit(5)),
+            Bool_lit(true),
+            Bool_lit(false)
+        )
+    ) ;
+    State(
+        If(
+            Bool_lit(true),
+            Binop(Int_lit(40), Add, Int_lit(2)),
+            Binop(Int_lit(5), Mult, Int_lit(5))
+        )
+    )
+]
