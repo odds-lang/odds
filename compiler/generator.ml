@@ -24,7 +24,7 @@ let get_pyname =
   in aux "" !cur_pyname
 *)
 
-let get_pyname = sprintf "py_var_%d" !cur_pyname
+let get_pyname name = sprintf "%s_%d" name !cur_pyname
 
 let update_pyname () = cur_pyname := !cur_pyname + 1
 
