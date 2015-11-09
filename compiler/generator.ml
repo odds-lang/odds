@@ -19,7 +19,7 @@ let txt_of_op = function
   | Mod -> "%"
   | Pow -> "**"
   | Not -> "not "
-  | Equal -> "=="
+  | Eq -> "=="
   | Neq -> "!="
   | Less -> "<"
   | Leq -> "<="

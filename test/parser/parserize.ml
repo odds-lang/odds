@@ -8,7 +8,7 @@ let txt_of_op = function
   | Mod -> "Mod"
   | Pow -> "Pow"
   | Not -> "Not"
-  | Equal -> "Equal"
+  | Eq -> "Eq"
   | Neq -> "Neq"
   | Less -> "Less"
   | Leq -> "Leq"
