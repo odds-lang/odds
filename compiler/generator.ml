@@ -57,14 +57,17 @@ and txt_of_args = function
 
 let process_stmt = function
   | State(expr) -> sprintf "%s" (txt_of_expr expr)
-  (*| Set(id, expr) -> sprinf "%s = %s" (* map *) (txt_of_expr env expr) *)
+  | Set(id, expr) -> "SET STATEMENT" (* To Do: Add in Functionality *)
+(*| Set(id, expr) -> sprinf "%s = %s" (* map *) (txt_of_expr env expr) *)
 
-let rec process_stmts acc = function
-  | [] -> String.concat "\n" acc
-  | stmt :: tl -> process_stmts (process_stmt stmt :: acc ) tl
+let process_stmts stmt_list = 
+  let rec aux acc = function
+    | [] -> String.concat "\n" acc
+    | stmt :: tl -> aux (process_stmt stmt :: acc ) tl
+  in aux [] stmt_list
 
 (* entry point for code generation *)
 let gen_program output_file program =
-  let code = process_stmts [] program in 
+  let code = process_stmts program in 
   let file = open_out output_file in
   fprintf file "%s\n" code; close_out file

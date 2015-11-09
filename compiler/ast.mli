@@ -25,8 +25,9 @@ type expr =                      (* Expressions *)
   | Unop of op * expr            (* -5 *)
   | Call of string * expr list   (* add(1, 2) *)
 
-type stmt =          (* Statements *)
-  | State of expr    (* set foo = bar + 3 *)
+type stmt =                   (* Statements *)
+  | State of expr             (* state print("hello, world") *)
+  | Set of string * expr      (* set foo = bar + 3 *)
 
 type program = stmt list
 
