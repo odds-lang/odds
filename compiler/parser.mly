@@ -80,23 +80,29 @@ stmt:
 
 expr:
   | literal                     { $1 }
+  | arith                       { $1 }
+  | boolean                     { $1 }
   | ID                          { Id($1) }
+  | ID LPAREN args_opt RPAREN   { Call($1, $3)}
+  | LPAREN expr RPAREN          { $2 }
+
+arith:
   | MINUS expr                  { Unop(Sub, $2) }
-  | NOT expr                    { Unop(Not, $2) }
   | expr PLUS expr              { Binop($1, Add, $3) }
   | expr MINUS expr             { Binop($1, Sub, $3) }
   | expr TIMES expr             { Binop($1, Mult, $3) }
   | expr DIVIDE expr            { Binop($1, Div, $3) }
   | expr MOD expr               { Binop($1, Mod, $3) }
   | expr POWER expr             { Binop($1, Pow, $3) }
+
+boolean:
+  | NOT expr                    { Unop(Not, $2) }
   | expr EQ expr                { Binop($1, Eq, $3) }
   | expr NEQ expr               { Binop($1, Neq, $3) }
   | expr LCAR expr              { Binop($1, Less, $3) }
   | expr LEQ expr               { Binop($1, Leq, $3) }
   | expr RCAR expr              { Binop($1, Greater, $3) }
   | expr GEQ expr               { Binop($1, Geq, $3) }
-  | ID LPAREN args_opt RPAREN   { Call($1, $3)}
-  | LPAREN expr RPAREN          { $2 }
 
 literal:
   | INT_LITERAL                 { Int_lit($1) }
