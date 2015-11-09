@@ -1,0 +1,12 @@
+[
+    State(Unop(Not, Bool_lit(true))) ;
+    State(Unop(Not, Bool_lit(false))) ;
+    State(Binop(Int_lit(1), Equal, Int_lit(1))) ;
+    State(Binop(Int_lit(41), Neq, Int_lit(42))) ;
+    State(Binop(Int_lit(41), Less, Int_lit(42))) ;
+    State(Binop(Int_lit(42), Leq, Int_lit(42))) ;
+    State(Binop(Int_lit(43), Greater, Int_lit(42))) ;
+    State(Binop(Int_lit(43), Geq, Int_lit(42))) ;
+    State(Unop(Not, Binop(Int_lit(41), Less, Int_lit(42)))) ;
+    State(Unop(Not, Binop(Int_lit(42), Leq, Int_lit(42))))
+]

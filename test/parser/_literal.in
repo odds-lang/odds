@@ -1,3 +1,5 @@
 state 42
 state 42.1
 state "forty-two"
+state true
+state false

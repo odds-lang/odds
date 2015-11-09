@@ -18,15 +18,23 @@ let txt_of_op = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
+  | Not -> "not "
+  | Equal -> "=="
+  | Neq -> "!="
+  | Less -> "<"
+  | Leq -> "<="
+  | Greater -> ">"
+  | Geq -> ">="
 
 let rec txt_of_expr = function
   | Int_lit(i) -> string_of_int(i)
   | Float_lit(f) -> string_of_float(f)
   | String_lit(s) -> sprintf "\"%s\"" s
+  | Bool_lit(b) -> String.capitalize (string_of_bool(b))
   | Id(e) -> e
-  | Binop(e1, op, e2) ->
-      sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Unop(op, e) -> sprintf "(%s%s)" (txt_of_op op) (txt_of_expr e)
+  | Binop(e1, op, e2) ->
+    sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Call(f, args) -> txt_of_func_call f args
 
 and txt_of_func_call f args = match f with
