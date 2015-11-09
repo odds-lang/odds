@@ -27,7 +27,7 @@ let rec txt_of_expr = function
     let v1 = txt_of_expr e1 and op1 = txt_of_op op and v2 = txt_of_expr e2 in
     "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"
   | Call(f, args) -> let args1 = List.map txt_of_expr args in
-    "Call(Id(" ^ f ^ "), [" ^ String.concat " ; " args1 ^ "])"
+    "Call(" ^ f ^ ", [" ^ String.concat " ; " args1 ^ "])"
 
 let rec txt_of_stmt = function
   | State(expr) -> let e = txt_of_expr expr in "State(" ^ e ^ ")"
