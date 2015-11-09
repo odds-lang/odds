@@ -15,12 +15,16 @@ module StringMap = Map.Make(String)
 
 let cur_pyname = ref 0 (* Python variable name tracker *)
 
+(*
 let get_pyname =
   let get_str num = sprintf "%c" (Char.chr (97 + num)) in 
   let rec aux str num =
     if num < 10 then get_str num
     else sprintf "%s%s" (aux str (num / 10)) (get_str (num mod 10))
   in aux "" !cur_pyname
+*)
+
+let get_pyname = sprintf "py_var_%d" !cur_pyname
 
 let update_pyname () = cur_pyname := !cur_pyname + 1
 
