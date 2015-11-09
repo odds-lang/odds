@@ -61,7 +61,7 @@ let process_stmt = function
 
 let rec process_stmts acc = function
   | [] -> String.concat "\n" acc
-  | stmt :: tl -> process_stmts (process_stmt stmt :: acc env) tl
+  | stmt :: tl -> process_stmts (process_stmt stmt :: acc ) tl
 
 (* entry point for code generation *)
 let gen_program output_file program =
