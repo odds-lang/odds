@@ -27,6 +27,9 @@ rule token = parse
 | ';'   { SEMI }
 | ','   { COMMA }   | '|'   { VBAR }
 
+(* Sequencing *)
+| "and" { SEQ }
+
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
@@ -46,9 +49,6 @@ rule token = parse
 (* Conditional Operators *)
 | "if"    { IF }    | "then"  { THEN }
 | "else"  { ELSE }
-
-(* Declarative Keywords *)
-| "set"   { SET }   | "state" { STATE }
 
 (* Function Symbols & Keywords *)
 | "->"      { FDELIM }

@@ -1,7 +1,7 @@
-state PI
-state myvar
-state print(40 + 2)
-state print("fourty-two")
-state myfunc(arg1, arg2)
-state noargs()
-state prec(myvar, 2 * (2 + 3))
+PI;
+myvar;
+print(40 + 2);
+print("fourty-two");
+myfunc(arg1, arg2);
+noargs();
+prec(myvar, 2 * (2 + 3));

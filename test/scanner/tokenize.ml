@@ -1,4 +1,3 @@
-(* equivalent to parser.mli when we write that *)
 open Parser
 
 let stringify = function
@@ -6,8 +5,11 @@ let stringify = function
   | LPAREN -> "LPAREN"  | RPAREN -> "RPAREN"
   | LCAR -> "LCAR"      | RCAR -> "RCAR"
   | LBRACK -> "LBRACK"  | RBRACK -> "RBRACK"
-  | SEMI -> "SEMI"      (*| COLON -> "COLON"*)
+  | SEMI -> "SEMI"
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
+
+  (* Sequencing *)
+  | SEQ -> "SEQ"
 
   (* Arithmetic Operators *)
   | PLUS -> "PLUS"     | MINUS -> "MINUS"
@@ -29,11 +31,8 @@ let stringify = function
   | IF -> "IF"    | THEN -> "THEN"
   | ELSE -> "ELSE"
 
-  (* Declarative Keywords *)
-  | SET -> "SET"   | STATE -> "STATE"
-
   (* Function Symbols & Keywords *)
-  | FDELIM -> "FDELIM"  (*| FRTYPE *)
+  | FDELIM -> "FDELIM"
   | RETURN -> "RETURN"
 
   (* End-of-File *)

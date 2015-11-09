@@ -39,7 +39,7 @@ and txt_of_args = function
   | _ as arg_list -> String.concat ", " (List.map txt_of_expr arg_list)
 
 let process_stmt = function
-  | State(expr) -> sprintf "%s" (txt_of_expr expr)
+  | Expr(expr) -> sprintf "%s" (txt_of_expr expr)
 
 let rec process_stmts acc = function
   | [] -> String.concat "\n" acc

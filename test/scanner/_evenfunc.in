@@ -1,2 +1,2 @@
-set iseven = (num) -> 
-  return if num % 2 == 0 then true else "false"
+iseven = (num) -> 
+  return if num % 2 == 0 then true else "false";

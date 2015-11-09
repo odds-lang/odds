@@ -13,6 +13,9 @@
 /* Punctuation */
 %token LPAREN RPAREN LCAR RCAR LBRACK RBRACK SEMI COMMA VBAR
 
+/* Sequencing */
+%token SEQ
+
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
 
@@ -27,9 +30,6 @@
 
 /* Conditional Operators */
 %token IF THEN ELSE
-
-/* Declarative Keywords */
-%token SET STATE
 
 /* Function Symbols & Keywords */
 %token FDELIM RETURN
@@ -73,7 +73,7 @@ args_list:
   | args_list COMMA expr        { $3 :: $1 }
  
 stmt:
-  | STATE expr                  { State($2) }
+  | expr SEMI                   { Expr($1) }
 
 expr:
   | literal                     { $1 }

@@ -1,26 +1,27 @@
-state 1 + 2.1
-state 1 - 2.1
-state 1 * 2.1
-state 1 / 2.1
-state 1 % 2.1
-state 1 ** 2.1
-state -42
-state 42
-state 1 + -43
-state 1 * 2 + 3 ** 4
-state 1 / 2 % 3 % 4
-state 1 + 2 - 3 / 4
-state 1 * (2 + 3)
-state print(1 + 2.1)
-state print(1 - 2.1)
-state print(1 * 2.1)
-state print(1 / 2.0)
-state print(1 % 2.1)
-state print(1 ** 2.1)
-state print(-42)
-state print(42)
-state print(1 + -43)
-state print(1 * 2 + 3 ** 4)
-state print(1 / 2 % 3 % 4)
-state print(1 + 2 - 3 / 4)
-state print(1 * (2 + 3))
+1 + 2.1;
+1 - 2.1;
+1 * 2.1;
+1 / 2.1;
+1 % 2.1;
+1 ** 2.1;
+-42;
+42;
+1 + -43;
+1 * 2 + 3 ** 4;
+1 / 2 % 3 % 4;
+1 + 2 - 3 / 4;
+1 * (2 + 3);
+
+print(1 + 2.1);
+print(1 - 2.1);
+print(1 * 2.1);
+print(1 / 2.0);
+print(1 % 2.1);
+print(1 ** 2.1);
+print(-42);
+print(42);
+print(1 + -43);
+print(1 * 2 + 3 ** 4);
+print(1 / 2 % 3 % 4);
+print(1 + 2 - 3 / 4);
+print(1 * (2 + 3));

@@ -1,6 +1,7 @@
-state 42
-state 42.1
-state "forty-two"
-state print(42)
-state print(42.1)
-state print("forty-two")
+42;
+42.1;
+"forty-two";
+
+print(42);
+print(42.1);
+print("forty-two");
