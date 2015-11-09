@@ -34,7 +34,7 @@ let rec txt_of_expr = function
   | Id(e) -> e
   | Unop(op, e) -> sprintf "(%s%s)" (txt_of_op op) (txt_of_expr e)
   | Binop(e1, op, e2) ->
-    sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
+      sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Call(f, args) -> txt_of_func_call f args
 
 and txt_of_func_call f args = match f with
