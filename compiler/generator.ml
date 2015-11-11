@@ -64,13 +64,7 @@ and txt_of_args = function
   | _ as arg_list -> String.concat ", " (List.map txt_of_expr arg_list)
 
 let process_stmt = function
-<<<<<<< HEAD
-  | State(expr) -> sprintf "%s" (txt_of_expr expr)
-  | Set(id, expr) -> "SET STATEMENT" (* To Do: Add in Functionality *)
-(*| Set(id, expr) -> sprinf "%s = %s" (* map *) (txt_of_expr env expr) *)
-=======
   | Do(expr) -> sprintf "%s" (txt_of_expr expr)
->>>>>>> master
 
 let process_stmts stmt_list = 
   let rec aux acc = function
