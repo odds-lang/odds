@@ -1,7 +1,7 @@
-42;
-42.1;
-"forty-two";
+do 42
+do 42.1
+do "forty-two"
 
-print(42);
-print(42.1);
-print("forty-two");
+do print(42)
+do print(42.1)
+do print("forty-two")

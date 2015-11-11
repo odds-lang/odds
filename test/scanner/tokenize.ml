@@ -5,7 +5,6 @@ let stringify = function
   | LPAREN -> "LPAREN"  | RPAREN -> "RPAREN"
   | LCAR -> "LCAR"      | RCAR -> "RCAR"
   | LBRACK -> "LBRACK"  | RBRACK -> "RBRACK"
-  | SEMI -> "SEMI"
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
 
   (* Sequencing *)
@@ -20,7 +19,7 @@ let stringify = function
   | EQ -> "EQ"    | NEQ -> "NEQ"
   | LEQ -> "LEQ"  | GEQ -> "GEQ"
 
-  (* Logical Operators & Keywords*)
+  (* Logical Operators & Keywords *)
   | AND -> "AND"   | OR -> "OR"
   | NOT -> "NOT"
 
@@ -30,6 +29,9 @@ let stringify = function
   (* Conditional Operators *)
   | IF -> "IF"    | THEN -> "THEN"
   | ELSE -> "ELSE"
+
+  (* Declarative Keywords *)
+  | DO -> "DO"
 
   (* Function Symbols & Keywords *)
   | FDELIM -> "FDELIM"

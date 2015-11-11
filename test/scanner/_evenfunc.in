@@ -1,2 +1,2 @@
-iseven = (num) -> 
-  return if num % 2 == 0 then true else "false";
+do iseven = (num) -> 
+  return if num % 2 == 0 then true else "false"

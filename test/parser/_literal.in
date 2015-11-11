@@ -1,3 +1,5 @@
-42;
-42.1;
-"forty-two";
+do 42
+do 42.1
+do "forty-two"
+do true
+do false
