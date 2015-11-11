@@ -30,7 +30,7 @@ let rec txt_of_expr = function
     "Call(" ^ f ^ ", [" ^ String.concat " ; " args1 ^ "])"
 
 let rec txt_of_stmt = function
-  | Expr(expr) -> let e = txt_of_expr expr in "Expr(" ^ e ^ ")"
+  | Do(expr) -> let e = txt_of_expr expr in "Do(" ^ e ^ ")"
 
 let rec txt_of_stmts acc = function
   | [] -> "[" ^ (String.concat " ; " acc) ^ "]"

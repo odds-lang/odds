@@ -1,20 +1,20 @@
 [
-	Expr(Binop(Int_lit(1), Add, Float_lit(2.1))) ;
-	Expr(Binop(Int_lit(1), Sub, Float_lit(2.1))) ;
-	Expr(Binop(Int_lit(1), Mult, Float_lit(2.1))) ;
-	Expr(Binop(Int_lit(1), Div, Float_lit(2.1))) ;
-	Expr(Binop(Int_lit(1), Mod, Float_lit(2.1))) ;
-	Expr(Binop(Int_lit(1), Pow, Float_lit(2.1))) ;
-	Expr(Unop(Sub, Int_lit(42))) ;
-	Expr(Binop(Int_lit(1), Add, Unop(Sub, Int_lit(43)))) ;
-	Expr(
+	Do(Binop(Int_lit(1), Add, Float_lit(2.1))) ;
+	Do(Binop(Int_lit(1), Sub, Float_lit(2.1))) ;
+	Do(Binop(Int_lit(1), Mult, Float_lit(2.1))) ;
+	Do(Binop(Int_lit(1), Div, Float_lit(2.1))) ;
+	Do(Binop(Int_lit(1), Mod, Float_lit(2.1))) ;
+	Do(Binop(Int_lit(1), Pow, Float_lit(2.1))) ;
+	Do(Unop(Sub, Int_lit(42))) ;
+	Do(Binop(Int_lit(1), Add, Unop(Sub, Int_lit(43)))) ;
+	Do(
 		Binop(
 			Binop(Int_lit(1), Mult, Int_lit(2)),
 			Add,
 			Binop(Int_lit(3), Pow, Int_lit(4))
 		)
 	) ;
-	Expr(
+	Do(
 		Binop(
 			Binop(
 				Binop(Int_lit(1), Div, Int_lit(2)),
@@ -25,14 +25,14 @@
 			Int_lit(4)
 		)
 	) ;
-	Expr(
+	Do(
 		Binop(
 			Binop(Int_lit(1), Add, Int_lit(2)),
 			Sub,
 			Binop(Int_lit(3), Div, Int_lit(4))
 		)
 	) ;
-	Expr(
+	Do(
 		Binop(
 			Int_lit(1),
 			Mult,

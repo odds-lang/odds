@@ -76,7 +76,7 @@ args_list:
   | args_list COMMA expr        { $3 :: $1 }
  
 stmt:
-  | DO expr                     { Expr($2) }
+  | DO expr                     { Do($2) }
 
 expr:
   | literal                     { $1 }

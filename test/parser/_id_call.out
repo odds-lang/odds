@@ -1,11 +1,11 @@
 [
-    Expr(Id(PI)) ;
-    Expr(Id(myvar)) ;
-    Expr(Call(print, [Binop(Int_lit(40), Add, Int_lit(2))])) ;
-    Expr(Call(print, [String_lit(fourty-two)])) ;
-    Expr(Call(myfunc, [Id(arg1) ; Id(arg2)])) ;
-    Expr(Call(noargs, [])) ;
-    Expr(
+    Do(Id(PI)) ;
+    Do(Id(myvar)) ;
+    Do(Call(print, [Binop(Int_lit(40), Add, Int_lit(2))])) ;
+    Do(Call(print, [String_lit(fourty-two)])) ;
+    Do(Call(myfunc, [Id(arg1) ; Id(arg2)])) ;
+    Do(Call(noargs, [])) ;
+    Do(
         Call(
             prec,
             [

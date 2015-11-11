@@ -34,6 +34,6 @@ type expr =                      (* Expressions *)
   | Call of string * expr list   (* add(1, 2) *)
 
 type stmt =         (* Statements *)
-  | Expr of expr    (* set foo = bar + 3 *)
+  | Do of expr    (* set foo = bar + 3 *)
 
 type program = stmt list
