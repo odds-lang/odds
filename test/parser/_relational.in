@@ -1,10 +1,10 @@
-state !true
-state !false
-state 1 == 1
-state 41 != 42
-state 41 < 42
-state 42 <= 42
-state 43 > 42
-state 43 >= 42
-state !(41 < 42)
-state !(42 <= 42)
+do !true
+do !false
+do 1 == 1
+do 41 != 42
+do 41 < 42
+do 42 <= 42
+do 43 > 42
+do 43 >= 42
+do !(41 < 42)
+do !(42 <= 42)

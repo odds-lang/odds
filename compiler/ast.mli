@@ -33,7 +33,7 @@ type expr =                      (* Expressions *)
   | Binop of expr * op * expr    (* a + b *)
   | Call of string * expr list   (* add(1, 2) *)
 
-type stmt =          (* Statements *)
-  | State of expr    (* set foo = bar + 3 *)
+type stmt =         (* Statements *)
+  | Do of expr    (* set foo = bar + 3 *)
 
 type program = stmt list

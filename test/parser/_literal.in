@@ -1,5 +1,5 @@
-state 42
-state 42.1
-state "forty-two"
-state true
-state false
+do 42
+do 42.1
+do "forty-two"
+do true
+do false

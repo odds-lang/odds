@@ -10,8 +10,8 @@ TMP_FILE=$(mktemp "compiled.XXXXX")
 printf "${CYAN}Running compiler tests...\n${NC}"
 
 for input_file in $INPUT_FILES; do
-    python_file=${input_file/ods/py}
-    output_file=${input_file/ods/out}
+    python_file=${input_file/.ods/.py}
+    output_file=${input_file/.ods/.out}
 
     # compile odds program to temp python file
     ../compiler/odds.sh $input_file -c $TMP_FILE

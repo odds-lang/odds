@@ -11,7 +11,7 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK SEMI COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK COMMA VBAR
 
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
@@ -29,7 +29,7 @@
 %token IF THEN ELSE
 
 /* Declarative Keywords */
-%token SET STATE
+%token DO
 
 /* Function Symbols & Keywords */
 %token FDELIM RETURN
@@ -76,7 +76,7 @@ args_list:
   | args_list COMMA expr        { $3 :: $1 }
  
 stmt:
-  | STATE expr                  { State($2) }
+  | DO expr                     { Do($2) }
 
 expr:
   | literal                     { $1 }

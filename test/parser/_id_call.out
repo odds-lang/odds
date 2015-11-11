@@ -1,13 +1,13 @@
 [
-    State(Id(PI)) ;
-    State(Id(myvar)) ;
-    State(Call(Id(print), [Binop(Int_lit(40), Add, Int_lit(2))])) ;
-    State(Call(Id(print), [String_lit(fourty-two)])) ;
-    State(Call(Id(myfunc), [Id(arg1) ; Id(arg2)])) ;
-    State(Call(Id(noargs), [])) ;
-    State(
+    Do(Id(PI)) ;
+    Do(Id(myvar)) ;
+    Do(Call(print, [Binop(Int_lit(40), Add, Int_lit(2))])) ;
+    Do(Call(print, [String_lit(fourty-two)])) ;
+    Do(Call(myfunc, [Id(arg1) ; Id(arg2)])) ;
+    Do(Call(noargs, [])) ;
+    Do(
         Call(
-            Id(prec),
+            prec,
             [
                 Id(myvar) ;
                 Binop(Int_lit(2), Mult, Binop(Int_lit(2), Add, Int_lit(3)))

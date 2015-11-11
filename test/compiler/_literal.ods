@@ -1,7 +1,7 @@
-state 42
-state 42.1
-state "forty-two"
+do 42
+do 42.1
+do "forty-two"
 
-state print(42)
-state print(42.1)
-state print("forty-two")
+do print(42)
+do print(42.1)
+do print("forty-two")

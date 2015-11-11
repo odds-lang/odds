@@ -1,21 +1,21 @@
-state !true
-state !false
-state 1 == 1
-state 41 != 42
-state 41 < 42
-state 42 <= 42
-state 43 > 42
-state 43 >= 42
-state !(41 < 42)
-state !(42 <= 42)
+do !true
+do !false
+do 1 == 1
+do 41 != 42
+do 41 < 42
+do 42 <= 42
+do 43 > 42
+do 43 >= 42
+do !(41 < 42)
+do !(42 <= 42)
 
-state print(!true)
-state print(!false)
-state print(1 == 1)
-state print(41 != 42)
-state print(41 < 42)
-state print(42 <= 42)
-state print(43 > 42)
-state print(43 >= 42)
-state print(!(41 < 42))
-state print(!(42 <= 42))
+do print(!true)
+do print(!false)
+do print(1 == 1)
+do print(41 != 42)
+do print(41 < 42)
+do print(42 <= 42)
+do print(43 > 42)
+do print(43 >= 42)
+do print(!(41 < 42))
+do print(!(42 <= 42))
