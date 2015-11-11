@@ -1,0 +1,6 @@
+/* PI; */
+/* EUL; */
+
+do print(40 + 2)
+do print("fourty-two")
+do print(2 * (2 + 3))

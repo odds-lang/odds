@@ -24,7 +24,6 @@ rule token = parse
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACK }  | ']'   { RBRACK }
-| ';'   { SEMI }
 | ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)
@@ -48,7 +47,7 @@ rule token = parse
 | "else"  { ELSE }
 
 (* Declarative Keywords *)
-| "set"   { SET }   | "state" { STATE }
+| "do"    { DO }
 
 (* Function Symbols & Keywords *)
 | "->"      { FDELIM }

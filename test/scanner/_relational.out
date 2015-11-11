@@ -1,4 +1,6 @@
 EQ
 NEQ
+LCAR
 LEQ
+RCAR
 GEQ
