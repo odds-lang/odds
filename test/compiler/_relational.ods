@@ -1,0 +1,21 @@
+state !true
+state !false
+state 1 == 1
+state 41 != 42
+state 41 < 42
+state 42 <= 42
+state 43 > 42
+state 43 >= 42
+state !(41 < 42)
+state !(42 <= 42)
+
+state print(!true)
+state print(!false)
+state print(1 == 1)
+state print(41 != 42)
+state print(41 < 42)
+state print(42 <= 42)
+state print(43 > 42)
+state print(43 >= 42)
+state print(!(41 < 42))
+state print(!(42 <= 42))
