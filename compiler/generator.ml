@@ -13,7 +13,7 @@ open Printf
 
 module StringMap = Map.Make(String)
 
-let ss_counter = ref 0 (* Static Scoping Variable Counter *)
+let ss_counter = ref (-1) (* Static Scoping Variable Counter *)
 
 (*
 let get_pyname =
@@ -24,9 +24,9 @@ let get_pyname =
   in aux "" !cur_pyname
 *)
 
-let get_ss_id name = sprintf "%s_%d" name !ss_counter
-
-let update_ss_counter () = ss_counter := !ss_counter + 1
+let get_ss_id name = 
+  ss_counter := !ss_counter + 1;
+  sprintf "%s_%d" name !ss_counter
 
 let txt_of_op = function
   | Add -> "+"
