@@ -7,9 +7,6 @@ let stringify = function
   | LBRACK -> "LBRACK"  | RBRACK -> "RBRACK"
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
 
-  (* Sequencing *)
-  | SEQ -> "SEQ"
-
   (* Arithmetic Operators *)
   | PLUS -> "PLUS"     | MINUS -> "MINUS"
   | TIMES -> "TIMES"   | DIVIDE -> "DIVIDE"

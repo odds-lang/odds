@@ -13,9 +13,6 @@
 /* Punctuation */
 %token LPAREN RPAREN LCAR RCAR LBRACK RBRACK COMMA VBAR
 
-/* Sequencing */
-%token SEQ
-
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
 
