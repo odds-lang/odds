@@ -62,7 +62,10 @@
 
 %%
 
-/* declarations */
+/* Program flow */
+program:
+  | stmt_list EOF               { $1 }
+
 stmt_list:
   | /* nothing */               { [] }
   | stmt_list stmt              { $2 :: $1 }
@@ -70,40 +73,7 @@ stmt_list:
 stmt:
   | DO expr                     { Do($2) }
 
-fparams_list:
-  | ID                          { [Id($1)] }
-  | fparams_list COMMA ID       { Id($3)::$1 }
-
-fparams:
-  | /* nothing */               { [] }
-  | fparams_list                { List.rev $1 }
-
-fdecl:
-  | LBRACK fparams RBRACK FDELIM stmt_list RETURN expr
-    { {
-      params = $2;
-      body = $5;
-      return = $7;
-    } }
-
-program:
-  | stmt_list EOF               { $1 }
-
-args_opt:
-  | /* nothing */               { [] }
-  | args_list                   { List.rev $1 }
-
-args_list:
-  | expr                        { [$1] }
-  | args_list COMMA expr        { $3 :: $1 }
-
-/* expressions */
-literal:
-  | INT_LITERAL                 { Int_lit($1) }
-  | FLOAT_LITERAL               { Float_lit($1) }
-  | STRING_LITERAL              { String_lit($1) }
-  | BOOL_LITERAL                { Bool_lit($1) }
-
+/* Expressions */
 expr:
   | literal                     { $1 }
   | arith                       { $1 }
@@ -114,6 +84,33 @@ expr:
   | fdecl                       { Fdecl($1) }
   | ID ASN expr                 { Assign($1, $3) }
 
+/* Function declaration */
+fdecl:
+  | LBRACK fparams_opt RBRACK FDELIM stmt_list RETURN expr
+    { {
+      params = $2;
+      body = $5;
+      return = $7;
+    } }
+
+fparams_opt:
+  | /* nothing */               { [] }
+  | fparam_list                 { List.rev $1 }
+
+fparam_list:
+  | ID                          { [Id($1)] }
+  | fparam_list COMMA ID        { Id($3)::$1 }
+
+/* Function calling */
+args_opt:
+  | /* nothing */               { [] }
+  | arg_list                    { List.rev $1 }
+
+arg_list:
+  | expr                        { [$1] }
+  | arg_list COMMA expr         { $3 :: $1 }
+
+/* Binary operators */
 arith:
   | MINUS expr                  { Unop(Sub, $2) }
   | expr PLUS expr              { Binop($1, Add, $3) }
@@ -132,3 +129,9 @@ boolean:
   | expr RCAR expr              { Binop($1, Greater, $3) }
   | expr GEQ expr               { Binop($1, Geq, $3) }
 
+/* Literals */
+literal:
+  | INT_LITERAL                 { Int_lit($1) }
+  | FLOAT_LITERAL               { Float_lit($1) }
+  | STRING_LITERAL              { String_lit($1) }
+  | BOOL_LITERAL                { Bool_lit($1) }
