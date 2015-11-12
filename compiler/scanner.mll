@@ -23,8 +23,8 @@ rule token = parse
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
-| '['   { LBRACK }  | ']'   { RBRACK }
-| ';'   { SEMI }
+| '['   { LBRACE }  | ']'   { RBRACE }
+| '{}'  { LBRACK }  | '}'   { RBRACK }
 | ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)
@@ -48,7 +48,7 @@ rule token = parse
 | "else"  { ELSE }
 
 (* Declarative Keywords *)
-| "set"   { SET }   | "state" { STATE }
+| "do"    { DO }
 
 (* Function Symbols & Keywords *)
 | "->"      { FDELIM }

@@ -1,0 +1,27 @@
+do 1 + 2.1
+do 1 - 2.1
+do 1 * 2.1
+do 1 / 2.1
+do 1 % 2.1
+do 1 ** 2.1
+do -42
+do 42
+do 1 + -43
+do 1 * 2 + 3 ** 4
+do 1 / 2 % 3 % 4
+do 1 + 2 - 3 / 4
+do 1 * (2 + 3)
+
+do print(1 + 2.1)
+do print(1 - 2.1)
+do print(1 * 2.1)
+do print(1 / 2.0)
+do print(1 % 2.1)
+do print(1 ** 2.1)
+do print(-42)
+do print(42)
+do print(1 + -43)
+do print(1 * 2 + 3 ** 4)
+do print(1 / 2 % 3 % 4)
+do print(1 + 2 - 3 / 4)
+do print(1 * (2 + 3))

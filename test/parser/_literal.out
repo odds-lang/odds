@@ -1,5 +1,7 @@
 [
-    State(Int_lit(42)) ;
-    State(Float_lit(42.1)) ;
-    State(String_lit(forty-two))
+    Do(Int_lit(42)) ;
+    Do(Float_lit(42.1)) ;
+    Do(String_lit(forty-two)) ;
+    Do(Bool_lit(true)) ;
+    Do(Bool_lit(false))
 ]

@@ -15,19 +15,35 @@ type op =    (* Operators *)
   | Div      (* / *)
   | Mod      (* % *)
   | Pow      (* ** *)
+  | Not      (* ! *)
+  | Eq       (* == *)
+  | Neq      (* != *)
+  | Less     (* < *)
+  | Leq      (* <= *)
+  | Greater  (* > *)
+  | Geq      (* >= *)
+
+
+type stmt =         (* Statements *)
+  | Do of expr    (* set foo = bar + 3 *)
+
+type fdecl =
+  {
+  params : expr list;
+  body: stmt list;
+  return: expr
+  }
 
 type expr =                      (* Expressions *)
   | Int_lit of int               (* 42 *)
   | Float_lit of float           (* 42.0 *)
   | String_lit of string         (* "Hello, world" *)
+  | Bool_lit of bool             (* true *)
   | Id of string                 (* x *)
-  | Binop of expr * op * expr    (* a + b *)
   | Unop of op * expr            (* -5 *)
+  | Binop of expr * op * expr    (* a + b *)
   | Call of string * expr list   (* add(1, 2) *)
-
-type stmt =                   (* Statements *)
-  | State of expr             (* state print("hello, world") *)
-  | Set of string * expr      (* set foo = bar + 3 *)
+  | Assign of string * expr      (* x = 4 *)
+  | Fdecl of fdecl  
 
 type program = stmt list
-

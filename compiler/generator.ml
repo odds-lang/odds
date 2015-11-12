@@ -35,15 +35,23 @@ let txt_of_op = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
+  | Not -> "not "
+  | Eq -> "=="
+  | Neq -> "!="
+  | Less -> "<"
+  | Leq -> "<="
+  | Greater -> ">"
+  | Geq -> ">="
 
 let rec txt_of_expr = function
   | Int_lit(i) -> string_of_int(i)
   | Float_lit(f) -> string_of_float(f)
   | String_lit(s) -> sprintf "\"%s\"" s
-  | Id(id) -> id (* map *)
+  | Bool_lit(b) -> String.capitalize (string_of_bool(b))
+  | Id(e) -> e
+  | Unop(op, e) -> sprintf "(%s%s)" (txt_of_op op) (txt_of_expr e)
   | Binop(e1, op, e2) ->
       sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
-  | Unop(op, e) -> sprintf "(%s%s)" (txt_of_op op) (txt_of_expr e)
   | Call(f, args) -> txt_of_func_call f args
 
 and txt_of_func_call f args = match f with
@@ -56,9 +64,7 @@ and txt_of_args = function
   | _ as arg_list -> String.concat ", " (List.map txt_of_expr arg_list)
 
 let process_stmt = function
-  | State(expr) -> sprintf "%s" (txt_of_expr expr)
-  | Set(id, expr) -> "SET STATEMENT" (* To Do: Add in Functionality *)
-(*| Set(id, expr) -> sprinf "%s = %s" (* map *) (txt_of_expr env expr) *)
+  | Do(expr) -> sprintf "%s" (txt_of_expr expr)
 
 let process_stmts stmt_list = 
   let rec aux acc = function
