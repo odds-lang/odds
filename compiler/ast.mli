@@ -28,12 +28,12 @@ type expr =                      (* Expressions *)
   | Float_lit of float           (* 42.0 *)
   | String_lit of string         (* "Hello, world" *)
   | Bool_lit of bool             (* true *)
-  | Id of string                 (* x *)
   | Unop of op * expr            (* -5 *)
   | Binop of expr * op * expr    (* a + b *)
+  | Id of string                 (* x *)
+  | Assign of expr * expr        (* x = 4 *)
   | Call of string * expr list   (* add(1, 2) *)
-  | Assign of string * expr      (* x = 4 *)
-  | Fdecl of fdecl
+  | Fdecl of fdecl               (* (x) -> ... return x *)
 
 and fdecl =               (* Function Declarations *)
   {

@@ -1,7 +1,7 @@
 [
     Do(
         Assign(
-            sum,
+            Id(sum),
             Fdecl({
                 params=[
                     Id(x) ;
