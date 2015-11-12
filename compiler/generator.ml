@@ -43,7 +43,7 @@ let txt_of_op = function
   | Greater -> ">"
   | Geq -> ">="
 
-let txt_of_cond i t e = "if " ^ i ^ ":\n{\n" ^ t ^ "\n}\nelse:\n{\n" ^ e ^ "\n}"
+let txt_of_cond i t e = sprintf "if %s:\n{\n%s\n}\nelse:\n{\n%s\n}" i t e
 
 let rec txt_of_expr = function
   | Int_lit(i) -> string_of_int(i)
