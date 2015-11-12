@@ -11,7 +11,7 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE LBRACK RBRACK COMMA VBAR
 
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
@@ -110,7 +110,7 @@ expr:
   | ID                          { Id($1) }
   | ID LPAREN args_opt RPAREN   { Call($1, $3)}
   | LPAREN expr RPAREN          { $2 }
-  | fdecl                       { $1 }
+  | fdecl                       { Fdecl($1) }
   | ID ASN expr                 { Assign($1, $3) }
 
 arith:

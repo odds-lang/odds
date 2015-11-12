@@ -24,7 +24,7 @@ rule token = parse
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACE }  | ']'   { RBRACE }
-| '{}'  { LBRACK }  | '}'   { RBRACK }
+| '{'   { LBRACK }  | '}'   { RBRACK }
 | ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)

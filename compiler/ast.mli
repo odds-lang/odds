@@ -27,14 +27,14 @@ type op =    (* Operators *)
 type stmt =         (* Statements *)
   | Do of expr    (* set foo = bar + 3 *)
 
-type fdecl =
+and fdecl =
   {
   params : expr list;
   body: stmt list;
   return: expr
   }
 
-type expr =                      (* Expressions *)
+and expr =                      (* Expressions *)
   | Int_lit of int               (* 42 *)
   | Float_lit of float           (* 42.0 *)
   | String_lit of string         (* "Hello, world" *)
