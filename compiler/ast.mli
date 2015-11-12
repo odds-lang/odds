@@ -23,18 +23,7 @@ type op =    (* Operators *)
   | Greater  (* > *)
   | Geq      (* >= *)
 
-
-type stmt =         (* Statements *)
-  | Do of expr    (* set foo = bar + 3 *)
-
-and fdecl =
-  {
-  params : expr list;
-  body: stmt list;
-  return: expr
-  }
-
-and expr =                      (* Expressions *)
+type expr =                      (* Expressions *)
   | Int_lit of int               (* 42 *)
   | Float_lit of float           (* 42.0 *)
   | String_lit of string         (* "Hello, world" *)
@@ -44,6 +33,17 @@ and expr =                      (* Expressions *)
   | Binop of expr * op * expr    (* a + b *)
   | Call of string * expr list   (* add(1, 2) *)
   | Assign of string * expr      (* x = 4 *)
-  | Fdecl of fdecl  
+  | Fdecl of fdecl
+
+and fdecl =                 (* Function Declarations *)
+  {
+    params : expr list;     (* Parameters *)
+    body: stmt list;        (* Function Body *)
+    return: expr            (* Return *)
+  }
+
+and stmt =         (* Statements *)
+  | Do of expr     (* set foo = bar + 3 *)
+
 
 type program = stmt list
