@@ -53,12 +53,13 @@ let rec txt_of_expr = function
   | Binop(e1, op, e2) ->
       sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Call(f, args) -> txt_of_func_call f args
+  | List(l) -> sprintf "[%s]" (txt_of_list l)
 
 and txt_of_func_call f args = match f with
-  | "print" -> sprintf "print(%s)" (txt_of_args args)
-  | _ ->  sprintf "%s(%s)" f (txt_of_args args)
+  | "print" -> sprintf "print(%s)" (txt_of_list args)
+  | _ ->  sprintf "%s(%s)" f (txt_of_list args)
 
-and txt_of_args = function
+and txt_of_list = function
   | [] -> ""
   | [arg] -> txt_of_expr arg
   | _ as arg_list -> String.concat ", " (List.map txt_of_expr arg_list)
