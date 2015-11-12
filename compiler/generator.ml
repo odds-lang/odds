@@ -43,6 +43,8 @@ let txt_of_op = function
   | Greater -> ">"
   | Geq -> ">="
 
+let txt_of_cond i t e = "if " ^ i ^ ":\n{\n" ^ t ^ "\n}\nelse:\n{\n" ^ e ^ "\n}"
+
 let rec txt_of_expr = function
   | Int_lit(i) -> string_of_int(i)
   | Float_lit(f) -> string_of_float(f)
@@ -53,6 +55,9 @@ let rec txt_of_expr = function
   | Binop(e1, op, e2) ->
       sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Call(f, args) -> txt_of_func_call f args
+  | If(e1, e2, e3) ->
+      let i = txt_of_expr e1 and t = txt_of_expr e2 and e = txt_of_expr e3 in
+      txt_of_cond i t e
 
 and txt_of_func_call f args = match f with
   | "print" -> sprintf "print(%s)" (txt_of_args args)
