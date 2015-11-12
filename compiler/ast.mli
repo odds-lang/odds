@@ -32,8 +32,18 @@ type expr =                      (* Expressions *)
   | Unop of op * expr            (* -5 *)
   | Binop of expr * op * expr    (* a + b *)
   | Call of string * expr list   (* add(1, 2) *)
+  | Assign of string * expr      (* x = 4 *)
+  | Fdecl of fdecl
 
-type stmt =         (* Statements *)
-  | Do of expr    (* set foo = bar + 3 *)
+and fdecl =                 (* Function Declarations *)
+  {
+    params : expr list;     (* Parameters *)
+    body: stmt list;        (* Function Body *)
+    return: expr            (* Return *)
+  }
+
+and stmt =         (* Statements *)
+  | Do of expr     (* set foo = bar + 3 *)
+
 
 type program = stmt list

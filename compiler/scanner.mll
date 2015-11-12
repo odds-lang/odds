@@ -23,7 +23,8 @@ rule token = parse
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
-| '['   { LBRACK }  | ']'   { RBRACK }
+| '['   { LBRACE }  | ']'   { RBRACE }
+| '{'   { LBRACK }  | '}'   { RBRACK }
 | ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)

@@ -11,7 +11,7 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE LBRACK RBRACK COMMA VBAR
 
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
@@ -48,24 +48,46 @@
 %token VOID_LITERAL
 
 /* Precedence and associativity of each operator */
+%right ASN
+%nonassoc RETURN
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 %left POWER
-%right NOT
+%nonassoc NOT
 
 %start program                /* Start symbol */
 %type <Ast.program> program   /* Type returned by a program */
 
 %%
 
-program:
-  | stmt_list EOF               { $1 }
-
+/* declarations */
 stmt_list:
   | /* nothing */               { [] }
   | stmt_list stmt              { $2 :: $1 }
+
+stmt:
+  | DO expr                     { Do($2) }
+
+fparams_list:
+  | ID                          { [Id($1)] }
+  | fparams_list COMMA ID       { Id($3)::$1 }
+
+fparams:
+  | /* nothing */               { [] }
+  | fparams_list                { List.rev $1 }
+
+fdecl:
+  | LBRACK fparams RBRACK FDELIM stmt_list RETURN expr
+    { {
+      params = $2;
+      body = $5;
+      return = $7;
+    } }
+
+program:
+  | stmt_list EOF               { $1 }
 
 args_opt:
   | /* nothing */               { [] }
@@ -74,9 +96,13 @@ args_opt:
 args_list:
   | expr                        { [$1] }
   | args_list COMMA expr        { $3 :: $1 }
- 
-stmt:
-  | DO expr                     { Do($2) }
+
+/* expressions */
+literal:
+  | INT_LITERAL                 { Int_lit($1) }
+  | FLOAT_LITERAL               { Float_lit($1) }
+  | STRING_LITERAL              { String_lit($1) }
+  | BOOL_LITERAL                { Bool_lit($1) }
 
 expr:
   | literal                     { $1 }
@@ -85,6 +111,8 @@ expr:
   | ID                          { Id($1) }
   | ID LPAREN args_opt RPAREN   { Call($1, $3)}
   | LPAREN expr RPAREN          { $2 }
+  | fdecl                       { Fdecl($1) }
+  | ID ASN expr                 { Assign($1, $3) }
 
 arith:
   | MINUS expr                  { Unop(Sub, $2) }
@@ -104,8 +132,3 @@ boolean:
   | expr RCAR expr              { Binop($1, Greater, $3) }
   | expr GEQ expr               { Binop($1, Geq, $3) }
 
-literal:
-  | INT_LITERAL                 { Int_lit($1) }
-  | FLOAT_LITERAL               { Float_lit($1) }
-  | STRING_LITERAL              { String_lit($1) }
-  | BOOL_LITERAL                { Bool_lit($1) }
