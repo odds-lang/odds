@@ -35,11 +35,11 @@ type expr =                      (* Expressions *)
   | Assign of string * expr      (* x = 4 *)
   | Fdecl of fdecl
 
-and fdecl =                 (* Function Declarations *)
+and fdecl =               (* Function Declarations *)
   {
-    params : expr list;     (* Parameters *)
-    body: stmt list;        (* Function Body *)
-    return: expr            (* Return *)
+    params: expr list;    (* Parameters *)
+    body: stmt list;      (* Function Body *)
+    return: expr          (* Return *)
   }
 
 and stmt =         (* Statements *)
