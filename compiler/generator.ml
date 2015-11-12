@@ -11,6 +11,23 @@
 open Ast
 open Printf
 
+module StringMap = Map.Make(String)
+
+let ss_counter = ref (-1) (* Static Scoping Variable Counter *)
+
+(*
+let get_pyname =
+  let get_str num = sprintf "%c" (Char.chr (97 + num)) in 
+  let rec aux str num =
+    if num < 10 then get_str num
+    else sprintf "%s%s" (aux str (num / 10)) (get_str (num mod 10))
+  in aux "" !cur_pyname
+*)
+
+let get_ss_id name = 
+  ss_counter := !ss_counter + 1;
+  sprintf "%s_%d" name !ss_counter
+
 let txt_of_op = function
   | Add -> "+"
   | Sub -> "-"
@@ -34,7 +51,7 @@ let rec txt_of_expr = function
   | Id(e) -> e
   | Unop(op, e) -> sprintf "(%s%s)" (txt_of_op op) (txt_of_expr e)
   | Binop(e1, op, e2) ->
-    sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
+      sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Call(f, args) -> txt_of_func_call f args
 
 and txt_of_func_call f args = match f with
@@ -49,12 +66,14 @@ and txt_of_args = function
 let process_stmt = function
   | Do(expr) -> sprintf "%s" (txt_of_expr expr)
 
-let rec process_stmts acc = function
-  | [] -> String.concat "\n" acc
-  | stmt :: tl -> process_stmts (process_stmt stmt :: acc) tl
+let process_stmts stmt_list = 
+  let rec aux acc = function
+    | [] -> String.concat "\n" acc
+    | stmt :: tl -> aux (process_stmt stmt :: acc ) tl
+  in aux [] stmt_list
 
 (* entry point for code generation *)
 let gen_program output_file program =
-  let code = process_stmts [] program in 
+  let code = process_stmts program in 
   let file = open_out output_file in
   fprintf file "%s\n" code; close_out file
