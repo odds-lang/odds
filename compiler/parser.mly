@@ -49,13 +49,13 @@
 
 /* Precedence and associativity of each operator */
 %right ASN
-%left RETURN
+%nonassoc RETURN
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 %left POWER
-%right NOT
+%nonassoc NOT
 
 %start program                /* Start symbol */
 %type <Ast.program> program   /* Type returned by a program */
