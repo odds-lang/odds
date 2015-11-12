@@ -55,7 +55,7 @@
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
 %left POWER
-%nonassoc NOT
+%right NOT
 
 %start program                /* Start symbol */
 %type <Ast.program> program   /* Type returned by a program */
