@@ -3,5 +3,5 @@
     Do(Float_lit(42.1)) ;
     Do(String_lit(forty-two)) ;
     Do(Bool_lit(true)) ;
-    Do(Bool_lit(false))
+    Do(Bool_lit(false)) ;
 ]
