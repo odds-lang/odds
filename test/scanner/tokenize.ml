@@ -5,7 +5,6 @@ let stringify = function
   | LPAREN -> "LPAREN"  | RPAREN -> "RPAREN"
   | LCAR -> "LCAR"      | RCAR -> "RCAR"
   | LBRACE -> "LBRACE"  | RBRACE -> "RBRACE"
-  | LBRACK -> "LBRACK"  | RBRACK -> "RBRACK"
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
 
   (* Arithmetic Operators *)

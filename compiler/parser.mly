@@ -86,11 +86,11 @@ expr:
 
 /* Function declaration */
 fdecl:
-  | LBRACK fparams_opt RBRACK FDELIM stmt_list RETURN expr
+  | LPAREN fparams_opt FDELIM stmt_list RETURN expr
     { {
       params = $2;
-      body = $5;
-      return = $7;
+      body = $4;
+      return = $6;
     } }
 
 fparams_opt:
