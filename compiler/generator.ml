@@ -67,10 +67,10 @@ let process_stmt = function
   | Do(expr) -> sprintf "%s" (txt_of_expr expr)
 
 let process_stmts stmt_list = 
-  let rec aux acc = function
+  let rec do_process_stmts acc = function
     | [] -> String.concat "\n" acc
-    | stmt :: tl -> aux (process_stmt stmt :: acc ) tl
-  in aux [] stmt_list
+    | stmt :: tl -> do_process_stmts (process_stmt stmt :: acc ) tl
+  in do_process_stmts [] stmt_list
 
 (* entry point for code generation *)
 let gen_program output_file program =
