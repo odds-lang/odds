@@ -29,8 +29,8 @@ let rec txt_of_expr = function
       let v1 = txt_of_expr e1 and op1 = txt_of_op op and v2 = txt_of_expr e2 in
       "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"
   | Call(f, args) -> let args1 = List.map txt_of_expr args in
-      "Call(" ^ f ^ ", [" ^ String.concat " ; " args1 ^ "])"
-  | Assign(x, e) -> "Assign(" ^ (txt_of_expr x) ^ ", " ^ (txt_of_expr e) ^ " )"
+      "Call(" ^ txt_of_expr f ^ ", [" ^ String.concat " ; " args1 ^ "])"
+  | Assign(x, e) -> "Assign(" ^ x ^ ", " ^ (txt_of_expr e) ^ " )"
   | Fdecl(f)-> txt_of_fdecl f
 
 and txt_of_exprs exprs =

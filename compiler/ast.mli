@@ -32,7 +32,7 @@ type expr =                      (* Expressions *)
   | Binop of expr * op * expr    (* a + b *)
   | Id of string                 (* x *)
   | Assign of string * expr      (* x = 4 *)
-  | Call of expr * expr list   (* add(1, 2) *)
+  | Call of expr * expr list     (* add(1, 2) *)
   | Fdecl of fdecl               (* (x) -> ... return x *)
 
 and fdecl =               (* Function Declarations *)
