@@ -56,9 +56,9 @@ let rec txt_of_expr env = function
       let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
       env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
   | Call(f, args) -> env, txt_of_func_call env f args
-  | Assign(id, e) -> 
+  | Assign(id, e) ->
       let ss_id = get_ss_id id and _, e = txt_of_expr env e in
-      StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
+      (StringMap.add id ss_id env), sprintf "%s = %s" ss_id e
 
 and txt_of_func_call env f args = match f with
   | "print" -> sprintf "print(%s)" (txt_of_args env args)
@@ -77,7 +77,7 @@ let process_stmt env = function
 
 let process_stmts stmt_list = 
   let rec do_process_stmts env acc = function
-    | [] -> String.concat "\n" acc
+    | [] -> String.concat "\n" (List.rev acc)
     | stmt :: tl -> 
         let updated_env, stmt_txt = process_stmt env stmt in
         do_process_stmts updated_env (stmt_txt :: acc) tl

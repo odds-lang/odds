@@ -31,7 +31,7 @@ type expr =                      (* Expressions *)
   | Unop of op * expr            (* -5 *)
   | Binop of expr * op * expr    (* a + b *)
   | Id of string                 (* x *)
-  | Assign of expr * expr        (* x = 4 *)
+  | Assign of string * expr      (* x = 4 *)
   | Call of string * expr list   (* add(1, 2) *)
   | Fdecl of fdecl               (* (x) -> ... return x *)
 
