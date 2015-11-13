@@ -89,7 +89,7 @@ fdecl:
   | LPAREN fparams_opt FDELIM stmt_list RETURN expr
     { {
       params = $2;
-      body = $4;
+      body = List.rev $4;
       return = $6;
     } }
 

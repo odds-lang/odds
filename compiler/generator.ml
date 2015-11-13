@@ -15,15 +15,6 @@ module StringMap = Map.Make(String)
 
 let ss_counter = ref (-1) (* Static Scoping Variable Counter *)
 
-(*
-let get_pyname =
-  let get_str num = sprintf "%c" (Char.chr (97 + num)) in 
-  let rec aux str num =
-    if num < 10 then get_str num
-    else sprintf "%s%s" (aux str (num / 10)) (get_str (num mod 10))
-  in aux "" !cur_pyname
-*)
-
 let get_ss_id name = 
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter

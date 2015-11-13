@@ -53,7 +53,7 @@ and txt_of_stmt = function
 
 and txt_of_stmts stmts =
   let rec aux acc = function
-      | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
+      | [] -> "[" ^ (String.concat " ; " (List.rev acc)) ^ "]"
       | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
   in aux [] stmts
 
