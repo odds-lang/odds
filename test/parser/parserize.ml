@@ -23,8 +23,7 @@ let rec txt_of_expr = function
   | String_lit(x) -> "String_lit(" ^ x ^ ")"
   | Bool_lit(x) -> "Bool_lit(" ^ string_of_bool x ^ ")"
   | Id(x) -> "Id(" ^ x ^ ")"
-  | Unop(op, e) -> let v = txt_of_expr e and op1 = txt_of_op op in
-      "Unop(" ^ op1 ^ ", " ^ v ^ ")"
+  | Unop(op, e) -> "Unop(" ^ (txt_of_op op) ^ ", " ^ (txt_of_expr e) ^ ")"
   | Binop(e1, op, e2) ->
       let v1 = txt_of_expr e1 and op1 = txt_of_op op and v2 = txt_of_expr e2 in
       "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"

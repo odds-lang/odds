@@ -8,7 +8,8 @@
  *  - Lilly Wang
  *)
 
-type op =    (* Operators *)
+(* Binary operators *)
+type op =
   | Add      (* + *)
   | Sub      (* - *)
   | Mult     (* * *)
@@ -23,7 +24,8 @@ type op =    (* Operators *)
   | Greater  (* > *)
   | Geq      (* >= *)
 
-type expr =                      (* Expressions *)
+(* Expressions *)
+type expr =
   | Int_lit of int               (* 42 *)
   | Float_lit of float           (* 42.0 *)
   | String_lit of string         (* "Hello, world" *)
@@ -35,15 +37,17 @@ type expr =                      (* Expressions *)
   | Call of expr * expr list     (* add(1, 2) *)
   | Fdecl of fdecl               (* (x) -> ... return x *)
 
-and fdecl =               (* Function Declarations *)
+(* Function Declarations *)
+and fdecl =
   {
     params: expr list;    (* Parameters *)
     body: stmt list;      (* Function Body *)
     return: expr          (* Return *)
   }
 
-and stmt =         (* Statements *)
+(* Statements *)
+and stmt =
   | Do of expr     (* set foo = bar + 3 *)
 
-
+(* Program entry point *)
 type program = stmt list
