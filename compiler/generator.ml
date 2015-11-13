@@ -19,6 +19,7 @@ let get_ss_id name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
 
+(* Binary operators *)
 let txt_of_op = function
   | Add -> "+"
   | Sub -> "-"
@@ -34,6 +35,7 @@ let txt_of_op = function
   | Greater -> ">"
   | Geq -> ">="
 
+(* Expressions *)
 let rec txt_of_expr env = function
   | Int_lit(i) -> env, string_of_int(i)
   | Float_lit(f) -> env, string_of_float(f)
@@ -51,6 +53,7 @@ let rec txt_of_expr env = function
       let ss_id = get_ss_id id and _, e = txt_of_expr env e in
       StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
 
+(* Function calls *)
 and txt_of_func_call env f args = match f with
   | "print" -> sprintf "print(%s)" (txt_of_args env args)
   | _ ->  sprintf "%s(%s)" f (txt_of_args env args)
@@ -61,6 +64,7 @@ and txt_of_args env = function
   | _ as arg_list -> String.concat ", " 
       (List.map (fun expr -> snd (txt_of_expr env expr)) arg_list)
 
+(* Statements *)
 let process_stmt env = function
   | Do(expr) -> 
       let updated_env, expr = txt_of_expr env expr in
@@ -74,7 +78,7 @@ let process_stmts stmt_list =
         do_process_stmts updated_env (stmt_txt :: acc) tl
   in do_process_stmts StringMap.empty [] stmt_list
 
-(* entry point for code generation *)
+(* Code generation entry point *)
 let gen_program output_file program =
   let code = process_stmts program in 
   let file = open_out output_file in
