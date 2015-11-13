@@ -43,34 +43,45 @@ let txt_of_op = function
   | Greater -> ">"
   | Geq -> ">="
 
-let rec txt_of_expr = function
-  | Int_lit(i) -> string_of_int(i)
-  | Float_lit(f) -> string_of_float(f)
-  | String_lit(s) -> sprintf "\"%s\"" s
-  | Bool_lit(b) -> String.capitalize (string_of_bool(b))
-  | Id(e) -> e
-  | Unop(op, e) -> sprintf "(%s%s)" (txt_of_op op) (txt_of_expr e)
-  | Binop(e1, op, e2) ->
-      sprintf "(%s %s %s)" (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
-  | Call(f, args) -> txt_of_func_call f args
+let rec txt_of_expr env = function
+  | Int_lit(i) -> env, string_of_int(i)
+  | Float_lit(f) -> env, string_of_float(f)
+  | String_lit(s) -> env, sprintf "\"%s\"" s
+  | Bool_lit(b) -> env, String.capitalize (string_of_bool(b))
+  | Id(e) -> env, StringMap.find e env
+  | Unop(op, e) -> 
+      let _, e = txt_of_expr env e in 
+      env, sprintf "(%s%s)" (txt_of_op op) e
+  | Binop(e1, op, e2) -> 
+      let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
+      env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
+  | Call(f, args) -> env, txt_of_func_call env f args
+  | Assign(id, e) -> 
+      let ss_id = get_ss_id id and _, e = txt_of_expr env e in
+      StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
 
-and txt_of_func_call f args = match f with
-  | "print" -> sprintf "print(%s)" (txt_of_args args)
-  | _ ->  sprintf "%s(%s)" f (txt_of_args args)
+and txt_of_func_call env f args = match f with
+  | "print" -> sprintf "print(%s)" (txt_of_args env args)
+  | _ ->  sprintf "%s(%s)" f (txt_of_args env args)
 
-and txt_of_args = function
+and txt_of_args env = function
   | [] -> ""
-  | [arg] -> txt_of_expr arg
-  | _ as arg_list -> String.concat ", " (List.map txt_of_expr arg_list)
+  | [arg] -> snd (txt_of_expr env arg)
+  | _ as arg_list -> String.concat ", " 
+      (List.map (fun expr -> snd (txt_of_expr env expr)) arg_list)
 
-let process_stmt = function
-  | Do(expr) -> sprintf "%s" (txt_of_expr expr)
+let process_stmt env = function
+  | Do(expr) -> 
+      let updated_env, expr = txt_of_expr env expr in
+      updated_env, sprintf "%s" expr
 
 let process_stmts stmt_list = 
-  let rec do_process_stmts acc = function
+  let rec do_process_stmts env acc = function
     | [] -> String.concat "\n" acc
-    | stmt :: tl -> do_process_stmts (process_stmt stmt :: acc ) tl
-  in do_process_stmts [] stmt_list
+    | stmt :: tl -> 
+        let updated_env, stmt_txt = process_stmt env stmt in
+        do_process_stmts updated_env (stmt_txt :: acc) tl
+  in do_process_stmts StringMap.empty [] stmt_list
 
 (* entry point for code generation *)
 let gen_program output_file program =
