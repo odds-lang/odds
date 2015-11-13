@@ -21,13 +21,12 @@ let rec txt_of_expr = function
   | String_lit(x) -> "String_lit(" ^ x ^ ")"
   | Bool_lit(x) -> "Bool_lit(" ^ string_of_bool x ^ ")"
   | Id(x) -> "Id(" ^ x ^ ")"
-  | Unop(op, e1) -> let v1 = txt_of_expr e1 and op1 = txt_of_op op in
-    "Unop(" ^ op1 ^ ", " ^ v1 ^ ")"
+  | Unop(op, e) -> "Unop(" ^ (txt_of_op op) ^ ", " ^ (txt_of_expr e) ^ ")"
   | Binop(e1, op, e2) ->
     let v1 = txt_of_expr e1 and op1 = txt_of_op op and v2 = txt_of_expr e2 in
     "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"
   | Call(f, args) -> let args1 = List.map txt_of_expr args in
-    "Call(" ^ f ^ ", [" ^ String.concat " ; " args1 ^ "])"
+    "Call(" ^ (txt_of_expr f) ^ ", [" ^ String.concat " ; " args1 ^ "])"
 
 let rec txt_of_stmt = function
   | Do(expr) -> let e = txt_of_expr expr in "Do(" ^ e ^ ")"

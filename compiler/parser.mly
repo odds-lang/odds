@@ -83,7 +83,7 @@ expr:
   | arith                       { $1 }
   | boolean                     { $1 }
   | ID                          { Id($1) }
-  | ID LPAREN args_opt RPAREN   { Call($1, $3)}
+  | ID LPAREN args_opt RPAREN   { Call(Id($1), $3)}
   | LPAREN expr RPAREN          { $2 }
 
 arith:
