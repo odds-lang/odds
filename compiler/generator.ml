@@ -57,9 +57,8 @@ let rec txt_of_expr env = function
       env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
   | Call(f, args) -> env, txt_of_func_call env (snd (txt_of_expr env f)) args
   | Assign(id, e) ->
-      let _, raw_id = txt_of_expr env id in
-      let ss_id = get_ss_id raw_id and _, e = txt_of_expr env e in
-      StringMap.add raw_id ss_id env, sprintf "%s = %s" ss_id e
+      let ss_id = get_ss_id id and _, e = txt_of_expr env e in
+      StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
 
 and txt_of_func_call env f args = match f with
   | "print" -> sprintf "print(%s)" (txt_of_args env args)

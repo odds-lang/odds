@@ -79,7 +79,7 @@ expr:
   | arith                       { $1 }
   | boolean                     { $1 }
   | ID                          { Id($1) }
-  | ID ASN expr                 { Assign(Id($1), $3) }
+  | ID ASN expr                 { Assign($1, $3) }
   | ID LPAREN args_opt RPAREN   { Call(Id($1), $3) }
   | fdecl                       { Fdecl($1) }
   | LPAREN expr RPAREN          { $2 }
