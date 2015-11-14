@@ -4,7 +4,7 @@ let stringify = function
   (* Punctuation *)
   | LPAREN -> "LPAREN"  | RPAREN -> "RPAREN"
   | LCAR -> "LCAR"      | RCAR -> "RCAR"
-  | LBRACK -> "LBRACK"  | RBRACK -> "RBRACK"
+  | LBRACE -> "LBRACE"  | RBRACE -> "RBRACE"
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
 
   (* Arithmetic Operators *)

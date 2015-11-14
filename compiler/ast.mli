@@ -31,8 +31,8 @@ type expr =                      (* Expressions *)
   | Id of string                 (* x *)
   | Unop of op * expr            (* -5 *)
   | Binop of expr * op * expr    (* a + b *)
-  | Call of string * expr list   (* add(1, 2) *)
-  | List of expr list
+  | Call of expr * expr list   (* add(1, 2) *)
+  | List of expr list            (* [1, 2, 3] *)
 
 type stmt =         (* Statements *)
   | Do of expr    (* set foo = bar + 3 *)

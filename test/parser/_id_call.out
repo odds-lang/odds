@@ -1,13 +1,13 @@
 [
     Do(Id(PI)) ;
     Do(Id(myvar)) ;
-    Do(Call(print, [Binop(Int_lit(40), Add, Int_lit(2))])) ;
-    Do(Call(print, [String_lit(fourty-two)])) ;
-    Do(Call(myfunc, [Id(arg1) ; Id(arg2)])) ;
-    Do(Call(noargs, [])) ;
+    Do(Call(Id(print), [Binop(Int_lit(40), Add, Int_lit(2))])) ;
+    Do(Call(Id(print), [String_lit(fourty-two)])) ;
+    Do(Call(Id(myfunc), [Id(arg1) ; Id(arg2)])) ;
+    Do(Call(Id(noargs), [])) ;
     Do(
         Call(
-            prec,
+            Id(prec),
             [
                 Id(myvar) ;
                 Binop(Int_lit(2), Mult, Binop(Int_lit(2), Add, Int_lit(3)))

@@ -1,0 +1,8 @@
+[
+    Do(List([])) ;
+    Do(List([Int_lit(1)])) ;
+    Do(List([Int_lit(1) ; Int_lit(2) ; Int_lit(3)])) ;
+    Do(List([Float_lit(42.) ; Float_lit(42.5)])) ;
+    Do(List([String_lit(hello) ; String_lit(world)])) ;
+    Do(List([Bool_lit(true) ; Bool_lit(false) ; Bool_lit(true)]))
+]
