@@ -30,6 +30,15 @@ let rec txt_of_expr = function
   | Call(f, args) -> let args1 = List.map txt_of_expr args in
       "Call(" ^ txt_of_expr f ^ ", [" ^ String.concat " ; " args1 ^ "])"
   | Assign(x, e) -> "Assign(" ^ x ^ ", " ^ (txt_of_expr e) ^ " )"
+  | Fdecl(f)-> txt_of_fdecl f
+
+(* Function declarations *)
+and txt_of_fdecl f =
+  "Fdecl({ " ^
+    "params=" ^ (txt_of_exprs f.params) ^
+    " ; body=" ^ (txt_of_stmts f.body) ^ 
+    " ; return=" ^ (txt_of_expr f.return) ^
+  " })"
 
 and txt_of_exprs exprs =
   let rec aux acc = function
