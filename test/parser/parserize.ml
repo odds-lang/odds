@@ -1,4 +1,5 @@
-open Ast 
+open Ast
+open Printf
 
 let txt_of_op = function
   | Add -> "Add"
@@ -16,23 +17,22 @@ let txt_of_op = function
   | Geq -> "Geq"
 
 let rec txt_of_expr = function
-  | Int_lit(x) -> "Int_lit(" ^ string_of_int x ^ ")"
-  | Float_lit(x) -> "Float_lit(" ^ string_of_float x ^ ")"
-  | String_lit(x) -> "String_lit(" ^ x ^ ")"
-  | Bool_lit(x) -> "Bool_lit(" ^ string_of_bool x ^ ")"
-  | Id(x) -> "Id(" ^ x ^ ")"
-  | Unop(op, e) -> "Unop(" ^ (txt_of_op op) ^ ", " ^ (txt_of_expr e) ^ ")"
-  | Binop(e1, op, e2) ->
-    let v1 = txt_of_expr e1 and op1 = txt_of_op op and v2 = txt_of_expr e2 in
-    "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"
+  | Int_lit(x) -> sprintf "Int_lit(%s)" (string_of_int x)
+  | Float_lit(x) -> sprintf "Float_lit(%s)" (string_of_float x)
+  | String_lit(x) -> sprintf "String_lit(%s)" x
+  | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
+  | Id(x) -> sprintf "Id(%s)" x
+  | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_op op) (txt_of_expr e)
+  | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
+      (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Call(f, args) -> let args1 = List.map txt_of_expr args in
-    "Call(" ^ (txt_of_expr f) ^ ", [" ^ String.concat " ; " args1 ^ "])"
+      sprintf "Call(%s, [%s])" (txt_of_expr f) (String.concat " ; " args1)
 
 let rec txt_of_stmt = function
-  | Do(expr) -> let e = txt_of_expr expr in "Do(" ^ e ^ ")"
+  | Do(e) -> sprintf "Do(%s)" (txt_of_expr e)
 
 let rec txt_of_stmts acc = function
-  | [] -> "[" ^ (String.concat " ; " acc) ^ "]"
+  | [] -> sprintf "[%s]" (String.concat " ; " acc)
   | stmt :: tl -> txt_of_stmts (txt_of_stmt stmt :: acc) tl
 
 let _ =
