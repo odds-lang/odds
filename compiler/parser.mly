@@ -83,6 +83,7 @@ expr:
   | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
   | LBRACE list_opt RBRACE      { List($2) }
   | LPAREN expr RPAREN          { $2 }
+  | fdecl                       { Fdecl($1) }
 
 /* Function declaration */
 fdecl:
@@ -92,6 +93,7 @@ fdecl:
       body = List.rev $4;
       return = $6;
     } }
+
 
 fparams_opt:
   | /* nothing */               { [] }

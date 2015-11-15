@@ -69,12 +69,8 @@ and txt_of_fdecl env id f =
     let list_txt = txt_of_list new_env f.params in
     let ret_env, body_txt = txt_of_stmts new_env f.body in
     let _, ret_txt = txt_of_expr ret_env f.return in
-    let func_txt = sprintf "def %s(%s):
-        \n{
-          \n%s
-          \nreturn %s
-        \n}
-      \n" ss_id list_txt body_txt ret_txt in
+    let func_txt = sprintf "def %s(%s):\n{\n%s\nreturn %s\n}" 
+      ss_id list_txt body_txt ret_txt in
     new_env, func_txt
 
 and txt_of_assign env id = function
