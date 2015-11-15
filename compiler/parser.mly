@@ -76,23 +76,23 @@ stmt:
 
 /* Expressions */
 expr:
-  | literal                     { $1 }
-  | arith                       { $1 }
-  | boolean                     { $1 }
-  | ID                          { Id($1) }
-  | ID ASN expr                 { Assign($1, $3) }
-  | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
-  | LBRACE list_opt RBRACE      { List($2) }
-  | LPAREN expr RPAREN          { $2 }
+  | literal                      { $1 }
+  | arith                        { $1 }
+  | boolean                      { $1 }
+  | ID                           { Id($1) }
+  | ID ASN expr                  { Assign($1, $3) }
+  | ID LPAREN list_opt RPAREN    { Call(Id($1), $3) }
+  | LBRACE list_opt RBRACE       { List($2) }
+  | LPAREN expr RPAREN           { $2 }
   | IF expr THEN expr ELSE expr  { If($2, $4, $6) }
 
 list_opt:
-  | /* nothing */               { [] }
-  | list                        { List.rev $1 }
+  | /* nothing */                { [] }
+  | list                         { List.rev $1 }
 
 list:
-  | expr                        { [$1] }
-  | list COMMA expr             { $3 :: $1 }
+  | expr                         { [$1] }
+  | list COMMA expr              { $3 :: $1 }
 
 /* Binary operators */
 arith:
