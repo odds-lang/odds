@@ -1,5 +1,5 @@
 (*
- * COMS4115: Post-processor
+ * COMS4115: Post-process printer
  *
  * Authors:
  *  - Alex Kalicki

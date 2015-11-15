@@ -4,7 +4,7 @@
 OCAMLC=ocamlc
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
-OBJS=parser.cmo scanner.cmo generator.cmo process.cmo odds.cmo
+OBJS=parser.cmo scanner.cmo generator.cmo printer.cmo odds.cmo
 
 default: odds
 
