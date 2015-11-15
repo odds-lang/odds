@@ -8,7 +8,8 @@
  *  - Lilly Wang
  *)
 
-type op =    (* Operators *)
+(* Binary operators *)
+type op =
   | Add      (* + *)
   | Sub      (* - *)
   | Mult     (* * *)
@@ -23,18 +24,22 @@ type op =    (* Operators *)
   | Greater  (* > *)
   | Geq      (* >= *)
 
-type expr =                      (* Expressions *)
+(* Expressions *)
+type expr =
   | Int_lit of int               (* 42 *)
   | Float_lit of float           (* 42.0 *)
   | String_lit of string         (* "Hello, world" *)
   | Bool_lit of bool             (* true *)
-  | Id of string                 (* x *)
   | Unop of op * expr            (* -5 *)
   | Binop of expr * op * expr    (* a + b *)
-  | Call of expr * expr list   (* add(1, 2) *)
+  | Id of string                 (* x *)
+  | Assign of string * expr      (* x = 4 *)
+  | Call of expr * expr list     (* add(1, 2) *)
   | List of expr list            (* [1, 2, 3] *)
 
-type stmt =         (* Statements *)
-  | Do of expr    (* set foo = bar + 3 *)
+(* Statements *)
+and stmt =
+  | Do of expr     (* set foo = bar + 3 *)
 
+(* Program entry point *)
 type program = stmt list

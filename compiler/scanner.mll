@@ -11,14 +11,18 @@
 { open Parser }
 
 let num = ['0'-'9']
+let whitespace = [' ' '\n' '\r']
 
 rule token = parse
   
 (* Whitespace *)
-| [' ' '\n' '\r']    { token lexbuf }
+| whitespace*    { token lexbuf }
 
 (* Comments *)
 | "/*"    { comment lexbuf }
+
+(* Function Symbols & Keywords *)
+| ')' whitespace* "->"   { FDELIM }  | "return"   { RETURN }
 
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
@@ -48,10 +52,6 @@ rule token = parse
 
 (* Declarative Keywords *)
 | "do"    { DO }
-
-(* Function Symbols & Keywords *)
-| "->"      { FDELIM }
-| "return"  { RETURN }
 
 (* End-of-File *)
 | eof { EOF }

@@ -29,7 +29,14 @@ let rec txt_of_expr = function
       (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
   | Call(f, args) -> sprintf "Call(%s, [%s])"
       (txt_of_expr f) (txt_of_list args)
+  | Assign(x, e) -> sprintf "Assign(%s, %s)" x (txt_of_expr e)
   | List(l) -> sprintf "List([%s])" (txt_of_list l)
+
+and txt_of_exprs exprs =
+  let rec aux acc = function
+    | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
+    | expr :: tl -> aux (txt_of_expr expr :: acc) tl
+  in aux [] exprs
 
 (* Lists *)
 and txt_of_list = function
@@ -38,16 +45,18 @@ and txt_of_list = function
   | _ as l -> String.concat " ; " (List.map txt_of_expr l)
 
 (* Statements *)
-let rec txt_of_stmt = function
-  | Do(e) -> sprintf "Do(%s)" (txt_of_expr e)
+let txt_of_stmt = function
+  | Do(expr) -> sprintf "Do(%s)" (txt_of_expr expr)
 
-let rec txt_of_stmts acc = function
-  | [] -> sprintf "[%s]" (String.concat " ; " acc)
-  | stmt :: tl -> txt_of_stmts (txt_of_stmt stmt :: acc) tl
+let txt_of_stmts stmts =
+  let rec aux acc = function
+      | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
+      | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
+  in aux [] stmts
 
 (* Program entry point *)
 let _ =
   let lexbuf = Lexing.from_channel stdin in
-  let expr = Parser.program Scanner.token lexbuf in
-  let result = txt_of_stmts [] expr in
+  let program = Parser.program Scanner.token lexbuf in
+  let result = txt_of_stmts program in
   print_endline result
