@@ -11,19 +11,23 @@
 { open Parser }
 
 let num = ['0'-'9']
+let whitespace = [' ' '\n' '\r']
 
 rule token = parse
   
 (* Whitespace *)
-| [' ' '\n' '\r']    { token lexbuf }
+| whitespace*    { token lexbuf }
 
 (* Comments *)
 | "/*"    { comment lexbuf }
 
+(* Function Symbols & Keywords *)
+| ')' whitespace* "->"   { FDELIM }  | "return"   { RETURN }
+
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
-| '['   { LBRACK }  | ']'   { RBRACK }
+| '['   { LBRACE }  | ']'   { RBRACE }
 | ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)
@@ -49,10 +53,6 @@ rule token = parse
 (* Declarative Keywords *)
 | "do"    { DO }
 
-(* Function Symbols & Keywords *)
-| "->"      { FDELIM }
-| "return"  { RETURN }
-
 (* End-of-File *)
 | eof { EOF }
 
@@ -62,7 +62,6 @@ rule token = parse
 | '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
 | "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
 | "void" { VOID_LITERAL }
-(* To Do - List Literals - Do they even go here? *)
 
 (* Identifiers *)
 | ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }

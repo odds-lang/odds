@@ -11,7 +11,7 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR
 
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
@@ -49,6 +49,8 @@
 
 /* Precedence and associativity of each operator */
 %nonassoc IF THEN ELSE
+%right ASN
+%nonassoc RETURN
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
 %left PLUS MINUS
@@ -61,33 +63,38 @@
 
 %%
 
+/* Program flow */
 program:
-  | stmt_list EOF                { $1 }
+  | stmt_list EOF               { List.rev $1 }
 
 stmt_list:
   | /* nothing */                { [] }
   | stmt_list stmt               { $2 :: $1 }
 
-args_opt:
-  | /* nothing */                { [] }
-  | args_list                    { List.rev $1 }
-
-args_list:
-  | expr                         { [$1] }
-  | args_list COMMA expr         { $3 :: $1 }
- 
 stmt:
   | DO expr                      { Do($2) }
 
+/* Expressions */
 expr:
-  | literal                      { $1 }
-  | arith                        { $1 }
-  | boolean                      { $1 }
-  | ID                           { Id($1) }
-  | ID LPAREN args_opt RPAREN    { Call($1, $3)}
-  | LPAREN expr RPAREN           { $2 }
+  | literal                     { $1 }
+  | arith                       { $1 }
+  | boolean                     { $1 }
+  | ID                          { Id($1) }
+  | ID ASN expr                 { Assign($1, $3) }
+  | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
+  | LBRACE list_opt RBRACE      { List($2) }
+  | LPAREN expr RPAREN          { $2 }
   | IF expr THEN expr ELSE expr  { If($2, $4, $6) }
 
+list_opt:
+  | /* nothing */               { [] }
+  | list                        { List.rev $1 }
+
+list:
+  | expr                        { [$1] }
+  | list COMMA expr             { $3 :: $1 }
+
+/* Binary operators */
 arith:
   | MINUS expr                   { Unop(Sub, $2) }
   | expr PLUS expr               { Binop($1, Add, $3) }
@@ -106,6 +113,7 @@ boolean:
   | expr RCAR expr               { Binop($1, Greater, $3) }
   | expr GEQ expr                { Binop($1, Geq, $3) }
 
+/* Literals */
 literal:
   | INT_LITERAL                  { Int_lit($1) }
   | FLOAT_LITERAL                { Float_lit($1) }
