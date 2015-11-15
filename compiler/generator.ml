@@ -66,8 +66,7 @@ and txt_of_list env = function
 
 (* Statements *)
 let txt_of_stmt env = function
-  | Do(expr) -> let updated_env, expr = txt_of_expr env expr in
-      updated_env, sprintf "%s" expr
+  | Do(e) -> let env, e = txt_of_expr env e in env, sprintf "%s" e
 
 let txt_of_stmts stmt_list = 
   let rec process_stmts env acc = function
