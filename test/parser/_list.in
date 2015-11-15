@@ -1,0 +1,6 @@
+do []
+do [1]
+do [1, 2, 3]
+do [42.0, 42.5]
+do ["hello", "world"]
+do [true, false, true]

@@ -11,7 +11,7 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACK RBRACK COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR
 
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
@@ -66,14 +66,6 @@ program:
 stmt_list:
   | /* nothing */               { [] }
   | stmt_list stmt              { $2 :: $1 }
-
-args_opt:
-  | /* nothing */               { [] }
-  | args_list                   { List.rev $1 }
-
-args_list:
-  | expr                        { [$1] }
-  | args_list COMMA expr        { $3 :: $1 }
  
 stmt:
   | DO expr                     { Do($2) }
@@ -83,8 +75,17 @@ expr:
   | arith                       { $1 }
   | boolean                     { $1 }
   | ID                          { Id($1) }
-  | ID LPAREN args_opt RPAREN   { Call(Id($1), $3)}
+  | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
+  | LBRACE list_opt RBRACE      { List($2) }
   | LPAREN expr RPAREN          { $2 }
+
+list_opt:
+  | /* nothing */               { [] }
+  | list                        { List.rev $1 }
+
+list:
+  | expr                        { [$1] }
+  | list COMMA expr             { $3 :: $1 }
 
 arith:
   | MINUS expr                  { Unop(Sub, $2) }

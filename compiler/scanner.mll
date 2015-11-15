@@ -23,7 +23,7 @@ rule token = parse
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
-| '['   { LBRACK }  | ']'   { RBRACK }
+| '['   { LBRACE }  | ']'   { RBRACE }
 | ','   { COMMA }   | '|'   { VBAR }
 
 (* Arithmetic Operators *)
@@ -62,7 +62,6 @@ rule token = parse
 | '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
 | "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
 | "void" { VOID_LITERAL }
-(* To Do - List Literals - Do they even go here? *)
 
 (* Identifiers *)
 | ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }
