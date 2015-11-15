@@ -35,6 +35,7 @@ type expr =
   | Id of string                 (* x *)
   | Assign of string * expr      (* x = 4 *)
   | Call of expr * expr list     (* add(1, 2) *)
+  | List of expr list            (* [1, 2, 3] *)
   | Fdecl of fdecl               (* (x) -> ... return x *)
 
 (* Function Declarations *)
@@ -44,7 +45,7 @@ and fdecl =
     body: stmt list;      (* Function Body *)
     return: expr          (* Return *)
   }
-
+  
 (* Statements *)
 and stmt =
   | Do of expr     (* set foo = bar + 3 *)

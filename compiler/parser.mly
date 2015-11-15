@@ -80,8 +80,8 @@ expr:
   | boolean                     { $1 }
   | ID                          { Id($1) }
   | ID ASN expr                 { Assign($1, $3) }
-  | ID LPAREN args_opt RPAREN   { Call(Id($1), $3) }
-  | fdecl                       { Fdecl($1) }
+  | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
+  | LBRACE list_opt RBRACE      { List($2) }
   | LPAREN expr RPAREN          { $2 }
 
 /* Function declaration */
@@ -102,13 +102,13 @@ fparam_list:
   | fparam_list COMMA ID        { Id($3)::$1 }
 
 /* Function calling */
-args_opt:
+list_opt:
   | /* nothing */               { [] }
-  | arg_list                    { List.rev $1 }
+  | list                        { List.rev $1 }
 
-arg_list:
+list:
   | expr                        { [$1] }
-  | arg_list COMMA expr         { $3 :: $1 }
+  | list COMMA expr             { $3 :: $1 }
 
 /* Binary operators */
 arith:
