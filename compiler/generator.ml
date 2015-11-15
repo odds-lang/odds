@@ -56,9 +56,9 @@ let rec txt_of_expr env = function
       let ss_id = get_ss_id id and _, e = txt_of_expr env e in
       StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
   | List(l) -> let e = txt_of_list env l in env, sprintf "[%s]" e
-  | If(e1, e2, e3) ->
-    let i = txt_of_expr e1 and t = txt_of_expr e2 and e = txt_of_expr e3 in
-    txt_of_cond i t e
+  | If(e1, e2, e3) -> let _, i = txt_of_expr env e1
+      and _, t = txt_of_expr env e2 and _, e = txt_of_expr env e3 in
+      env, txt_of_cond i t e
 
 (* Function calls *)
 and txt_of_func_call env f args = match f with
