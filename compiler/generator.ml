@@ -74,9 +74,3 @@ let txt_of_stmts stmt_list =
     | stmt :: tl -> let updated_env, stmt_txt = txt_of_stmt env stmt in
         process_stmts updated_env (stmt_txt :: acc) tl
   in process_stmts StringMap.empty [] stmt_list
-
-(* Code generation entry point *)
-let gen_program output_file program =
-  let code = txt_of_stmts program in 
-  let file = open_out output_file in
-  fprintf file "%s\n" code; close_out file
