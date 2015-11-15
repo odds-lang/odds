@@ -25,4 +25,5 @@ let _ =
     let program = Parser.program Scanner.token lexbuf in 
     match action with
       | Compile -> Printer.gen_program output_file program
+      | Help -> ()
       | Raw -> Printer.gen_raw output_file program
