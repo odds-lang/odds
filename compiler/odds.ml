@@ -18,5 +18,5 @@ let _ =
   let program = Parser.program Scanner.token lexbuf in 
   match action with
     | Ast -> print_endline "TODO: Add pretty printer for AST"
-    | Compile -> Generator.gen_program output_file program
+    | Compile -> Process.gen_program output_file program
     | Help -> print_endline "TODO: Add help prompt for compiler"

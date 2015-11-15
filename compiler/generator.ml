@@ -68,15 +68,9 @@ and txt_of_list env = function
 let txt_of_stmt env = function
   | Do(e) -> let env, e = txt_of_expr env e in env, sprintf "%s" e
 
-let txt_of_stmts stmt_list = 
+let gen_stmts program = 
   let rec process_stmts env acc = function
-    | [] -> String.concat "\n" (List.rev acc)
+    | [] -> List.rev acc
     | stmt :: tl -> let updated_env, stmt_txt = txt_of_stmt env stmt in
         process_stmts updated_env (stmt_txt :: acc) tl
-  in process_stmts StringMap.empty [] stmt_list
-
-(* Code generation entry point *)
-let gen_program output_file program =
-  let code = txt_of_stmts program in 
-  let file = open_out output_file in
-  fprintf file "%s\n" code; close_out file
+  in process_stmts StringMap.empty [] program
