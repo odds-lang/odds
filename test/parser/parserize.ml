@@ -1,4 +1,5 @@
-open Ast 
+open Ast
+open Printf
 
 (* Binary operators *)
 let txt_of_op = function
@@ -18,32 +19,38 @@ let txt_of_op = function
 
 (* Expressions *)
 let rec txt_of_expr = function
-  | Int_lit(x) -> "Int_lit(" ^ string_of_int x ^ ")"
-  | Float_lit(x) -> "Float_lit(" ^ string_of_float x ^ ")"
-  | String_lit(x) -> "String_lit(" ^ x ^ ")"
-  | Bool_lit(x) -> "Bool_lit(" ^ string_of_bool x ^ ")"
-  | Id(x) -> "Id(" ^ x ^ ")"
-  | Unop(op, e) -> "Unop(" ^ (txt_of_op op) ^ ", " ^ (txt_of_expr e) ^ ")"
-  | Binop(e1, op, e2) ->
-      let v1 = txt_of_expr e1 and op1 = txt_of_op op and v2 = txt_of_expr e2 in
-      "Binop(" ^ v1 ^ ", " ^ op1 ^ ", " ^ v2 ^ ")"
-  | Call(f, args) -> let args1 = List.map txt_of_expr args in
-      "Call(" ^ txt_of_expr f ^ ", [" ^ String.concat " ; " args1 ^ "])"
-  | Assign(x, e) -> "Assign(" ^ x ^ ", " ^ (txt_of_expr e) ^ " )"
+  | Int_lit(x) -> sprintf "Int_lit(%s)" (string_of_int x)
+  | Float_lit(x) -> sprintf "Float_lit(%s)" (string_of_float x)
+  | String_lit(x) -> sprintf "String_lit(%s)" x
+  | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
+  | Id(x) -> sprintf "Id(%s)" x
+  | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_op op) (txt_of_expr e)
+  | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
+      (txt_of_expr e1) (txt_of_op op) (txt_of_expr e2)
+  | Call(f, args) -> sprintf "Call(%s, [%s])"
+      (txt_of_expr f) (txt_of_list args)
+  | Assign(x, e) -> sprintf "Assign(%s, %s)" x (txt_of_expr e)
+  | List(l) -> sprintf "List([%s])" (txt_of_list l)
 
 and txt_of_exprs exprs =
   let rec aux acc = function
-    | [] -> "[" ^ (String.concat " ; " (List.rev acc)) ^ "]"
+    | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
     | expr :: tl -> aux (txt_of_expr expr :: acc) tl
   in aux [] exprs
 
-(* Statements *)
-and txt_of_stmt = function
-  | Do(expr) -> let e = txt_of_expr expr in "Do(" ^ e ^ ")"
+(* Lists *)
+and txt_of_list = function
+  | [] -> ""
+  | [x] -> txt_of_expr x
+  | _ as l -> String.concat " ; " (List.map txt_of_expr l)
 
-and txt_of_stmts stmts =
+(* Statements *)
+let txt_of_stmt = function
+  | Do(expr) -> sprintf "Do(%s)" (txt_of_expr expr)
+
+let txt_of_stmts stmts =
   let rec aux acc = function
-      | [] -> "[" ^ (String.concat " ; " (List.rev acc)) ^ "]"
+      | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
       | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
   in aux [] stmts
 

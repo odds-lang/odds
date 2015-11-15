@@ -35,6 +35,7 @@ type expr =
   | Id of string                 (* x *)
   | Assign of string * expr      (* x = 4 *)
   | Call of expr * expr list     (* add(1, 2) *)
+  | List of expr list            (* [1, 2, 3] *)
 
 (* Statements *)
 and stmt =
