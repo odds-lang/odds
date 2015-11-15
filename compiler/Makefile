@@ -4,12 +4,13 @@
 OCAMLC=ocamlc
 OCAMLLEX=ocamllex
 OCAMLYACC=ocamlyacc
+LIBS=str.cma
 OBJS=parser.cmo scanner.cmo generator.cmo printer.cmo odds.cmo
 
 default: odds
 
 odds: $(OBJS)
-	$(OCAMLC) -g -o odds $(OBJS)
+	$(OCAMLC) -g -o odds $(LIBS) $(OBJS)
 
 all:
 	cd ..; make all
