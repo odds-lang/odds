@@ -90,4 +90,4 @@ and txt_of_stmts env_input stmt_list =
         process_stmts updated_env (stmt_txt :: acc) tl
   in process_stmts env_input [] stmt_list
 
-let gen_program program = txt_of_stmts StringMap.empty program
+let gen_program program = snd (txt_of_stmts StringMap.empty program)

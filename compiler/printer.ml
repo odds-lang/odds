@@ -21,7 +21,7 @@ let txt_of_stmts stmts =
 
 (* Code generation entry point *)
 let gen_raw output_file program = 
-  let text = Generator.txt_of_stmts program in
+  let text = Generator.gen_program program in
   let file = open_out output_file in
   fprintf file "%s\n" text; close_out file
 
