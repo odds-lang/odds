@@ -79,7 +79,6 @@ and txt_of_assign env id = function
       let ss_id = get_ss_id id and _, e = txt_of_expr env e in
       StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
 
-
 (* Statements *)
 and txt_of_stmt env = function
   | Do(e) -> let env, e = txt_of_expr env e in env, sprintf "%s" e
@@ -91,8 +90,4 @@ and txt_of_stmts env_input stmt_list =
         process_stmts updated_env (stmt_txt :: acc) tl
   in process_stmts env_input [] stmt_list
 
-(* Code generation entry point *)
-let gen_program output_file program =
-  let _, code = txt_of_stmts StringMap.empty program in
-  let file = open_out output_file in
-  fprintf file "%s\n" code; close_out file
+let gen_program program = txt_of_stmts StringMap.empty program
