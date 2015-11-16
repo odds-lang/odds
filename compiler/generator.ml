@@ -54,7 +54,7 @@ let rec txt_of_expr env = function
   | Binop(e1, op, e2) -> 
       let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
       env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
-  | Call(f, args) -> let id = txt_of_id env f in
+  | Call(f, args) -> let _, id = txt_of_expr env f in
       env, sprintf "%s(%s)" id (txt_of_list env args)
   | Assign(id, e) ->
       let ss_id = get_ss_id id and _, e = txt_of_expr env e in

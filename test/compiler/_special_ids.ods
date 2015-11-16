@@ -1,0 +1,5 @@
+do PI
+do EUL
+
+do print(PI)
+do print(EUL)
