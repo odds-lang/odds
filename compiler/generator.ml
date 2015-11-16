@@ -40,7 +40,8 @@ let txt_of_id env = function
   | "PI" -> string_of_float 3.14159265
   | "EUL" -> string_of_float 2.7182818
   | "print" -> "print"
-  | _ as id -> if StringMap.mem id env then StringMap.find id env else "ERROR"
+  | _ as id -> if StringMap.mem id env then StringMap.find id env
+      else raise Not_found
 
 (* Expressions *)
 let rec txt_of_expr env = function
