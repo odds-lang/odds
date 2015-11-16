@@ -8,6 +8,6 @@ if [ "$#" -ne 3 ] || [ "$1" == "-h" ]; then
   exit 0
 fi
 
-cat $2 | $ODDS_FILE $1 $3
+$ODDS_FILE $1 $3 < $2
 
 exit 0
