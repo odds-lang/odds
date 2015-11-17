@@ -35,29 +35,32 @@ let txt_of_op = function
   | Greater -> ">"
   | Geq -> ">="
 
+(* Identifier lookup *)
+let txt_of_id env = function
+  | "PI" -> string_of_float 3.14159265
+  | "EUL" -> string_of_float 2.7182818
+  | "print" -> "print"
+  | _ as id -> if StringMap.mem id env then StringMap.find id env
+      else raise Not_found
+
 (* Expressions *)
 let rec txt_of_expr env = function
   | Int_lit(i) -> env, string_of_int(i)
   | Float_lit(f) -> env, string_of_float(f)
   | String_lit(s) -> env, sprintf "\"%s\"" s
   | Bool_lit(b) -> env, String.capitalize (string_of_bool(b))
-  | Id(e) -> env, if StringMap.mem e env then StringMap.find e env else e
+  | Id(id) -> env, txt_of_id env id
   | Unop(op, e) -> let _, e = txt_of_expr env e in 
       env, sprintf "(%s%s)" (txt_of_op op) e
   | Binop(e1, op, e2) -> 
       let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
       env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
   | Call(f, args) -> let _, id = txt_of_expr env f in
-      env, txt_of_func_call env id args
+      env, sprintf "%s(%s)" id (txt_of_list env args)
   | Assign(id, e) ->
       let ss_id = get_ss_id id and _, e = txt_of_expr env e in
       StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
   | List(l) -> let e = txt_of_list env l in env, sprintf "[%s]" e
-
-(* Function calls *)
-and txt_of_func_call env f args = match f with
-  | "print" -> sprintf "print(%s)" (txt_of_list env args)
-  | _ ->  sprintf "%s(%s)" f (txt_of_list env args)
 
 and txt_of_list env = function
   | [] -> ""
