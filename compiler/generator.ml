@@ -15,11 +15,15 @@ module StringMap = Map.Make(String)
 
 let ss_counter = ref (-1) (* Static Scoping Variable Counter *)
 
-let get_ss_id name = 
+let get_ss_id name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
 
 (* Binary operators *)
+let string_of_num = function
+  | Num_int(i) -> string_of_int i
+  | Num_float(f) -> string_of_float f
+
 let txt_of_op = function
   | Add -> "+"
   | Sub -> "-"
@@ -45,14 +49,13 @@ let txt_of_id env = function
 
 (* Expressions *)
 let rec txt_of_expr env = function
-  | Int_lit(i) -> env, string_of_int(i)
-  | Float_lit(f) -> env, string_of_float(f)
+  | Num_lit(n) -> env, string_of_num n
   | String_lit(s) -> env, sprintf "\"%s\"" s
   | Bool_lit(b) -> env, String.capitalize (string_of_bool(b))
   | Id(id) -> env, txt_of_id env id
-  | Unop(op, e) -> let _, e = txt_of_expr env e in 
+  | Unop(op, e) -> let _, e = txt_of_expr env e in
       env, sprintf "(%s%s)" (txt_of_op op) e
-  | Binop(e1, op, e2) -> 
+  | Binop(e1, op, e2) ->
       let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
       env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
   | Call(f, args) -> let _, id = txt_of_expr env f in
@@ -71,7 +74,7 @@ and txt_of_list env = function
 let txt_of_stmt env = function
   | Do(e) -> let env, e = txt_of_expr env e in env, sprintf "%s" e
 
-let txt_of_stmts stmt_list = 
+let txt_of_stmts stmt_list =
   let rec process_stmts env acc = function
     | [] -> String.concat "\n" (List.rev acc)
     | stmt :: tl -> let updated_env, stmt_txt = txt_of_stmt env stmt in

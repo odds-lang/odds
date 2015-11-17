@@ -1,4 +1,9 @@
 open Parser
+open Ast
+
+type num =
+  | Num_int of int
+  | Num_float of float 
 
 let stringify = function
   (* Punctuation *)
@@ -41,8 +46,7 @@ let stringify = function
   | ID(string) -> "ID"
 
   (* Literals *)
-  | INT_LITERAL(int) -> "INT_LITERAL"
-  | FLOAT_LITERAL(float) -> "FLOAT_LITERAL"
+  | NUM_LITERAL(num) -> "NUM_LITERAL"
   | STRING_LITERAL(string) -> "STRING_LITERAL"
   | BOOL_LITERAL(bool) -> "BOOL_LITERAL"
   | VOID_LITERAL -> "VOID_LITERAL"

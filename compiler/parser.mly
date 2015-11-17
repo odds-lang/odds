@@ -41,8 +41,7 @@
 %token <string> ID
 
 /* Literals */
-%token <int> INT_LITERAL
-%token <float> FLOAT_LITERAL
+%token <Ast.num> NUM_LITERAL
 %token <string> STRING_LITERAL
 %token <bool> BOOL_LITERAL
 %token VOID_LITERAL
@@ -113,7 +112,6 @@ boolean:
 
 /* Literals */
 literal:
-  | INT_LITERAL                 { Int_lit($1) }
-  | FLOAT_LITERAL               { Float_lit($1) }
+  | NUM_LITERAL                 { Num_lit($1) }
   | STRING_LITERAL              { String_lit($1) }
   | BOOL_LITERAL                { Bool_lit($1) }
