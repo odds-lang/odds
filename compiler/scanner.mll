@@ -8,7 +8,10 @@
  *  - Lilly Wang
  *)
 
-{ open Parser open Ast}
+{ 
+  open Ast
+  open Parser
+}
 
 let numeric = ['0'-'9']
 let whitespace = [' ' '\n' '\r']
