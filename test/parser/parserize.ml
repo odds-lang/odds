@@ -22,9 +22,12 @@ let txt_of_binop = function
   | Geq -> "Geq"
 
 (* Expressions *)
+let txt_of_num = function
+  | Num_int(x) -> string_of_int x
+  | Num_float(x) -> string_of_float x
+
 let rec txt_of_expr = function
-  | Int_lit(x) -> sprintf "Int_lit(%s)" (string_of_int x)
-  | Float_lit(x) -> sprintf "Float_lit(%s)" (string_of_float x)
+  | Num_lit(x) -> sprintf "Num_lit(%s)" (txt_of_num x)
   | String_lit(x) -> sprintf "String_lit(%s)" x
   | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
   | Id(x) -> sprintf "Id(%s)" x

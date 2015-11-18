@@ -1,12 +1,12 @@
 [
     Do(Unop(Not, Bool_lit(true))) ;
     Do(Unop(Not, Bool_lit(false))) ;
-    Do(Binop(Int_lit(1), Eq, Int_lit(1))) ;
-    Do(Binop(Int_lit(41), Neq, Int_lit(42))) ;
-    Do(Binop(Int_lit(41), Less, Int_lit(42))) ;
-    Do(Binop(Int_lit(42), Leq, Int_lit(42))) ;
-    Do(Binop(Int_lit(43), Greater, Int_lit(42))) ;
-    Do(Binop(Int_lit(43), Geq, Int_lit(42))) ;
-    Do(Unop(Not, Binop(Int_lit(41), Less, Int_lit(42)))) ;
-    Do(Unop(Not, Binop(Int_lit(42), Leq, Int_lit(42))))
+    Do(Binop(Num_lit(1), Eq, Num_lit(1))) ;
+    Do(Binop(Num_lit(41), Neq, Num_lit(42))) ;
+    Do(Binop(Num_lit(41), Less, Num_lit(42))) ;
+    Do(Binop(Num_lit(42), Leq, Num_lit(42))) ;
+    Do(Binop(Num_lit(43), Greater, Num_lit(42))) ;
+    Do(Binop(Num_lit(43), Geq, Num_lit(42))) ;
+    Do(Unop(Not, Binop(Num_lit(41), Less, Num_lit(42)))) ;
+    Do(Unop(Not, Binop(Num_lit(42), Leq, Num_lit(42))))
 ]

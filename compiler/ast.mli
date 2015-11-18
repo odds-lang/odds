@@ -29,9 +29,12 @@ type binop =
   | Geq      (* >= *)
 
 (* Expressions *)
+type num =
+  | Num_int of int      (* 42 *)
+  | Num_float of float  (* 42.0 *)
+
 type expr =
-  | Int_lit of int                (* 42 *)
-  | Float_lit of float            (* 42.0 *)
+  | Num_lit of num                (* 42 *)
   | String_lit of string          (* "Hello, world" *)
   | Bool_lit of bool              (* true *)
   | Unop of unop * expr           (* -5 *)
@@ -41,7 +44,6 @@ type expr =
   | Call of expr * expr list      (* add(1, 2) *)
   | List of expr list             (* [1, 2, 3] *)
   | Fdecl of fdecl                (* (x) -> ... return x *)
-
 
 (* Function Declarations *)
 and fdecl =

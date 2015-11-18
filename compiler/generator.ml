@@ -25,6 +25,10 @@ let txt_of_unop = function
   | Sub -> "-"
 
 (* Binary operators *)
+let txt_of_num = function
+  | Num_int(i) -> string_of_int i
+  | Num_float(f) -> string_of_float f
+
 let txt_of_binop = function
   | Add -> "+"
   | Sub -> "-"
@@ -49,8 +53,7 @@ let txt_of_id env = function
 
 (* Expressions *)
 let rec txt_of_expr env = function
-  | Int_lit(i) -> env, string_of_int(i)
-  | Float_lit(f) -> env, string_of_float(f)
+  | Num_lit(n) -> env, txt_of_num n
   | String_lit(s) -> env, sprintf "\"%s\"" s
   | Bool_lit(b) -> env, String.capitalize (string_of_bool(b))
   | Id(id) -> env, txt_of_id env id

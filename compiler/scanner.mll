@@ -8,13 +8,13 @@
  *  - Lilly Wang
  *)
 
-{ open Parser }
+{ open Parser open Ast}
 
-let num = ['0'-'9']
+let numeric = ['0'-'9']
 let whitespace = [' ' '\n' '\r']
 
 rule token = parse
-  
+
 (* Whitespace *)
 | whitespace*    { token lexbuf }
 
@@ -57,14 +57,15 @@ rule token = parse
 | eof { EOF }
 
 (* Literals *)
-| num+ as intlit { INT_LITERAL(int_of_string intlit) }
-| num* '.' num+ as floatlit { FLOAT_LITERAL(float_of_string floatlit) }
+| numeric+ as intlit { NUM_LITERAL(Ast.Num_int(int_of_string intlit)) }
+| numeric* '.' numeric+ as floatlit 
+    { NUM_LITERAL(Ast.Num_float(float_of_string floatlit)) }
 | '"' (([^ '"'] | "\\\"")* as strlit) '"' { STRING_LITERAL(strlit) }
 | "true" | "false" as boollit { BOOL_LITERAL(bool_of_string boollit)}
 | "void" { VOID_LITERAL }
 
 (* Identifiers *)
-| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }
+| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | numeric)* as lxm { ID(lxm) }
 
 and comment = parse
 | "*/"    { token lexbuf }
