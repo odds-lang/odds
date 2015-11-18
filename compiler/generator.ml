@@ -72,7 +72,7 @@ and txt_of_stmts stmt_list =
   in aux [] stmt_list
 
 (* Code generation entry point *)
-let gen_program output_file program =
-  let text = txt_of_stmts program in
+let gen_program output_file sast =
+  let text = txt_of_stmts sast in
   let file = open_out output_file in
   fprintf file "%s\n" text; close_out file

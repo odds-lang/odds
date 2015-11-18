@@ -36,11 +36,11 @@ let get_ss_id name =
 
 let add_to_scope env id =
   let ss_id = get_ss_id id in
-  let new_env = {
+  let env' = {
     reserved = env.reserved;
     scope = StringMap.add id ss_id env.scope;
   } in
-  new_env, ss_id
+  env', ss_id
 
 (* Checks *)
 let rec check_expr env = function
@@ -74,16 +74,16 @@ and check_func_call env f args =
 
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
-  | _ as e -> let new_env, e = check_expr env e in
-      let new_env, name = add_to_scope new_env id in
-      new_env, Sast.Assign(name, e)
+  | _ as e -> let env', e = check_expr env e in
+      let env', name = add_to_scope env' id in
+      env', Sast.Assign(name, e)
 
 and check_list env l =
   let l = List.map (fun e -> snd(check_expr env e)) l in env, Sast.List(l)
 
 and check_fdecl env id f = 
-  let new_env, name = add_to_scope env id in
-  let func_env, params = check_fdecl_params new_env f.params in
+  let env', name = add_to_scope env id in
+  let func_env, params = check_fdecl_params env' f.params in
   let func_env, body = check_stmts func_env f.body in
   let _, return = check_expr func_env f.return in
   let fdecl = {
@@ -92,24 +92,25 @@ and check_fdecl env id f =
     body = body;
     return = return;
   }
-  in new_env, Sast.Fdecl(fdecl)
+  in env', Sast.Fdecl(fdecl)
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
     | [] -> env, List.rev acc
-    | Ast.Id(param) :: tl -> let new_env, name = add_to_scope env param in
-        aux new_env (Sast.Id(name) :: acc) tl
+    | Ast.Id(param) :: tl -> let env', name = add_to_scope env param in
+        aux env' (Sast.Id(name) :: acc) tl
     | _ -> raise (Error("Invalid function parameter."))
   in aux env [] param_list
 
 and check_stmt env = function
-  | Ast.Do(e) -> let new_env, e = check_expr env e in new_env, Sast.Do(e)
+  | Ast.Do(e) -> let env', e = check_expr env e in env', Sast.Do(e)
 
 and check_stmts env stmt_list = 
   let rec aux env acc = function
     | [] -> env, List.rev acc
-    | stmt :: tl -> let new_env, e = check_stmt env stmt in
-        aux new_env (e :: acc) tl
+    | stmt :: tl -> let env', e = check_stmt env stmt in
+        aux env' (e :: acc) tl
   in aux env [] stmt_list
 
-let check_program program = snd(check_stmts root_env program)
+let check_ast ast = 
+  let _, sast = check_stmts root_env ast in sast
