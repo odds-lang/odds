@@ -10,53 +10,98 @@
 
 open Ast
 open Sast
+open Printf
 
-let rec check_expr = function
-  | Ast.Num_lit(x) -> Sast.Num_lit(x)
-  | Ast.String_lit(s) -> Sast.String_lit(s)
-  | Ast.Bool_lit(b) -> Sast.Bool_lit(b)
-  | Ast.Id(id) -> check_id id
-  | Ast.Unop(op, e) -> check_unop op e
-  | Ast.Binop(e1, op, e2) -> check_binop e1 op e2
-  | Ast.Call(f, args) -> check_func_call f args
-  | Ast.Assign(id, e) -> check_assign id e
-  | Ast.List(l) -> check_list l
-  | Ast.Fdecl(f) -> check_fdecl f
+module StringMap = Map.Make(String)
 
-and check_id id =
-  Sast.Id(id)
+(* Environment *)
+type environment = {
+  reserved: string list;
+  scope: string StringMap.t;
+}
 
-and check_unop op e =
-  let e = check_expr e in Sast.Unop(op, e)
+let root_env = {
+  reserved = ["print"];
+  scope = StringMap.empty;
+}
 
-and check_binop e1 op e2 =
-  let e1 = check_expr e1 and e2 = check_expr e2 in Sast.Binop(e1, op, e2)
+(* Exceptions *)
+exception Error of string
 
-and check_func_call f args =
-  let id = check_expr f and args = List.map check_expr args in
+(* Static scoping variable counter *)
+let ss_counter = ref (-1)
+let get_ss_id name =
+  ss_counter := !ss_counter + 1;
+  sprintf "%s_%d" name !ss_counter
+
+(* Checks *)
+let rec check_expr env = function
+  | Ast.Num_lit(x) -> env, Sast.Num_lit(x)
+  | Ast.String_lit(s) -> env, Sast.String_lit(s)
+  | Ast.Bool_lit(b) -> env, Sast.Bool_lit(b)
+  | Ast.Id(id) -> env, check_id env id
+  | Ast.Unop(op, e) -> env, check_unop env op e
+  | Ast.Binop(e1, op, e2) -> env, check_binop env e1 op e2
+  | Ast.Call(f, args) -> env, check_func_call env f args
+  | Ast.Assign(id, e) -> check_assign env id e
+  | Ast.List(l) -> env, check_list env l
+  | Ast.Fdecl(f) -> check_fdecl env "anon" f
+
+and check_id env id =
+  if List.mem id env.reserved then Sast.Id(id) else
+  if StringMap.mem id env.scope then Sast.Id(StringMap.find id env.scope)
+  else let error = sprintf "ID '%s' not found." id in raise (Error(error))
+
+and check_unop env op e =
+  let _, e = check_expr env e in Sast.Unop(op, e)
+
+and check_binop env e1 op e2 =
+  let _, e1 = check_expr env e1 and _, e2 = check_expr env e2 in
+  Sast.Binop(e1, op, e2)
+
+and check_func_call env f args =
+  let _, id = check_expr env f in
+  let args = List.map (fun e -> snd(check_expr env e)) args in
   Sast.Call(id, args)
 
-and check_assign id e =
-  let e = check_expr e in Sast.Assign(id, e)
+and check_assign env id = function
+  | Fdecl(f) -> check_fdecl env id f
+  | _ as e ->
+      let name = get_ss_id id and _, e = check_expr env e in
+      let new_env = {
+        reserved = env.reserved;
+        scope = StringMap.add id name env.scope;
+      } in
+      new_env, Sast.Assign(name, e)
 
-and check_list l =
-  let l = List.map check_expr l in Sast.List(l)
+and check_list env l =
+  let l = List.map (fun e -> snd(check_expr env e)) l in Sast.List(l)
 
-and check_fdecl f = 
-  let params = List.map check_expr f.params in
-  let body = check_stmts f.body in
-  let return = check_expr f.return in
+and check_fdecl env id f = 
+  let name = get_ss_id id in
+  let new_env = {
+    reserved = env.reserved;
+    scope = StringMap.add id name env.scope;
+  } in
+  let params = List.map (fun e -> snd(check_expr env e)) f.params in
+  let ret_env, body = check_stmts env f.body in
+  let _, return = check_expr ret_env f.return in
   let fdecl = {
+    name = name;
     params = params;
     body = body;
-    return = return
+    return = return;
   }
-  in Sast.Fdecl(fdecl)
+  in new_env, Sast.Fdecl(fdecl)
 
-and check_stmt = function
-  | Ast.Do(e) -> let e = check_expr e in Sast.Do(e)
+and check_stmt env = function
+  | Ast.Do(e) -> let new_env, e = check_expr env e in new_env, Sast.Do(e)
 
-and check_stmts stmts = 
-  List.map check_stmt stmts
+and check_stmts env stmt_list = 
+  let rec aux env acc = function
+    | [] -> env, List.rev acc
+    | stmt :: tl -> let new_env, e = check_stmt env stmt in
+        aux new_env (e :: acc) tl
+  in aux env [] stmt_list
 
-let check_program program = check_stmts program
+let check_program program = snd(check_stmts root_env program)

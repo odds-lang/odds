@@ -1,5 +1,5 @@
 (*
- * COMS4115: Odds Syntactically Checked abstract syntax tree
+ * COMS4115: Odds semantically checked abstract syntax tree
  *
  * Authors:
  *  - Alex Kalicki
@@ -34,9 +34,10 @@ type expr =
 (* Function Declarations *)
 and fdecl =
   {
+    name: string;          (* Function Name *)
     params: expr list;     (* Parameters *)
     body: stmt list;       (* Function Body *)
-    return: expr           (* Return *)
+    return: expr;          (* Return *)
   }
   
 (* Statements *)
