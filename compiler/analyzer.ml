@@ -83,7 +83,7 @@ and check_list env l =
 
 and check_fdecl env id f = 
   let new_env, name = add_to_scope env id in
-  let func_env, params = check_fdecl_params env f.params in
+  let func_env, params = check_fdecl_params new_env f.params in
   let func_env, body = check_stmts func_env f.body in
   let _, return = check_expr func_env f.return in
   let fdecl = {
@@ -99,7 +99,7 @@ and check_fdecl_params env param_list =
     | [] -> env, List.rev acc
     | Ast.Id(param) :: tl -> let new_env, name = add_to_scope env param in
         aux new_env (Sast.Id(name) :: acc) tl
-    | _ -> env, acc (* dummy case for matching, never reached *)
+    | _ -> raise (Error("Invalid function parameter."))
   in aux env [] param_list
 
 and check_stmt env = function
