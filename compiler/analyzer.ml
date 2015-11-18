@@ -11,24 +11,52 @@
 open Ast
 open Sast
 
-let gen_check_expr = function
-  | Ast.Int_lit(i) -> Sast.Int_lit(i)
+let rec check_expr = function
+  | Ast.Num_lit(x) -> Sast.Num_lit(x)
   | Ast.String_lit(s) -> Sast.String_lit(s)
-  | Ast.Bool_lit(b) -> env, String.capitalize (string_of_bool(b))
-  | Ast.Id(id) -> env, txt_of_id env id
-  | Ast.Unop(op, e) -> let _, e = txt_of_expr env e in 
-      env, sprintf "(%s%s)" (txt_of_unop op) e
-  | Ast.Binop(e1, op, e2) ->
-      let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
-      env, sprintf "(%s %s %s)" e1 (txt_of_binop op) e2
-  | Ast.Call(f, args) -> let _, id = txt_of_expr env f in
-      env, sprintf "%s(%s)" id (txt_of_list env args)
-  | Ast.Assign(id, e) -> txt_of_assign env id e
-  | Ast.List(l) -> let e = txt_of_list env l in env, sprintf "[%s]" e
-  | Ast.Fdecl(f) -> txt_of_fdecl env "anon" f
+  | Ast.Bool_lit(b) -> Sast.Bool_lit(b)
+  | Ast.Id(id) -> check_id id
+  | Ast.Unop(op, e) -> check_unop op e
+  | Ast.Binop(e1, op, e2) -> check_binop e1 op e2
+  | Ast.Call(f, args) -> check_func_call f args
+  | Ast.Assign(id, e) -> check_assign id e
+  | Ast.List(l) -> check_list l
+  | Ast.Fdecl(f) -> check_fdecl f
 
-let gen_check_stmt = function
-  | Ast.Do(e) -> Sast.stmt(gen_check_expr e)
+and check_id id =
+  Sast.Id(id)
 
-let gen_check_program program =
-  List.fold_left gen_check_stmt [] program
+and check_unop op e =
+  let e = check_expr e in Sast.Unop(op, e)
+
+and check_binop e1 op e2 =
+  let e1 = check_expr e1 and e2 = check_expr e2 in Sast.Binop(e1, op, e2)
+
+and check_func_call f args =
+  let id = check_expr f and args = List.map check_expr args in
+  Sast.Call(id, args)
+
+and check_assign id e =
+  let e = check_expr e in Sast.Assign(id, e)
+
+and check_list l =
+  let l = List.map check_expr l in Sast.List(l)
+
+and check_fdecl f = 
+  let params = List.map check_expr f.params in
+  let body = check_stmts f.body in
+  let return = check_expr f.return in
+  let fdecl = {
+    params = params;
+    body = body;
+    return = return
+  }
+  in Sast.Fdecl(fdecl)
+
+and check_stmt = function
+  | Ast.Do(e) -> let e = check_expr e in Sast.Do(e)
+
+and check_stmts stmts = 
+  List.map check_stmt stmts
+
+let check_program program = check_stmts program

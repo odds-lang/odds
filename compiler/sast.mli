@@ -20,22 +20,23 @@ type data_type =
 
 (* Expressions *)
 type expr = 
-  | Int_lit of int
+  | Num_lit of Ast.num
   | String_lit of string
   | Bool_lit of bool
   | Unop of Ast.unop * expr
-  | Binop of sexpr * Ast.binop * expr
+  | Binop of expr * Ast.binop * expr
   | Id of string
   | Assign of string * expr
   | Call of expr * expr list
   | List of expr list
+  | Fdecl of fdecl
 
 (* Function Declarations *)
 and fdecl =
   {
     params: expr list;     (* Parameters *)
-    body: stmt list;      (* Function Body *)
-    return: expr            (* Return *)
+    body: stmt list;       (* Function Body *)
+    return: expr           (* Return *)
   }
   
 (* Statements *)

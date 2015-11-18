@@ -9,6 +9,7 @@
  *)
 
 open Ast
+open Sast
 open Printf
 
 module StringMap = Map.Make(String)
@@ -91,7 +92,7 @@ and txt_of_assign env id = function
 
 (* Statements *)
 and txt_of_stmt env = function
-  | Do(e) -> let env, e = txt_of_expr env e in env, sprintf "%s" e
+  | Sast.Do(e) -> let env, e = txt_of_expr env e in env, sprintf "%s" e
 
 and txt_of_stmts env_input stmt_list =
   let rec process_stmts env acc = function
@@ -100,4 +101,8 @@ and txt_of_stmts env_input stmt_list =
         process_stmts updated_env (stmt_txt :: acc) tl
   in process_stmts env_input [] stmt_list
 
-let gen_program program = snd (txt_of_stmts StringMap.empty program)
+(* Code generation entry point *)
+let gen_program output_file program =
+  let _, text = txt_of_stmts StringMap.empty program in
+  let file = open_out output_file in
+  fprintf file "%s\n" text; close_out file
