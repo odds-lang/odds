@@ -41,8 +41,7 @@
 %token <string> ID
 
 /* Literals */
-%token <int> INT_LITERAL
-%token <float> FLOAT_LITERAL
+%token <Ast.num> NUM_LITERAL
 %token <string> STRING_LITERAL
 %token <bool> BOOL_LITERAL
 %token VOID_LITERAL
@@ -83,7 +82,26 @@ expr:
   | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
   | LBRACE list_opt RBRACE      { List($2) }
   | LPAREN expr RPAREN          { $2 }
+  | fdecl                       { Fdecl($1) }
 
+/* Function declaration */
+fdecl:
+  | LPAREN fparams_opt FDELIM stmt_list RETURN expr
+    { {
+      params = $2;
+      body = List.rev $4;
+      return = $6;
+    } }
+
+fparams_opt:
+  | /* nothing */               { [] }
+  | fparam_list                 { List.rev $1 }
+
+fparam_list:
+  | ID                          { [Id($1)] }
+  | fparam_list COMMA ID        { Id($3)::$1 }
+
+/* Function calling */
 list_opt:
   | /* nothing */               { [] }
   | list                        { List.rev $1 }
@@ -113,7 +131,6 @@ boolean:
 
 /* Literals */
 literal:
-  | INT_LITERAL                 { Int_lit($1) }
-  | FLOAT_LITERAL               { Float_lit($1) }
+  | NUM_LITERAL                 { Num_lit($1) }
   | STRING_LITERAL              { String_lit($1) }
   | BOOL_LITERAL                { Bool_lit($1) }

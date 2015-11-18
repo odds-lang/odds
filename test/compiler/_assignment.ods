@@ -1,3 +1,6 @@
 do x = 4
 do x = 5
 do print(x)
+do y = x = 6
+do print(x)
+do print(y)
