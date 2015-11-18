@@ -83,7 +83,27 @@ expr:
   | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
   | LBRACE list_opt RBRACE      { List($2) }
   | LPAREN expr RPAREN          { $2 }
+  | fdecl                       { Fdecl($1) }
 
+/* Function declaration */
+fdecl:
+  | LPAREN fparams_opt FDELIM stmt_list RETURN expr
+    { {
+      params = $2;
+      body = List.rev $4;
+      return = $6;
+    } }
+
+
+fparams_opt:
+  | /* nothing */               { [] }
+  | fparam_list                 { List.rev $1 }
+
+fparam_list:
+  | ID                          { [Id($1)] }
+  | fparam_list COMMA ID        { Id($3)::$1 }
+
+/* Function calling */
 list_opt:
   | /* nothing */               { [] }
   | list                        { List.rev $1 }

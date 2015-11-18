@@ -31,6 +31,15 @@ let rec txt_of_expr = function
       (txt_of_expr f) (txt_of_list args)
   | Assign(x, e) -> sprintf "Assign(%s, %s)" x (txt_of_expr e)
   | List(l) -> sprintf "List([%s])" (txt_of_list l)
+  | Fdecl(f)-> txt_of_fdecl f
+
+(* Function declarations *)
+and txt_of_fdecl f =
+  "Fdecl({ " ^
+    "params=" ^ (txt_of_exprs f.params) ^
+    " ; body=" ^ (txt_of_stmts f.body) ^ 
+    " ; return=" ^ (txt_of_expr f.return) ^
+  " })"
 
 and txt_of_exprs exprs =
   let rec aux acc = function
@@ -45,10 +54,10 @@ and txt_of_list = function
   | _ as l -> String.concat " ; " (List.map txt_of_expr l)
 
 (* Statements *)
-let txt_of_stmt = function
+and txt_of_stmt = function
   | Do(expr) -> sprintf "Do(%s)" (txt_of_expr expr)
 
-let txt_of_stmts stmts =
+and txt_of_stmts stmts =
   let rec aux acc = function
       | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
       | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
