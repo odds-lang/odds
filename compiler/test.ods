@@ -1,4 +1,0 @@
-do a = 42
-do call = (x) -> do a = 47 
-                return a
-do call(a)
