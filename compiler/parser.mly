@@ -93,7 +93,6 @@ fdecl:
       return = $6;
     } }
 
-
 fparams_opt:
   | /* nothing */               { [] }
   | fparam_list                 { List.rev $1 }

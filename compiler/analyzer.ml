@@ -34,6 +34,14 @@ let get_ss_id name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
 
+let add_to_scope env id =
+  let ss_id = get_ss_id id in
+  let new_env = {
+    reserved = env.reserved;
+    scope = StringMap.add id ss_id env.scope;
+  } in
+  new_env, ss_id
+
 (* Checks *)
 let rec check_expr env = function
   | Ast.Num_lit(x) -> env, Sast.Num_lit(x)
@@ -65,27 +73,19 @@ and check_func_call env f args =
   Sast.Call(id, args)
 
 and check_assign env id = function
-  | Fdecl(f) -> check_fdecl env id f
-  | _ as e ->
-      let name = get_ss_id id and _, e = check_expr env e in
-      let new_env = {
-        reserved = env.reserved;
-        scope = StringMap.add id name env.scope;
-      } in
+  | Ast.Fdecl(f) -> check_fdecl env id f
+  | _ as e -> let new_env, e = check_expr env e in
+      let new_env, name = add_to_scope new_env id in
       new_env, Sast.Assign(name, e)
 
 and check_list env l =
   let l = List.map (fun e -> snd(check_expr env e)) l in Sast.List(l)
 
 and check_fdecl env id f = 
-  let name = get_ss_id id in
-  let new_env = {
-    reserved = env.reserved;
-    scope = StringMap.add id name env.scope;
-  } in
-  let params = List.map (fun e -> snd(check_expr env e)) f.params in
-  let ret_env, body = check_stmts env f.body in
-  let _, return = check_expr ret_env f.return in
+  let new_env, name = add_to_scope env id in
+  let func_env, params = check_fdecl_params env f.params in
+  let func_env, body = check_stmts func_env f.body in
+  let _, return = check_expr func_env f.return in
   let fdecl = {
     name = name;
     params = params;
@@ -93,6 +93,14 @@ and check_fdecl env id f =
     return = return;
   }
   in new_env, Sast.Fdecl(fdecl)
+
+and check_fdecl_params env param_list =
+  let rec aux env acc = function
+    | [] -> env, List.rev acc
+    | Ast.Id(param) :: tl -> let new_env, name = add_to_scope env param in
+        aux new_env (Sast.Id(name) :: acc) tl
+    | _ -> env, acc (* dummy case for matching, never reached *)
+  in aux env [] param_list
 
 and check_stmt env = function
   | Ast.Do(e) -> let new_env, e = check_expr env e in new_env, Sast.Do(e)
