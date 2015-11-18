@@ -19,15 +19,19 @@ let get_ss_id name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
 
+(* Unary operators *)
+let txt_of_unop = function
+  | Not -> "not "
+  | Sub -> "-"
+
 (* Binary operators *)
-let txt_of_op = function
+let txt_of_binop = function
   | Add -> "+"
   | Sub -> "-"
   | Mult -> "*"
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
-  | Not -> "not "
   | Eq -> "=="
   | Neq -> "!="
   | Less -> "<"
@@ -51,10 +55,10 @@ let rec txt_of_expr env = function
   | Bool_lit(b) -> env, String.capitalize (string_of_bool(b))
   | Id(id) -> env, txt_of_id env id
   | Unop(op, e) -> let _, e = txt_of_expr env e in 
-      env, sprintf "(%s%s)" (txt_of_op op) e
+      env, sprintf "(%s%s)" (txt_of_unop op) e
   | Binop(e1, op, e2) ->
       let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
-      env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
+      env, sprintf "(%s %s %s)" e1 (txt_of_binop op) e2
   | Call(f, args) -> let _, id = txt_of_expr env f in
       env, sprintf "%s(%s)" id (txt_of_list env args)
   | Assign(id, e) -> txt_of_assign env id e

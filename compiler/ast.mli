@@ -8,15 +8,19 @@
  *  - Lilly Wang
  *)
 
+(* Unary operators *)
+type unop =
+  | Sub      (* - *) 
+  | Not      (* ! *)
+
 (* Binary operators *)
-type op =
+type binop =
   | Add      (* + *)
   | Sub      (* - *)
   | Mult     (* * *)
   | Div      (* / *)
   | Mod      (* % *)
   | Pow      (* ** *)
-  | Not      (* ! *)
   | Eq       (* == *)
   | Neq      (* != *)
   | Less     (* < *)
@@ -26,17 +30,17 @@ type op =
 
 (* Expressions *)
 type expr =
-  | Int_lit of int               (* 42 *)
-  | Float_lit of float           (* 42.0 *)
-  | String_lit of string         (* "Hello, world" *)
-  | Bool_lit of bool             (* true *)
-  | Unop of op * expr            (* -5 *)
-  | Binop of expr * op * expr    (* a + b *)
-  | Id of string                 (* x *)
-  | Assign of string * expr      (* x = 4 *)
-  | Call of expr * expr list     (* add(1, 2) *)
-  | List of expr list            (* [1, 2, 3] *)
-  | Fdecl of fdecl               (* (x) -> ... return x *)
+  | Int_lit of int                (* 42 *)
+  | Float_lit of float            (* 42.0 *)
+  | String_lit of string          (* "Hello, world" *)
+  | Bool_lit of bool              (* true *)
+  | Unop of unop * expr           (* -5 *)
+  | Binop of expr * binop * expr  (* a + b *)
+  | Id of string                  (* x *)
+  | Assign of string * expr       (* x = 4 *)
+  | Call of expr * expr list      (* add(1, 2) *)
+  | List of expr list             (* [1, 2, 3] *)
+  | Fdecl of fdecl                (* (x) -> ... return x *)
 
 
 (* Function Declarations *)
