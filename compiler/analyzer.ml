@@ -47,30 +47,30 @@ let rec check_expr env = function
   | Ast.Num_lit(x) -> env, Sast.Num_lit(x)
   | Ast.String_lit(s) -> env, Sast.String_lit(s)
   | Ast.Bool_lit(b) -> env, Sast.Bool_lit(b)
-  | Ast.Id(id) -> env, check_id env id
-  | Ast.Unop(op, e) -> env, check_unop env op e
-  | Ast.Binop(e1, op, e2) -> env, check_binop env e1 op e2
-  | Ast.Call(f, args) -> env, check_func_call env f args
+  | Ast.Id(id) -> check_id env id
+  | Ast.Unop(op, e) -> check_unop env op e
+  | Ast.Binop(e1, op, e2) -> check_binop env e1 op e2
+  | Ast.Call(f, args) -> check_func_call env f args
   | Ast.Assign(id, e) -> check_assign env id e
-  | Ast.List(l) -> env, check_list env l
+  | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f
 
 and check_id env id =
-  if List.mem id env.reserved then Sast.Id(id) else
-  if StringMap.mem id env.scope then Sast.Id(StringMap.find id env.scope)
+  if List.mem id env.reserved then env, Sast.Id(id) else
+  if StringMap.mem id env.scope then env, Sast.Id(StringMap.find id env.scope)
   else let error = sprintf "ID '%s' not found." id in raise (Error(error))
 
 and check_unop env op e =
-  let _, e = check_expr env e in Sast.Unop(op, e)
+  let _, e = check_expr env e in env, Sast.Unop(op, e)
 
 and check_binop env e1 op e2 =
   let _, e1 = check_expr env e1 and _, e2 = check_expr env e2 in
-  Sast.Binop(e1, op, e2)
+  env, Sast.Binop(e1, op, e2)
 
 and check_func_call env f args =
   let _, id = check_expr env f in
   let args = List.map (fun e -> snd(check_expr env e)) args in
-  Sast.Call(id, args)
+  env, Sast.Call(id, args)
 
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
@@ -79,7 +79,7 @@ and check_assign env id = function
       new_env, Sast.Assign(name, e)
 
 and check_list env l =
-  let l = List.map (fun e -> snd(check_expr env e)) l in Sast.List(l)
+  let l = List.map (fun e -> snd(check_expr env e)) l in env, Sast.List(l)
 
 and check_fdecl env id f = 
   let new_env, name = add_to_scope env id in
