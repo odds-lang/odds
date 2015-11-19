@@ -27,6 +27,8 @@ type binop =
   | Leq      (* <= *)
   | Greater  (* > *)
   | Geq      (* >= *)
+  | And      (* && *)
+  | Or       (* || *)
 
 (* Expressions *)
 type num =
