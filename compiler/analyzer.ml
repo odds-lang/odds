@@ -31,18 +31,15 @@ let str_of_type = function
   | Bool -> "bool"        | List -> "list"
   | Unconst -> "Unconst"
 
-let str_of_unop = function
-  | Not -> "!"
-  | Sub -> "-"
-
-let str_of_binop = function
+let str_if_op = function
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
   | Eq -> "=="      | Neq -> "!="
   | Less -> "<"     | Leq -> "<="
   | Greater -> ">"  | Geq -> ">="
-  | And -> "&&"     | Or -> "||" 
+  | And -> "&&"     | Or -> "||"
+  | Not -> "!"
 
 (* Exceptions *)
 exception Error of string
@@ -53,12 +50,12 @@ let var_error id =
 
 let unop_error op t = 
   let message = sprintf "Invalid use of unary operator '%s' with type %s"
-    (str_of_unop op) (str_of_type t) in
+    (str_if_op op) (str_of_type t) in
   raise (Error(message))
 
 let binop_error t1 op t2 = 
   let message = sprintf "Invalid use of binary operator '%s' with type %s and %s" 
-    (str_of_binop op) (str_of_type t1) (str_of_type t2) in
+    (str_if_op op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
 (* Static scoping variable counter *)
