@@ -31,7 +31,11 @@ let str_of_type = function
   | Bool -> "bool"        | List -> "list"
   | Unconst -> "Unconst"
 
-let str_if_op = function
+let str_of_unop = function
+  | Not -> "!"
+  | Sub -> "-"
+
+let str_of_binop = function
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
@@ -39,7 +43,6 @@ let str_if_op = function
   | Less -> "<"     | Leq -> "<="
   | Greater -> ">"  | Geq -> ">="
   | And -> "&&"     | Or -> "||"
-  | Not -> "!"
 
 (* Exceptions *)
 exception Error of string
@@ -50,12 +53,12 @@ let var_error id =
 
 let unop_error op t = 
   let message = sprintf "Invalid use of unary operator '%s' with type %s"
-    (str_if_op op) (str_of_type t) in
+    (str_of_unop op) (str_of_type t) in
   raise (Error(message))
 
 let binop_error t1 op t2 = 
   let message = sprintf "Invalid use of binary operator '%s' with type %s and %s" 
-    (str_if_op op) (str_of_type t1) (str_of_type t2) in
+    (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
 (* Static scoping variable counter *)
@@ -111,7 +114,7 @@ and check_unop env op e =
 
 and check_binop env e1 op e2 =
   let _, Sast.Expr(e1, typ1) = check_expr env e1 
-    and _, Sast.Expr(e2, typ2) = check_expr env e2 in
+  and _, Sast.Expr(e2, typ2) = check_expr env e2 in
   match op with
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
       let is_num = function
@@ -122,17 +125,18 @@ and check_binop env e1 op e2 =
       if is_num typ1 && is_num typ2 then 
         let result_type = match op with
           | Add | Sub | Mult | Div | Mod | Pow -> Num
-          | Less | Leq | Greater | Geq -> Bool in
-      env, Sast.Expr(Sast.Binop(e1, op, e2), result_type) else 
-      binop_error typ1 op typ2
+          | Less | Leq | Greater | Geq -> Bool
+          | _ -> binop_error typ1 op typ2 in
+        env, Sast.Expr(Sast.Binop(e1, op, e2), result_type)
+      else binop_error typ1 op typ2
     | Eq | Neq -> 
       let is_valid_equality = function
         | Num | Bool | String -> true
         (* NO CONSTRAINING CAN BE DONE ON OVERLOADED EQUALITY OPERATOR *)
         | _ -> false in 
       if is_valid_equality typ1 && is_valid_equality typ2 then 
-      env, Sast.Expr(Sast.Binop(e1, op, e2), Bool) else 
-      binop_error typ1 op typ2
+        env, Sast.Expr(Sast.Binop(e1, op, e2), Bool)
+      else binop_error typ1 op typ2
     | And | Or ->
       let is_bool = function
         | Bool -> true
@@ -140,8 +144,8 @@ and check_binop env e1 op e2 =
         | Unconst -> true
         | _ -> false in
       if is_bool typ1 && is_bool typ2 then 
-      env, Sast.Expr(Sast.Binop(e1, op, e2), Bool) else
-      binop_error typ1 op typ2
+        env, Sast.Expr(Sast.Binop(e1, op, e2), Bool)
+      else binop_error typ1 op typ2
 
 and check_func_call env f args =
   let _, id = check_expr env f in
