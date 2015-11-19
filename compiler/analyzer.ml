@@ -12,17 +12,17 @@ open Ast
 open Sast
 open Printf
 
-module StringMap = Map.Make(String)
+module VarMap = Map.Make(String)
 
 (* Environment *)
 type environment = {
   reserved: string list;
-  scope: Sast.var StringMap.t;
+  scope: Sast.var VarMap.t;
 }
 
 let root_env = {
   reserved = ["print"];
-  scope = StringMap.empty;
+  scope = VarMap.empty;
 }
 
 (* Utilities *)
@@ -69,7 +69,7 @@ let add_to_scope env id s_type =
   let var = { name = ss_id; s_type = s_type } in
   let env' = {
     reserved = env.reserved;
-    scope = StringMap.add id var env.scope;
+    scope = VarMap.add id var env.scope;
   } in
   env', ss_id
 
@@ -88,8 +88,8 @@ let rec check_expr env = function
 
 and check_id env id =
   if List.mem id env.reserved then env, Sast.Expr(Sast.Id(id), Unconst) else
-  if StringMap.mem id env.scope then
-    let var = StringMap.find id env.scope in
+  if VarMap.mem id env.scope then
+    let var = VarMap.find id env.scope in
     env, Sast.Expr(Sast.Id(var.name), var.s_type)
   else var_error id
 
