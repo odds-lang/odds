@@ -31,7 +31,10 @@ let str_of_type = function
   | Bool -> "bool"        | List -> "list"
   | Unconst -> "Unconst"
 
-let str_if_op = function
+let str_of_unop = function
+  | Not -> "!"      | Sub -> "-"
+
+let str_of_binop = function
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
@@ -39,7 +42,6 @@ let str_if_op = function
   | Less -> "<"     | Leq -> "<="
   | Greater -> ">"  | Geq -> ">="
   | And -> "&&"     | Or -> "||"
-  | Not -> "!"
 
 (* Exceptions *)
 exception Error of string
@@ -50,12 +52,12 @@ let var_error id =
 
 let unop_error op t = 
   let message = sprintf "Invalid use of unary operator '%s' with type %s"
-    (str_if_op op) (str_of_type t) in
+    (str_of_unop op) (str_of_type t) in
   raise (Error(message))
 
 let binop_error t1 op t2 = 
   let message = sprintf "Invalid use of binary operator '%s' with type %s and %s" 
-    (str_if_op op) (str_of_type t1) (str_of_type t2) in
+    (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
 (* Static scoping variable counter *)
@@ -72,6 +74,29 @@ let add_to_scope env id s_type =
     scope = VarMap.add id var env.scope;
   } in
   env', ss_id
+
+(* Type Inference/Type Constraints *)
+(* This function looks to see if any of the constraints applied in the
+ * child should be applied to any of the variables in the parent env *)
+let add_constraints child_env parent_env =  
+  let c_scope = child_env.scope and p_scope = parent_env.scope in
+  let add_constraint raw_id p_var = 
+    if p_var.s_type = Sast.Unconst then
+      let c_var = VarMap.find raw_id c_scope in 
+      if (p_var.name = c_var.name) && (c_var.s_type != Sast.Unconst) then
+       let _ =  p_var.s_type <- c_var.s_type in true 
+      else false
+    else false in
+    (* returns true if constraint added, otherwise false. 
+     * For debugging purposes only. *)
+  let debugger raw_id p_var = (* This function for debugging purposes only *)
+    if add_constraint raw_id p_var then 
+      let message = sprintf 
+          "constrained var with raw id: %s, ss_id: %s, type: %s\n"
+          raw_id p_var.name (str_of_type p_var.s_type) in
+      print_string message in
+  VarMap.iter debugger p_scope; { parent_env with scope = p_scope }
+
 
 (* Checks *)
 let rec check_expr env = function
