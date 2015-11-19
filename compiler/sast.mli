@@ -16,7 +16,7 @@ type data_type =
   | String
   | Bool
   | List
-  | Unrestrained
+  | Unconst
 
 (* Expressions *)
 type expr = 
@@ -31,18 +31,27 @@ type expr =
   | List of expr list
   | Fdecl of fdecl
 
+and expr_wrapper = 
+  | Expr of expr * data_type
+
 (* Function Declarations *)
+and var =
+  {
+    name: string;
+    mutable s_type: data_type;
+  }
+
 and fdecl =
   {
-    name: string;          (* Function Name *)
-    params: expr list;     (* Parameters *)
-    body: stmt list;       (* Function Body *)
-    return: expr;          (* Return *)
+    name: string;            (* Function Name *)
+    params: expr_wrapper list;     (* Parameters *)
+    body: stmt list;         (* Function Body *)
+    return: expr_wrapper;          (* Return *)
   }
   
 (* Statements *)
 and stmt =
-  | Do of expr     (* set foo = bar + 3 *)
+  | Do of expr_wrapper     (* set foo = bar + 3 *)
 
 (* Program entry point *)
 type program = stmt list
