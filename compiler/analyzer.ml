@@ -56,12 +56,8 @@ let unop_error op t =
   raise (Error(message))
 
 let binop_error t1 op t2 = 
-<<<<<<< HEAD
-  let message = sprintf "Invalid use of binary operator '%s' with type %s and %s" 
-=======
   let message = 
     sprintf "Invalid use of binary operator '%s' with type %s and %s" 
->>>>>>> origin/constraint_system
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
