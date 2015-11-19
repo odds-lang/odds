@@ -57,7 +57,8 @@ let unop_error op t =
   raise (Error(message))
 
 let binop_error t1 op t2 = 
-  let message = sprintf "Invalid use of binary operator '%s' with type %s and %s" 
+  let message = 
+    sprintf "Invalid use of binary operator '%s' with type %s and %s" 
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
@@ -159,6 +160,8 @@ and check_assign env id = function
       env', Sast.Assign(name, e)
 
 and check_list env l =
+  (* TODO: enforce that they're all the same type, then return
+     Sast.Expr(Sast.List(l), type) *)
   let l = List.map (fun e -> snd(check_expr env e)) l in env, Sast.List(l)
 
 and check_fdecl env id f = 
