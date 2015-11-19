@@ -44,7 +44,7 @@ let add_to_scope env id s_type =
   env', ss_id
 
 (* Utilities *)
-let get_type = function
+let str_of_type = function
   | Num -> "num"
   | String -> "string"
   | Bool -> "bool"
@@ -70,8 +70,8 @@ and check_id env id =
   else let error = sprintf "ID '%s' not found." id in raise (Error(error))
 
 and check_unop env op e =
-  let raise_error t = 
-    let message = sprintf "Invalid use of Unop with %s" (get_type t) in
+  let raise_error op t = 
+    let message = sprintf "Invalid use of '%s' with %s" in
     raise (Error(message)) in
   let _, Sast.Expr(e, typ) = check_expr env e in
   match op with
@@ -79,16 +79,17 @@ and check_unop env op e =
       | Bool -> env, Sast.Expr(Sast.Unop(op, e), Bool)
       (* constrain types here *)
       | Unconst -> env, Sast.Expr(Sast.Unop(op, e), Bool)
-      | _ as t -> raise_error t
+      | _ as t -> raise_error "!" (str_of_type t)
     end
     | Minus -> begin match typ with 
       | Num -> env, Sast.Expr(Sast.Unop(op, e), Num)
       (* constrain types here *)
       | Unconst -> env, Sast.Expr(Sast.Unop(op, e), Num)
-      | _ as t -> raise_error t
+      | _ as t -> raise_error "-" (str_of_type t)
     end
 
 and check_binop env e1 op e2 =
+  let raise_error t = 
   let _, e1 = check_expr env e1 and _, e2 = check_expr env e2 in
   env, Sast.Binop(e1, op, e2)
 
