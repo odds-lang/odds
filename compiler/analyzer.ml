@@ -125,7 +125,7 @@ and check_binop env e1 op e2 =
       if is_num typ1 && is_num typ2 then 
         let result_type = match op with
           | Add | Sub | Mult | Div | Mod | Pow -> Num
-          | Less | Leq | Greater | Geq | Eq | Neq | And | Or -> Bool in
+          | Less | Leq | Greater | Geq -> Bool in
       env, Sast.Expr(Sast.Binop(e1, op, e2), result_type) else 
       binop_error typ1 op typ2
     | Eq | Neq -> 
