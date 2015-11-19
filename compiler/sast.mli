@@ -18,6 +18,11 @@ type data_type =
   | List
   | Unconst
 
+type var = {
+  name: string;
+  mutable s_type: data_type;
+}
+
 (* Expressions *)
 type expr = 
   | Num_lit of Ast.num
@@ -35,19 +40,12 @@ and expr_wrapper =
   | Expr of expr * data_type
 
 (* Function Declarations *)
-and var =
-  {
-    name: string;
-    mutable s_type: data_type;
-  }
-
-and fdecl =
-  {
-    name: string;            (* Function Name *)
-    params: expr_wrapper list;     (* Parameters *)
-    body: stmt list;         (* Function Body *)
-    return: expr_wrapper;          (* Return *)
-  }
+and fdecl = {
+  name: string;                  (* Function Name *)
+  params: expr_wrapper list;     (* Parameters *)
+  body: stmt list;               (* Function Body *)
+  return: expr_wrapper;          (* Return *)
+}
   
 (* Statements *)
 and stmt =

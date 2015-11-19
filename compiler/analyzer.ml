@@ -31,7 +31,11 @@ let str_of_type = function
   | Bool -> "bool"        | List -> "list"
   | Unconst -> "Unconst"
 
-let str_of_op = function
+let str_of_unop = function
+  | Not -> "!"
+  | Sub -> "-"
+
+let str_of_binop = function
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
@@ -43,14 +47,18 @@ let str_of_op = function
 (* Exceptions *)
 exception Error of string
 
+let var_error id =
+  let message = sprintf "Use of variable '%s' is undefined in current scope" id
+  in raise (Error(message))
+
 let unop_error op t = 
   let message = sprintf "Invalid use of unary operator '%s' with type %s"
-    (str_of_op op) (str_of_type t) in
+    (str_of_unop op) (str_of_type t) in
   raise (Error(message))
 
 let binop_error t1 op t2 = 
   let message = sprintf "Invalid use of binary operator '%s' with type %s and %s" 
-    (str_of_op op) (str_of_type t1) (str_of_type t2) in
+    (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
 (* Static scoping variable counter *)
@@ -82,9 +90,11 @@ let rec check_expr env = function
   | Ast.Fdecl(f) -> check_fdecl env "anon" f
 
 and check_id env id =
-  if List.mem id env.reserved then env, Sast.Id(id) else
-  if StringMap.mem id env.scope then env, Sast.Id(StringMap.find id env.scope)
-  else let error = sprintf "ID '%s' not found." id in raise (Error(error))
+  if List.mem id env.reserved then env, Sast.Expr(Sast.Id(id), Unconst) else
+  if StringMap.mem id env.scope then
+    let var = StringMap.find id env.scope in
+    env, Sast.Expr(Sast.Id(var.name), var.s_type)
+  else var_error id
 
 and check_unop env op e =
   let _, Sast.Expr(e, typ) = check_expr env e in
@@ -95,7 +105,7 @@ and check_unop env op e =
       | Unconst -> env, Sast.Expr(Sast.Unop(op, e), Bool)
       | _ as t -> unop_error op t
     end
-    | Minus -> begin match typ with 
+    | Sub -> begin match typ with 
       | Num -> env, Sast.Expr(Sast.Unop(op, e), Num)
       (* constrain types here *)
       | Unconst -> env, Sast.Expr(Sast.Unop(op, e), Num)
@@ -115,7 +125,7 @@ and check_binop env e1 op e2 =
       if is_num typ1 && is_num typ2 then 
         let result_type = match op with
           | Add | Sub | Mult | Div | Mod | Pow -> Num
-          | Less | Leq | Greater | Geq -> Bool in
+          | Less | Leq | Greater | Geq | Eq | Neq | And | Or -> Bool in
       env, Sast.Expr(Sast.Binop(e1, op, e2), result_type) else 
       binop_error typ1 op typ2
     | Eq | Neq -> 
