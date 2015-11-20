@@ -68,13 +68,18 @@ let unop_error op t =
   raise (Error(message))
 
 let binop_error t1 op t2 = 
-  let message = 
+  let message =
     sprintf "Invalid use of binary operator '%s' with type %s and %s" 
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
-let f_decl_param_error () = 
+let fdecl_param_error = 
   let message = "Invalid parameter in function declaration" in 
+  raise (Error(message))
+
+let fcall_error id f =
+  let message = sprintf "Invalid call of function '%s' with type %s"
+    id (str_of_func f) in
   raise (Error(message))
 
 (* Static scoping variable counter *)
@@ -123,7 +128,7 @@ let rec check_expr env = function
   | Ast.Id(id) -> check_id env id
   | Ast.Unop(op, e) -> check_unop env op e
   | Ast.Binop(e1, op, e2) -> check_binop env e1 op e2
-  | Ast.Call(f, args) -> check_func_call env f args
+  | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f
@@ -186,20 +191,20 @@ and check_binop env e1 op e2 =
         env, Sast.Expr(Sast.Binop(e1, op, e2), Bool)
       else binop_error typ1 op typ2
 
-and check_func_call env f args =
-  let _, Sast.Expr(id, typ) = check_expr env f in
-  let Sast.Func(param_types, return_type) = typ in
-  let args = check_func_args env param_types args in
-  env, Sast.Expr(Sast.Call(id, args), return_type)
+and check_func_call env id args =
+  let _, Sast.Expr(id, Sast.Func(f)) = check_expr env id in
+  let args = check_func_call_args env id f args in
+  env, Sast.Expr(Sast.Call(id, args), f.return_type)
 
-and check_func_args env param_types args =
-  if List.length param_types <> List.length args then (* ARG LENGTH ERROR *) else
+and check_func_call_args env id f args =
+  let Sast.Id(name) = id in
+  if List.length f.param_types <> List.length args then fcall_error name f else
   let aux acc param_types = function
     | [] -> List.rev acc
     | Sast.Expr(e, typ) :: tl -> let param_const = List.hd param_types in
-      if typ = param_const then aux (e :: acc) (List.tl param_types) tl else
-      (* TYPE ERROR *) in
-  aux [] param_types (List.Map (fun e -> snd(check_expr env e)) args)
+      if typ = param_const then aux (e :: acc) (List.tl param_types) tl
+      else f_call_error name f
+  in aux [] f.param_types (List.Map (fun e -> snd(check_expr env e)) args)
 
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
