@@ -86,20 +86,12 @@ expr:
 
 /* Function declaration */
 fdecl:
-  | LPAREN fparams_opt FDELIM stmt_list RETURN expr
+  | LPAREN list_opt FDELIM stmt_list RETURN expr
     { {
       params = $2;
       body = List.rev $4;
       return = $6;
     } }
-
-fparams_opt:
-  | /* nothing */               { [] }
-  | fparam_list                 { List.rev $1 }
-
-fparam_list:
-  | ID                          { [Id($1)] }
-  | fparam_list COMMA ID        { Id($3)::$1 }
 
 /* Function calling */
 list_opt:

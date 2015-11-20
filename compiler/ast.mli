@@ -48,12 +48,11 @@ type expr =
   | Fdecl of fdecl                (* (x) -> ... return x *)
 
 (* Function Declarations *)
-and fdecl =
-  {
-    params: expr list;    (* Parameters *)
-    body: stmt list;      (* Function Body *)
-    return: expr;         (* Return *)
-  }
+and fdecl = {
+  params: expr list;    (* Parameters *)
+  body: stmt list;      (* Function Body *)
+  return: expr;         (* Return *)
+}
   
 (* Statements *)
 and stmt =

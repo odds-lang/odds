@@ -42,17 +42,16 @@ type expr =
   | List of expr list
   | Fdecl of fdecl
 
+and fdecl = {
+  fname: string;          (* Function Name *)
+  params: string list;    (* Parameters *)
+  body: stmt list;        (* Function Body *)
+  return: expr;           (* Return *)
+}
+
 and expr_wrapper = 
   | Expr of expr * data_type
 
-(* Function Declarations *)
-and fdecl = {
-  name: string;                  (* Function Name *)
-  params: expr_wrapper list;     (* Parameters *)
-  body: stmt list;               (* Function Body *)
-  return: expr_wrapper;          (* Return *)
-}
-  
 (* Statements *)
 and stmt =
   | Do of expr_wrapper     (* set foo = bar + 3 *)
