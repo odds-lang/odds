@@ -11,12 +11,17 @@
 open Ast
 
 (* Data types *)
+type func = {
+  param_types: data_type list;
+  return_type: data_type;
+}
+
 type data_type = 
   | Num
   | String
   | Bool
   | List
-  | Func of data_type list * data_type
+  | Func of func
   | Unconst
 
 type var = {

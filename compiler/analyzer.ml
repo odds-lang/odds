@@ -16,12 +16,18 @@ module VarMap = Map.Make(String)
 
 (* Environment *)
 type environment = {
-  reserved: string list;
+  reserved: Sast.var list;
   scope: Sast.var VarMap.t;
 }
 
+let builtins = [
+  { name = "EUL"; s_type = Num; } ;
+  { name = "PI"; s_type = Num; };
+  { name = "print"; s_type = { param_types = []; return_type = Unconst; }};
+]
+
 let root_env = {
-  reserved = ["print"];
+  reserved = builtins;
   scope = VarMap.empty;
 }
 
@@ -29,7 +35,7 @@ let root_env = {
 let str_of_type = function
   | Num -> "num"          | String -> "string"
   | Bool -> "bool"        | List -> "list"
-  | Unconst -> "Unconst"
+  | Func(_, _) -> "func"  | Unconst -> "Unconst"
 
 let str_of_unop = function
   | Not -> "!"      | Sub -> "-"
@@ -117,11 +123,11 @@ let rec check_expr env = function
   | Ast.Fdecl(f) -> check_fdecl env "anon" f
 
 and check_id env id =
-  if List.mem id env.reserved then env, Sast.Expr(Sast.Id(id), Unconst) else
-  if VarMap.mem id env.scope then
-    let var = VarMap.find id env.scope in
-    env, Sast.Expr(Sast.Id(var.name), var.s_type)
-  else var_error id
+  let var =
+    if VarMap.mem id env.scope then VarMap.find id env.scope else
+    try List.find (fun var -> id = var.name) env.reserved
+    with Not_found -> var_error id
+  in env, Sast.Expr(Sast.Id(var.name), var.s_type)
 
 and check_unop env op e =
   let _, Sast.Expr(e, typ) = check_expr env e in
