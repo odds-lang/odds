@@ -16,6 +16,7 @@ type data_type =
   | String
   | Bool
   | List
+  | Func of data_type list * data_type
   | Unconst
 
 type var = {

@@ -61,7 +61,7 @@ let binop_error t1 op t2 =
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
-let f_decl_param_error = 
+let f_decl_param_error () = 
   let message = "Invalid parameter in function declaration" in 
   raise (Error(message))
 
@@ -200,14 +200,16 @@ and check_fdecl env id f =
     params = params;
     body = body;
     return = return;
-  }
-  in env', Sast.Fdecl(fdecl)
+  } in
+  let param_types = List.map (fun var -> var.s_type) params in
+  env', Sast.Expr(Sast.Fdecl(fdecl), Sast.Func(param_types, return.s_type))
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
     | [] -> env, List.rev acc
     | Ast.Id(param) :: tl -> let env', name = add_to_scope env param Unconst in
         aux env' (Sast.Id(name) :: acc) tl
+    | _ -> f_decl_param_error ()
   in aux env [] param_list
 
 and check_stmt env = function
