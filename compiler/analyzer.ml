@@ -58,8 +58,9 @@ let str_of_binop = function
 (* Exceptions *)
 exception Error of string
 
-let var_error id =
-  let message = sprintf "Use of variable '%s' is undefined in current scope" id
+let var_error name =
+  let message = sprintf "Use of variable '%s' is undefined in current scope"
+    name
   in raise (Error(message))
 
 let unop_error op t = 
@@ -78,8 +79,11 @@ let fdecl_param_error =
   raise (Error(message))
 
 let fcall_error id f =
+  let name = match id with
+    | Sast.Id(name) -> name
+    | _ -> raise (Error("Sast.Call provided non-ID as first argument")) in
   let message = sprintf "Invalid call of function '%s' with type %s"
-    id (str_of_func f) in
+    name (str_of_func f) in
   raise (Error(message))
 
 (* Static scoping variable counter *)
@@ -192,19 +196,21 @@ and check_binop env e1 op e2 =
       else binop_error typ1 op typ2
 
 and check_func_call env id args =
-  let _, Sast.Expr(id, Sast.Func(f)) = check_expr env id in
+  let _, Sast.Expr(id, typ) = check_expr env id in
+  let f = match typ with
+    | Sast.Func(f) -> f
+    | _ -> raise (Error("Attempting to call a non-function")) in
   let args = check_func_call_args env id f args in
   env, Sast.Expr(Sast.Call(id, args), f.return_type)
 
 and check_func_call_args env id f args =
-  let Sast.Id(name) = id in
-  if List.length f.param_types <> List.length args then fcall_error name f else
-  let aux acc param_types = function
+  if List.length f.param_types <> List.length args then fcall_error id f else
+  let rec aux acc param_types = function
     | [] -> List.rev acc
     | Sast.Expr(e, typ) :: tl -> let param_const = List.hd param_types in
       if typ = param_const then aux (e :: acc) (List.tl param_types) tl
-      else f_call_error name f
-  in aux [] f.param_types (List.Map (fun e -> snd(check_expr env e)) args)
+      else fcall_error id f
+  in aux [] f.param_types (List.map (fun e -> snd(check_expr env e)) args)
 
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
