@@ -208,6 +208,7 @@ and check_func_call_args env id f args =
   let rec aux acc param_types = function
     | [] -> List.rev acc
     | Sast.Expr(e, typ) :: tl -> let param_const = List.hd param_types in
+      (* TODO: allow unconstrained types, constrain if possible *)
       if typ = param_const then aux (e :: acc) (List.tl param_types) tl
       else fcall_error id f
   in aux [] f.param_types (List.map (fun e -> snd(check_expr env e)) args)
