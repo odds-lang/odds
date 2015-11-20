@@ -61,6 +61,10 @@ let binop_error t1 op t2 =
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
+let f_decl_param_error = 
+  let message = "Invalid parameter in function declaration" in 
+  raise (Error(message))
+
 (* Static scoping variable counter *)
 let ss_counter = ref (-1)
 let get_ss_id name =
@@ -204,7 +208,6 @@ and check_fdecl_params env param_list =
     | [] -> env, List.rev acc
     | Ast.Id(param) :: tl -> let env', name = add_to_scope env param Unconst in
         aux env' (Sast.Id(name) :: acc) tl
-    | _ -> raise (Error("Invalid function parameter."))
   in aux env [] param_list
 
 and check_stmt env = function
