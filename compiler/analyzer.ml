@@ -187,9 +187,19 @@ and check_binop env e1 op e2 =
       else binop_error typ1 op typ2
 
 and check_func_call env f args =
-  let _, id = check_expr env f in
-  let args = List.map (fun e -> snd(check_expr env e)) args in
-  env, Sast.Call(id, args)
+  let _, Sast.Expr(id, typ) = check_expr env f in
+  let Sast.Func(param_types, return_type) = typ in
+  let args = check_func_args env param_types args in
+  env, Sast.Expr(Sast.Call(id, args), return_type)
+
+and check_func_args env param_types args =
+  if List.length param_types <> List.length args then (* ARG LENGTH ERROR *) else
+  let aux acc param_types = function
+    | [] -> List.rev acc
+    | Sast.Expr(e, typ) :: tl -> let param_const = List.hd param_types in
+      if typ = param_const then aux (e :: acc) (List.tl param_types) tl else
+      (* TYPE ERROR *) in
+  aux [] param_types (List.Map (fun e -> snd(check_expr env e)) args)
 
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
