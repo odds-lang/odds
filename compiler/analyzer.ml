@@ -74,7 +74,7 @@ let binop_error t1 op t2 =
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Error(message))
 
-let fdecl_param_error = 
+let fdecl_param_error () = 
   let message = "Invalid parameter in function declaration" in 
   raise (Error(message))
 
@@ -221,7 +221,7 @@ and check_assign env id = function
 
 and check_list env l =
   (* TODO: enforce that they're all the same type, then return
-     Sast.Expr(Sast.List(l), type) *)
+     Sast.Expr(Sast.List(l), List(type)) *)
   let l = List.map (fun e -> snd(check_expr env e)) l in env, Sast.List(l)
 
 and check_fdecl env id f = 

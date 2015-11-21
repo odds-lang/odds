@@ -15,7 +15,7 @@ type data_type =
   | Num
   | String
   | Bool
-  | List
+  | List of data_type
   | Func of func
   | Unconst
 
