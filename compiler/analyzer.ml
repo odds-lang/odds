@@ -33,8 +33,10 @@ let root_env = {
 
 (* Utilities *)
 let rec str_of_type = function
-  | Num -> "num"          | String -> "string"
-  | Bool -> "bool"        | List -> "list"
+  | Num -> "num"
+  | String -> "string"
+  | Bool -> "bool"
+  | List(l) -> sprintf "[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
   | Unconst -> "Unconst"
 
