@@ -235,8 +235,9 @@ and check_fdecl env id f =
     body = body;
     return = return;
   } in
-  let param_types = List.map (fun var -> var.s_type) params in
-  env', Sast.Expr(Sast.Fdecl(fdecl), Sast.Func(param_types, return.s_type))
+  let param_type_list = List.map (fun var -> var.s_type) params in
+  let func_type = { param_types = param_type_list; return_type = return.s_type } in
+  env', Sast.Expr(Sast.Fdecl(fdecl), Sast.Func(func_type))
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
