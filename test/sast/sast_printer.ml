@@ -65,9 +65,12 @@ and txt_of_stmts sast =
 let print () = 
   let lexbuf = Lexing.from_channel stdin in 
   let ast = Parser.program Scanner.token lexbuf in
-  let sast = Analyzer.check_ast ast in
-  let sast_str = txt_of_stmts sast in
-  print_string sast_str
+  try
+    let sast = Analyzer.check_ast ast in
+    let sast_str = txt_of_stmts sast in
+    print_string sast_str
+  with
+    Analyzer.Error(message) -> print_string message
 
 (* Execute *)
 print ()
