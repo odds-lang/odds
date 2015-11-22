@@ -55,6 +55,7 @@ rule token = parse
 
 (* End-of-File *)
 | eof { EOF }
+| _ as c { raise (Failure("illegal character " ^ Char.escaped c)) }
 
 (* Literals *)
 | num+ as intlit { INT_LITERAL(int_of_string intlit) }
