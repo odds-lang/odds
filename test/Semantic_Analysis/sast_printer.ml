@@ -30,7 +30,7 @@ and str_of_expr = function
     sprintf "%s%s" op_str we_str
   | Binop(we1, op, we2) -> 
       let we1_str = str_of_wrapped_expr we1 and
-        op_str = Sast.str_of_unop op and 
+        op_str = Sast.str_of_binop op and 
         we2_str = str_of_wrapped_expr we2 in
       sprintf "%s %s %s" we1_str op_str we2_str
   | Id(id) -> id
