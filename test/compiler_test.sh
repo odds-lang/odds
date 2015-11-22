@@ -5,7 +5,7 @@ CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 
-INPUT_FILES="compiler/*.ods"
+INPUT_FILES="compiler/success/*.ods"
 TMP_FILE=$(mktemp "compiled.XXXXX")
 printf "${CYAN}Running compiler tests...\n${NC}"
 
