@@ -48,7 +48,7 @@ and str_of_expr = function
       let params_txt = str_of_wrapped_expr_list fdecl.params and
         body_txt = txt_of_stmts fdecl.body and
         return_txt = txt_of_wrapped_expr fdecl.return in
-      sprintf "(%s) ->\n%s\n%s" params_txt body_txt return_txt
+      sprintf "(%s) ->\n%s\nreturn %s" params_txt body_txt return_txt
 
 and str_of_wrapped_expr = function
   | Sast.Expr(expr, typ) -> 
