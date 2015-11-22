@@ -12,8 +12,12 @@ open Sast
 open Analyzer
 open Printf
 
+(* Utility Functions *)
+let str_of_wrapped_expr_list l = 
+  String.concat ", " (List.map str_of_wrapped_expr l)
 
-let str_of_expr = function
+(* Stringerizer *)
+and str_of_expr = function
   | Num_lit(n) -> 
       begin match n with
         | Ast.Num_int(i) -> string_of_int i
@@ -34,19 +38,28 @@ let str_of_expr = function
       let we_str = str_of_wrapped_expr we in 
       sprintf "%s = %s" id we_str
   | Call(we, we_list) -> 
+      let func_name = str_of_wrapped_expr we and 
+        args_txt = str_of_wrapped_expr_list we_list in
+      sprintf "%s(%s)" func_name args_txt
   | List(we_list) -> 
+      let l_txt = str_of_wrapped_expr_list we_list in
+      sprintf "[%s]" l_txt
   | Fdecl(fdecl) -> 
+      let params_txt = str_of_wrapped_expr_list fdecl.params and
+        body_txt = txt_of_stmts fdecl.body and
+        return_txt = txt_of_wrapped_expr fdecl.return in
+      sprintf "(%s) ->\n%s\n%s" params_txt body_txt return_txt
 
 and str_of_wrapped_expr = function
   | Sast.Expr(expr, typ) -> 
       let type_str = Analyzer.str_of_type typ and expr_str = str_of_expr expr in
       sprintf "{%s %s}" type_str expr_str
 
-let str_of_stmt = function
+and str_of_stmt = function
   | Sast.Do(expr_wrapper) -> 
       sprintf "do %s" (txt_of_wrapped_expr wrapped_expr)
 
-let txt_of_stmts sast = 
+and txt_of_stmts sast = 
   let rec aux acc = function
     | [] -> String.concat "\n" (List.rev acc)
     | hd :: tl -> aux (txt_of_stmt hd :: acc) tl
