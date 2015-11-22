@@ -7,9 +7,6 @@
  *  - Daniel Echikson
  *  - Lilly Wang
  *)
-open Ast
-open Sast
-open Analyzer
 open Printf
 
 (* Utility Functions *)
@@ -65,6 +62,12 @@ and txt_of_stmts sast =
     | hd :: tl -> aux (txt_of_stmt hd :: acc) tl
   in aux [] sast
 
-let print sast = 
+let print () = 
+  let lexbuf = Lexing.from_channel stdin in 
+  let ast = Parser.program Scanner.token lexbuf in
+  let sast = Analyzer.check_ast ast in
   let sast_str = txt_of_stmts sast in
   print_string sast_str
+
+(* Execute *)
+print ()
