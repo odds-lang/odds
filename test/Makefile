@@ -11,6 +11,7 @@ test: build
 	./scanner_test.sh
 	./parser_test.sh
 	./compiler_test.sh
+	./fail_test.sh
 
 build:
 	cd scanner; make
