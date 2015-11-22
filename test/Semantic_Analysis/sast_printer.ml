@@ -70,7 +70,7 @@ let print () =
     let sast_str = txt_of_stmts sast in
     print_string sast_str
   with
-    Analyzer.Error(message) -> print_string message
+    | Analyzer.Error(message) -> print_string message
 
 (* Execute *)
 print ()
