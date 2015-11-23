@@ -231,11 +231,12 @@ and check_assign env id = function
       env', Sast.Expr(Sast.Assign(name, ew'), Unconst)
 
 and check_list env l =
+  if List.length l = 0 then env, Sast.Expr(Sast.List([]), List(Unconst)) else
   let rec aux acc const = function
     | [] -> Sast.Expr(Sast.List(List.rev acc), List(const))
     | (Sast.Expr(e, typ) as ew) :: tl ->
       (* TODO: constrain type to const *)
-      if typ = const || typ = Unconst then
+      if typ = const || const = Unconst then
         aux (ew :: acc) const tl
       else list_error (List(const)) typ in
   (* TODO: don't throw away env from args here *)
