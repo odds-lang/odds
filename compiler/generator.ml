@@ -41,6 +41,7 @@ let rec txt_of_expr = function
   | Num_lit(n) -> txt_of_num n
   | String_lit(s) -> sprintf "\"%s\"" s
   | Bool_lit(b) -> String.capitalize (string_of_bool(b))
+  | Void_lit -> "None"
   | Id(id) -> id
   | Unop(op, ew) -> sprintf "(%s%s)" (txt_of_unop op) (txt_of_expr_wrapper ew)
   | Binop(ew1, op, ew2) -> sprintf "(%s %s %s)"

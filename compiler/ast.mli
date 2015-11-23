@@ -39,6 +39,7 @@ type expr =
   | Num_lit of num                (* 42 *)
   | String_lit of string          (* "Hello, world" *)
   | Bool_lit of bool              (* true *)
+  | Void_lit                      (* void *)
   | Unop of unop * expr           (* -5 *)
   | Binop of expr * binop * expr  (* a + b *)
   | Id of string                  (* x *)

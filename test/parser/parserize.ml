@@ -30,6 +30,7 @@ let rec txt_of_expr = function
   | Num_lit(x) -> sprintf "Num_lit(%s)" (txt_of_num x)
   | String_lit(x) -> sprintf "String_lit(%s)" x
   | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
+  | Void_lit -> "Void_lit"
   | Id(x) -> sprintf "Id(%s)" x
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"

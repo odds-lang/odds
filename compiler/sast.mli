@@ -15,6 +15,7 @@ type data_type =
   | Num
   | String
   | Bool
+  | Void
   | List of data_type
   | Func of func
   | Unconst
@@ -37,6 +38,7 @@ and expr =
   | Num_lit of Ast.num
   | String_lit of string
   | Bool_lit of bool
+  | Void_lit
   | Unop of Ast.unop * expr_wrapper
   | Binop of expr_wrapper * Ast.binop * expr_wrapper
   | Id of string

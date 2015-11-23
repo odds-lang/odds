@@ -134,3 +134,4 @@ literal:
   | NUM_LITERAL                 { Num_lit($1) }
   | STRING_LITERAL              { String_lit($1) }
   | BOOL_LITERAL                { Bool_lit($1) }
+  | VOID_LITERAL                { Void_lit }

@@ -25,7 +25,7 @@ let builtins = [
   { name = "PI"; s_type = Num; };
   {
     name = "print";
-    s_type = Func({ param_types = [Unconst]; return_type = Unconst; });
+    s_type = Func({ param_types = [Unconst]; return_type = Void; });
   };
 ]
 
@@ -39,6 +39,7 @@ let rec str_of_type = function
   | Num -> "num"
   | String -> "string"
   | Bool -> "bool"
+  | Void -> "void"
   | List(l) -> sprintf "list[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
   | Unconst -> "Unconst"
@@ -133,6 +134,7 @@ let rec check_expr env = function
   | Ast.Num_lit(x) -> env, Sast.Expr(Sast.Num_lit(x), Num)
   | Ast.String_lit(s) -> env, Sast.Expr(Sast.String_lit(s), String)
   | Ast.Bool_lit(b) -> env, Sast.Expr(Sast.Bool_lit(b), Bool)
+  | Ast.Void_lit -> env, Sast.Expr(Sast.Void_lit, Void)
   | Ast.Id(id) -> check_id env id
   | Ast.Unop(op, e) -> check_unop env op e
   | Ast.Binop(e1, op, e2) -> check_binop env e1 op e2
