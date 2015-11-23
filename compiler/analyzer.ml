@@ -23,7 +23,10 @@ type environment = {
 let builtins = [
   { name = "EUL"; s_type = Num; };
   { name = "PI"; s_type = Num; };
-  { name = "print"; s_type = Func({ param_types = []; return_type = Unconst; })}
+  {
+    name = "print";
+    s_type = Func({ param_types = [Unconst]; return_type = Unconst; });
+  };
 ]
 
 let root_env = {

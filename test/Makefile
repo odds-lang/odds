@@ -15,8 +15,10 @@ test: build
 build:
 	cd scanner; make
 	cd parser; make
+	cd sast; make
 
 .PHONY: clean
 clean:
 	cd scanner; make clean
 	cd parser; make clean
+	cd sast; make clean

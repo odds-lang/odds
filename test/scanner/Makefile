@@ -1,7 +1,7 @@
 # Odds: test/scanner Makefile
 #  - builds the tokenize executable for printing scanned tokens from stdin
 
-OCAMLC=ocamlc
+OCAMLC = ocamlc
 OBJS = ../../compiler/scanner.cmo tokenize.cmo
 INCLUDES = -I ../../compiler
 
