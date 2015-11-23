@@ -58,7 +58,7 @@ let str_of_binop = function
   | Eq -> "=="      | Neq -> "!="
   | Less -> "<"     | Leq -> "<="
   | Greater -> ">"  | Geq -> ">="
-  | And -> "&&"     | Or -> "||"
+  (*| And -> "&&"     | Or -> "||"*)
 
 (* Exceptions *)
 let var_error name =
@@ -192,7 +192,7 @@ and check_binop env e1 op e2 =
       if is_valid_equality typ1 && is_valid_equality typ2 then 
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
-    | And | Or ->
+    (*| And | Or ->
       let is_bool = function
         | Bool -> true
         (* constrain types here *)
@@ -200,7 +200,7 @@ and check_binop env e1 op e2 =
         | _ -> false in
       if is_bool typ1 && is_bool typ2 then
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
-      else binop_error typ1 op typ2
+      else binop_error typ1 op typ2*)
 
 and check_func_call env id args =
   let env', ew = check_expr env id in
