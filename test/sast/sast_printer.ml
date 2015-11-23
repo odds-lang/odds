@@ -23,6 +23,7 @@ let rec str_of_expr = function
       end
   | String_lit(s) -> s
   | Bool_lit(b) -> string_of_bool b
+  | Void_lit -> "()"
   | Unop(op, we) -> 
       let op_str = Analyzer.str_of_unop op and we_str = str_of_wrapped_expr we in
       sprintf "%s%s" op_str we_str
