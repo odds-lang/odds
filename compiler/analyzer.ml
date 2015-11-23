@@ -226,9 +226,9 @@ and check_func_call_args env id f args =
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
   | _ as ew -> let env', ew' = check_expr env ew in
-      let Sast.Expr(expr, expr_type) = ew' in
-      let env', name = add_to_scope env' id expr_type in
-      env', Sast.Expr(Sast.Assign(name, ew'), expr_type)
+      let Sast.Expr(_, typ) = ew' in
+      let env', name = add_to_scope env' id typ in
+      env', Sast.Expr(Sast.Assign(name, ew'), typ)
 
 and check_list env l =
   if List.length l = 0 then env, Sast.Expr(Sast.List([]), List(Unconst)) else
