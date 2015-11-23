@@ -21,7 +21,7 @@ type environment = {
 }
 
 let builtins = [
-  { name = "EUL"; s_type = Num; } ;
+  { name = "EUL"; s_type = Num; };
   { name = "PI"; s_type = Num; };
   { name = "print"; s_type = Func({ param_types = []; return_type = Unconst; })}
 ]
@@ -36,7 +36,7 @@ let rec str_of_type = function
   | Num -> "num"
   | String -> "string"
   | Bool -> "bool"
-  | List(l) -> sprintf "[%s]" (str_of_type l)
+  | List(l) -> sprintf "list[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
   | Unconst -> "Unconst"
 
@@ -58,35 +58,34 @@ let str_of_binop = function
   | And -> "&&"     | Or -> "||"
 
 (* Exceptions *)
-exception Error of string
-
 let var_error name =
   let message = sprintf "Use of variable '%s' is undefined in current scope"
-    name
-  in raise (Error(message))
+    name in
+  failwith message
 
 let unop_error op t = 
   let message = sprintf "Invalid use of unary operator '%s' with type %s"
     (str_of_unop op) (str_of_type t) in
-  raise (Error(message))
+  failwith message
 
 let binop_error t1 op t2 = 
   let message =
     sprintf "Invalid use of binary operator '%s' with type %s and %s" 
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
-  raise (Error(message))
-
-let fdecl_param_error () = 
-  let message = "Invalid parameter in function declaration" in 
-  raise (Error(message))
+  failwith message
 
 let fcall_error id f =
   let name = match id with
     | Sast.Id(name) -> name
-    | _ -> raise (Error("Sast.Call provided non-ID as first argument")) in
+    | _ -> failwith "Sast.Call provided non-ID as first argument" in
   let message = sprintf "Invalid call of function '%s' with type %s"
     name (str_of_func f) in
-  raise (Error(message))
+  failwith message
+
+let list_error list_type elem_type = 
+  let message = sprintf "Invalid element of type %s in list of type %s"
+    (str_of_type elem_type) (str_of_type list_type) in
+  failwith message
 
 (* Static scoping variable counter *)
 let ss_counter = ref (-1)
@@ -143,28 +142,31 @@ and check_id env id =
   let var =
     if VarMap.mem id env.scope then VarMap.find id env.scope else
     try List.find (fun var -> id = var.name) env.reserved
-    with Not_found -> var_error id
-  in env, Sast.Expr(Sast.Id(var.name), var.s_type)
+    with Not_found -> var_error id in
+  env, Sast.Expr(Sast.Id(var.name), var.s_type)
 
 and check_unop env op e =
-  let _, Sast.Expr(e, typ) = check_expr env e in
+  let env', ew = check_expr env e in
+  let Sast.Expr(e, typ) = ew in
   match op with
     | Not -> begin match typ with
-      | Bool -> env, Sast.Expr(Sast.Unop(op, e), Bool)
+      | Bool -> env', Sast.Expr(Sast.Unop(op, ew), Bool)
       (* constrain types here *)
-      | Unconst -> env, Sast.Expr(Sast.Unop(op, e), Bool)
+      | Unconst -> env', Sast.Expr(Sast.Unop(op, ew), Bool)
       | _ as t -> unop_error op t
     end
     | Sub -> begin match typ with 
-      | Num -> env, Sast.Expr(Sast.Unop(op, e), Num)
+      | Num -> env', Sast.Expr(Sast.Unop(op, ew), Num)
       (* constrain types here *)
-      | Unconst -> env, Sast.Expr(Sast.Unop(op, e), Num)
+      | Unconst -> env', Sast.Expr(Sast.Unop(op, ew), Num)
       | _ as t -> unop_error op t
     end
 
 and check_binop env e1 op e2 =
-  let _, Sast.Expr(e1, typ1) = check_expr env e1 
-  and _, Sast.Expr(e2, typ2) = check_expr env e2 in
+  let env', ew1 = check_expr env e1 in
+  let Sast.Expr(e1, typ1) = ew1 in
+  let env', ew2 = check_expr env' e2 in
+  let Sast.Expr(e2, typ2) = ew2 in
   match op with
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
       let is_num = function
@@ -177,7 +179,7 @@ and check_binop env e1 op e2 =
           | Add | Sub | Mult | Div | Mod | Pow -> Num
           | Less | Leq | Greater | Geq -> Bool
           | _ -> binop_error typ1 op typ2 in
-        env, Sast.Expr(Sast.Binop(e1, op, e2), result_type)
+        env', Sast.Expr(Sast.Binop(ew1, op, ew2), result_type)
       else binop_error typ1 op typ2
     | Eq | Neq -> 
       let is_valid_equality = function
@@ -185,7 +187,7 @@ and check_binop env e1 op e2 =
         (* NO CONSTRAINING CAN BE DONE ON OVERLOADED EQUALITY OPERATOR *)
         | _ -> false in 
       if is_valid_equality typ1 && is_valid_equality typ2 then 
-        env, Sast.Expr(Sast.Binop(e1, op, e2), Bool)
+        env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
     | And | Or ->
       let is_bool = function
@@ -193,64 +195,77 @@ and check_binop env e1 op e2 =
         (* constrain types here *)
         | Unconst -> true
         | _ -> false in
-      if is_bool typ1 && is_bool typ2 then 
-        env, Sast.Expr(Sast.Binop(e1, op, e2), Bool)
+      if is_bool typ1 && is_bool typ2 then
+        env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
 
 and check_func_call env id args =
-  let _, Sast.Expr(id, typ) = check_expr env id in
+  let env', ew = check_expr env id in
+  let Sast.Expr(id, typ) = ew in
   let f = match typ with
     | Sast.Func(f) -> f
-    | _ -> raise (Error("Attempting to call a non-function")) in
-  let args = check_func_call_args env id f args in
-  env, Sast.Expr(Sast.Call(id, args), f.return_type)
+    | _ -> failwith "Attempting to call a non-function" in
+  let args = check_func_call_args env' id f args in
+  env', Sast.Expr(Sast.Call(ew, args), f.return_type)
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then fcall_error id f else
   let rec aux acc param_types = function
     | [] -> List.rev acc
-    | Sast.Expr(e, typ) :: tl -> let param_const = List.hd param_types in
-      (* TODO: allow unconstrained types, constrain if possible *)
-      if typ = param_const then aux (e :: acc) (List.tl param_types) tl
-      else fcall_error id f
-  in aux [] f.param_types (List.map (fun e -> snd(check_expr env e)) args)
+    | (Sast.Expr(e, typ) as ew) :: tl -> let const = List.hd param_types in
+      (* TODO: constrain types if possible *)
+      if (typ = const || typ = Unconst) then
+        aux (ew :: acc) (List.tl param_types) tl
+      else fcall_error id f in
+  (* TODO: don't throw away env from args here *)
+  aux [] f.param_types (List.map (fun e -> snd(check_expr env e)) args)
 
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
-  | _ as e -> let env', e = check_expr env e in
+  | _ as ew -> let env', ew' = check_expr env ew in
+      (* TODO: don't just add Unconst, add actual type *)
       let env', name = add_to_scope env' id Unconst in
-      env', Sast.Assign(name, e)
+      env', Sast.Expr(Sast.Assign(name, ew'), Unconst)
 
 and check_list env l =
-  (* TODO: enforce that they're all the same type, then return
-     Sast.Expr(Sast.List(l), List(type)) *)
-  let l = List.map (fun e -> snd(check_expr env e)) l in env, Sast.List(l)
+  let rec aux acc const = function
+    | [] -> Sast.Expr(Sast.List(List.rev acc), List(const))
+    | (Sast.Expr(e, typ) as ew) :: tl ->
+      (* TODO: constrain type to const *)
+      if typ = const || typ = Unconst then
+        aux (ew :: acc) const tl
+      else list_error (List(const)) typ in
+  (* TODO: don't throw away env from args here *)
+  let ew_list = List.map (fun e -> snd(check_expr env e)) l in
+  let Sast.Expr(_, const) = List.hd ew_list in
+  env, aux [] const ew_list
 
-and check_fdecl env id f = 
+and check_fdecl env id f =
   let env', name = add_to_scope env id Unconst in
-  let func_env, params = check_fdecl_params env' f.params in
+  let func_env, param_ids = check_fdecl_params env' f.params in
   let func_env, body = check_stmts func_env f.body in
-  let _, return = check_expr func_env f.return in
+  let func_env, return = check_expr func_env f.return in
+  let Sast.Expr(_, ret_type) = return in
   let fdecl = {
-    name = name;
-    params = params;
+    fname = name;
+    params = param_ids;
     body = body;
     return = return;
   } in
-  let param_type_list = List.map (fun var -> var.s_type) params in
-  let func_type = { param_types = param_type_list; return_type = return.s_type } in
-  env', Sast.Expr(Sast.Fdecl(fdecl), Sast.Func(func_type))
+  let param_types = 
+    List.map (fun name -> (VarMap.find name func_env.scope).s_type) f.params in
+  let f_type = { param_types = param_types; return_type = ret_type } in
+  env', Sast.Expr(Sast.Fdecl(fdecl), Func(f_type))
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
     | [] -> env, List.rev acc
-    | Ast.Id(param) :: tl -> let env', name = add_to_scope env param Unconst in
-        aux env' (Sast.Id(name) :: acc) tl
-    | _ -> f_decl_param_error ()
+    | param :: tl -> let env', name = add_to_scope env param Unconst in
+        aux env' (name :: acc) tl
   in aux env [] param_list
 
 and check_stmt env = function
-  | Ast.Do(e) -> let env', e = check_expr env e in env', Sast.Do(e)
+  | Ast.Do(e) -> let env', ew = check_expr env e in env', Sast.Do(ew)
 
 and check_stmts env stmt_list = 
   let rec aux env acc = function

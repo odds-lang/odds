@@ -3,10 +3,7 @@
         Assign(
             sum,
             Fdecl({
-                params=[
-                    Id(x) ;
-                    Id(y)
-                ] ;
+                params=[x ; y] ;
                 body=[
                     Do(Call(Id(print), [Id(x)])) ;
                     Do(Call(Id(print), [Id(y)]))

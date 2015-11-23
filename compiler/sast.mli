@@ -30,31 +30,31 @@ type var = {
 }
 
 (* Expressions *)
-type expr = 
+type expr_wrapper = 
+  | Expr of expr * data_type
+
+and expr = 
   | Num_lit of Ast.num
   | String_lit of string
   | Bool_lit of bool
-  | Unop of Ast.unop * expr
-  | Binop of expr * Ast.binop * expr
+  | Unop of Ast.unop * expr_wrapper
+  | Binop of expr_wrapper * Ast.binop * expr_wrapper
   | Id of string
-  | Assign of string * expr
-  | Call of expr * expr list
-  | List of expr list
+  | Assign of string * expr_wrapper
+  | Call of expr_wrapper * expr_wrapper list
+  | List of expr_wrapper list
   | Fdecl of fdecl
 
 and fdecl = {
   fname: string;          (* Function Name *)
   params: string list;    (* Parameters *)
   body: stmt list;        (* Function Body *)
-  return: expr;           (* Return *)
+  return: expr_wrapper;   (* Return *)
 }
-
-and expr_wrapper = 
-  | Expr of expr * data_type
 
 (* Statements *)
 and stmt =
-  | Do of expr_wrapper     (* set foo = bar + 3 *)
+  | Do of expr_wrapper    (* set foo = bar + 3 *)
 
 (* Program entry point *)
 type program = stmt list

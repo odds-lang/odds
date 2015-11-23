@@ -42,17 +42,8 @@ let rec txt_of_expr = function
 
 (* Function declarations *)
 and txt_of_fdecl f =
-  "Fdecl({ " ^
-    "params=" ^ (txt_of_exprs f.params) ^
-    " ; body=" ^ (txt_of_stmts f.body) ^ 
-    " ; return=" ^ (txt_of_expr f.return) ^
-  " })"
-
-and txt_of_exprs exprs =
-  let rec aux acc = function
-    | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
-    | expr :: tl -> aux (txt_of_expr expr :: acc) tl
-  in aux [] exprs
+  sprintf "Fdecl({ params=[%s] ; body=%s ; return = %s })"
+    (String.concat " ; " f.params) (txt_of_stmts f.body) (txt_of_expr f.return)
 
 (* Lists *)
 and txt_of_list = function

@@ -49,7 +49,7 @@ type expr =
 
 (* Function Declarations *)
 and fdecl = {
-  params: expr list;    (* Parameters *)
+  params: string list;  (* Parameters *)
   body: stmt list;      (* Function Body *)
   return: expr;         (* Return *)
 }
