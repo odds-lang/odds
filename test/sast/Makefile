@@ -2,15 +2,15 @@
 #  - builds tand executes the semantic_analysis printer
 
 OCAMLC = ocamlc
-OBJS = ../../compiler/parser.cmo ../../compiler/scanner.cmo ../../compiler/analyzer.cmo
+OBJS = ../../compiler/parser.cmo ../../compiler/scanner.cmo ../../compiler/analyzer.cmo sast_printer.cmo
 INCLUDES = -I ../../compiler
 
-default: sast_print
+default: sast_printer
 
 all:
 	cd ..; make all
 
-sast_print: $(OBJS)
+sast_printer: $(OBJS)
 	$(OCAMLC) $(INCLUDES) -o sast_printer $(OBJS)
 
 %.cmo: %.ml

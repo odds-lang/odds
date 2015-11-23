@@ -46,7 +46,7 @@ let rec str_of_type = function
 and str_of_func f =
   let param_types = List.map str_of_type f.param_types and
     return_type = str_of_type f.return_type in
-  sprintf "func(%s) -> %s" (String.concat ", " param_types) return_type
+  sprintf "func(%s => %s)" (String.concat ", " param_types) return_type
 
 let str_of_unop = function
   | Not -> "!"      | Sub -> "-"
