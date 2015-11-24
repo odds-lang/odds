@@ -14,11 +14,7 @@ open Printf
 
 (* Utility Functions *)
 let tabs = ref 0
-
-let tab_str () = 
-  let rec gen_str str cur_tabs = 
-    if cur_tabs = 0 then str else gen_str ("  " ^ str) (cur_tabs - 1)
-  in gen_str "" !tabs
+let tab_str () = String.make (!tabs * 2) ' '
 
 (* Stringerizer *)
 let rec str_of_expr = function
