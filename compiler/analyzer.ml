@@ -62,39 +62,42 @@ let str_of_binop = function
   (*| And -> "&&"     | Or -> "||"*)
 
 (* Exceptions *)
+exception Semantic_Error of string
+
 let var_error name =
   let message = sprintf "Use of variable '%s' is undefined in current scope"
     name in
-  failwith message
+  raise (Semantic_Error message)
 
 let unop_error op t = 
   let message = sprintf "Invalid use of unary operator '%s' with type %s"
     (str_of_unop op) (str_of_type t) in
-  failwith message
+  raise (Semantic_Error message)
 
 let binop_error t1 op t2 = 
   let message =
     sprintf "Invalid use of binary operator '%s' with type %s and %s" 
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
-  failwith message
+  raise (Semantic_Error message)
 
 let fcall_error id f =
   let name = match id with
     | Sast.Id(name) -> name
-    | _ -> failwith "Sast.Call provided non-ID as first argument" in
+    | _ -> raise 
+        (Semantic_Error "Sast.Call provided non-ID as first argument") in
   let message = sprintf "Invalid call of function '%s' with type %s"
     name (str_of_func f) in
-  failwith message
+  raise (Semantic_Error message)
 
 let assign_error id typ =
   let message = sprintf "Invalid assignment of id %s to type %s"
     id (str_of_type typ) in
-  failwith message
+  raise (Semantic_Error message)
 
 let list_error list_type elem_type = 
   let message = sprintf "Invalid element of type %s in list of type %s"
     (str_of_type elem_type) (str_of_type list_type) in
-  failwith message
+  raise (Semantic_Error message)
 
 (* Static scoping variable counter *)
 let ss_counter = ref (-1)
@@ -214,7 +217,7 @@ and check_func_call env id args =
   let Sast.Expr(id, typ) = ew in
   let f = match typ with
     | Sast.Func(f) -> f
-    | _ -> failwith "Attempting to call a non-function" in
+    | _ -> raise (Semantic_Error "Attempting to call a non-function") in
   let args = check_func_call_args env' id f args in
   env', Sast.Expr(Sast.Call(ew, args), f.return_type)
 

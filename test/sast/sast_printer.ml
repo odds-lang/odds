@@ -73,8 +73,14 @@ and str_of_stmts sast =
   in aux [] sast
 
 let _ = 
-  let lexbuf = Lexing.from_channel stdin in 
-  let ast = Parser.program Scanner.token lexbuf in
-  let sast = Analyzer.check_ast ast in
-  let sast_str = str_of_stmts sast in
-  print_endline sast_str
+  try 
+    let lexbuf = Lexing.from_channel stdin in 
+    let ast = Parser.program Scanner.token lexbuf in
+    let sast = Analyzer.check_ast ast in
+    let sast_str = str_of_stmts sast in
+    print_endline sast_str
+  with 
+    | Scanner.Illegal_Character(m) -> 
+        eprintf "Exception raised in Scanner:\n  %s\n\n" m
+    | Analyzer.Semantic_Error(m) ->
+        eprintf "Exception raised in Analyzer:\n  %s\n\n" m
