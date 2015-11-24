@@ -86,6 +86,11 @@ let fcall_error id f =
     name (str_of_func f) in
   failwith message
 
+let assign_error id typ =
+  let message = sprintf "Invalid assignment of id %s to type %s"
+    id (str_of_type typ) in
+  failwith message
+
 let list_error list_type elem_type = 
   let message = sprintf "Invalid element of type %s in list of type %s"
     (str_of_type elem_type) (str_of_type list_type) in
@@ -229,6 +234,7 @@ and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
   | _ as ew -> let env', ew' = check_expr env ew in
       let Sast.Expr(_, typ) = ew' in
+      if typ = Void then assign_error id Void else
       let env', name = add_to_scope env' id typ in
       env', Sast.Expr(Sast.Assign(name, ew'), typ)
 
