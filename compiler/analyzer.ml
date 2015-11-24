@@ -258,6 +258,7 @@ and check_fdecl env id f =
     body = body;
     return = return;
   } in
+  (* TO DO: RAISE ERROR IF FUNCTION RETURN TYPE IS UNCONSTRAINED *)
   let param_types = 
     List.map (fun name -> (VarMap.find name func_env.scope).s_type) f.params in
   let f_type = { param_types = param_types; return_type = ret_type } in
