@@ -13,6 +13,12 @@ open Analyzer
 open Printf
 
 (* Utility Functions *)
+let tabs = ref 0
+
+let tab_str () = 
+  let rec gen_str str cur_tabs = 
+    if cur_tabs = 0 then str else gen_str ("  " ^ str) (cur_tabs - 1)
+  in gen_str "" !tabs
 
 (* Stringerizer *)
 let rec str_of_expr = function
@@ -44,10 +50,13 @@ let rec str_of_expr = function
       let l_txt = str_of_wrapped_expr_list we_list in
       sprintf "[%s]" l_txt
   | Fdecl(fdecl) -> 
+      tabs := !tabs + 1;
       let params_txt = String.concat ", " fdecl.params and
         body_txt = str_of_stmts fdecl.body and
         return_txt = str_of_wrapped_expr fdecl.return in
-      sprintf "(%s) ->\n%s  return %s\n" params_txt body_txt return_txt
+      let f_str = sprintf "(%s) ->\n%s%sreturn %s\n" params_txt body_txt 
+        (tab_str ()) return_txt in
+      tabs := !tabs - 1; f_str
 
 and str_of_wrapped_expr_list l = 
   String.concat ", " (List.map str_of_wrapped_expr l)
@@ -59,7 +68,7 @@ and str_of_wrapped_expr = function
 
 and str_of_stmt = function
   | Sast.Do(wrapped_expr) -> 
-      sprintf "do %s" (str_of_wrapped_expr wrapped_expr)
+      sprintf "%sdo %s" (tab_str ()) (str_of_wrapped_expr wrapped_expr)
 
 and str_of_stmts sast = 
   let rec aux acc = function

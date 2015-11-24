@@ -36,18 +36,18 @@ let root_env = {
 
 (* Utilities *)
 let rec str_of_type = function
-  | Num -> "num"
-  | String -> "string"
-  | Bool -> "bool"
-  | Void -> "void"
-  | List(l) -> sprintf "list[%s]" (str_of_type l)
+  | Num -> "Num"
+  | String -> "String"
+  | Bool -> "Bool"
+  | Void -> "Void"
+  | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
   | Unconst -> "Unconst"
 
 and str_of_func f =
   let param_types = List.map str_of_type f.param_types and
     return_type = str_of_type f.return_type in
-  sprintf "func(%s => %s)" (String.concat ", " param_types) return_type
+  sprintf "Func(%s => %s)" (String.concat ", " param_types) return_type
 
 let str_of_unop = function
   | Not -> "!"      | Sub -> "-"
