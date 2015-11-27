@@ -16,22 +16,21 @@ module VarMap = Map.Make(String)
 
 (* Environment *)
 type environment = {
-  reserved: Sast.var list;
+  locals: Sast.var VarMap.t;
   scope: Sast.var VarMap.t;
 }
 
-let builtins = [
-  { name = "EUL"; s_type = Num; };
-  { name = "PI"; s_type = Num; };
-  {
-    name = "print";
-    s_type = Func({ param_types = [Unconst]; return_type = Void; });
-  };
-]
+let builtins = VarMap.empty
+let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; } builtins
+let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; } builtins
+let builtins = VarMap.add "print" {
+  name = "print";
+  s_type = Func({ param_types = [Unconst]; return_type = Void; });
+} builtins
 
 let root_env = {
-  reserved = builtins;
-  scope = VarMap.empty;
+  locals = VarMap.empty;
+  scope = builtins;
 }
 
 (* Utilities *)
@@ -64,10 +63,9 @@ let str_of_binop = function
 (* Exceptions *)
 exception Semantic_Error of string
 
-let var_error name =
-  let message = sprintf "Use of variable '%s' is undefined in current scope"
-    name in
-  raise (Semantic_Error message)
+let var_error id =
+  let message = sprintf "Use of variable '%s' is undefined in current scope" id
+  in raise (Semantic_Error message)
 
 let unop_error op t = 
   let message = sprintf "Invalid use of unary operator '%s' with type %s"
@@ -99,6 +97,11 @@ let list_error list_type elem_type =
     (str_of_type elem_type) (str_of_type list_type) in
   raise (Semantic_Error message)
 
+let fdecl_unconst_error id =
+  let message = sprintf
+    "Invalid declaration of function '%s' with unconstrained return value" id in
+  raise (Semantic_Error message)
+
 (* Static scoping variable counter *)
 let ss_counter = ref (-1)
 let get_ss_id name =
@@ -109,15 +112,24 @@ let add_to_scope env id s_type =
   let ss_id = get_ss_id id in
   let var = { name = ss_id; s_type = s_type } in
   let env' = {
-    reserved = env.reserved;
+    locals = env.locals;
     scope = VarMap.add id var env.scope;
+  } in
+  env', ss_id
+
+let add_to_local env id s_type =
+  let ss_id = get_ss_id id in 
+  let var = { name = ss_id; s_type = s_type } in
+  let env' = {
+    locals = VarMap.add id var env.locals;
+    scope = VarMap.remove id env.scope;
   } in
   env', ss_id
 
 (* Type Inference/Type Constraints *)
 (* This function looks to see if any of the constraints applied in the
  * child should be applied to any of the variables in the parent env *)
-let add_constraints child_env parent_env =  
+(*let add_constraints child_env parent_env =  
   let c_scope = child_env.scope and p_scope = parent_env.scope in
   let add_constraint raw_id p_var = 
     if p_var.s_type = Sast.Unconst then
@@ -134,7 +146,7 @@ let add_constraints child_env parent_env =
           "constrained var with raw id: %s, ss_id: %s, type: %s\n"
           raw_id p_var.name (str_of_type p_var.s_type) in
       print_string message in
-  VarMap.iter debugger p_scope; { parent_env with scope = p_scope }
+  VarMap.iter debugger p_scope; { parent_env with scope = p_scope }*)
 
 
 (* Checks *)
@@ -154,13 +166,13 @@ let rec check_expr env = function
 and check_id env id =
   let var =
     if VarMap.mem id env.scope then VarMap.find id env.scope else
-    try List.find (fun var -> id = var.name) env.reserved
-    with Not_found -> var_error id in
+    if VarMap.mem id env.locals then VarMap.find id env.locals else
+    var_error id in
   env, Sast.Expr(Sast.Id(var.name), var.s_type)
 
 and check_unop env op e =
   let env', ew = check_expr env e in
-  let Sast.Expr(e, typ) = ew in
+  let Sast.Expr(_, typ) = ew in
   match op with
     | Not -> begin match typ with
       | Bool -> env', Sast.Expr(Sast.Unop(op, ew), Bool)
@@ -177,9 +189,9 @@ and check_unop env op e =
 
 and check_binop env e1 op e2 =
   let env', ew1 = check_expr env e1 in
-  let Sast.Expr(e1, typ1) = ew1 in
+  let Sast.Expr(_, typ1) = ew1 in
   let env', ew2 = check_expr env' e2 in
-  let Sast.Expr(e2, typ2) = ew2 in
+  let Sast.Expr(_, typ2) = ew2 in
   match op with
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
       let is_num = function
@@ -197,7 +209,7 @@ and check_binop env e1 op e2 =
     | Eq | Neq -> 
       let is_valid_equality = function
         | Num | Bool | String -> true
-        (* NO CONSTRAINING CAN BE DONE ON OVERLOADED EQUALITY OPERATOR *)
+        (* No constraining can be done on overloaded equality operator *)
         | _ -> false in 
       if is_valid_equality typ1 && is_valid_equality typ2 then 
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
@@ -225,8 +237,8 @@ and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then fcall_error id f else
   let rec aux acc param_types = function
     | [] -> List.rev acc
-    | (Sast.Expr(e, typ) as ew) :: tl -> let const = List.hd param_types in
-      (* TODO: constrain types if possible *)
+    | (Sast.Expr(_, typ) as ew) :: tl -> let const = List.hd param_types in
+      (* TODO: constrain types if possible within function? *)
       if (typ = const || const = Unconst) then
         aux (ew :: acc) (List.tl param_types) tl
       else fcall_error id f in
@@ -261,22 +273,23 @@ and check_fdecl env id f =
   let func_env, body = check_stmts func_env f.body in
   let func_env, return = check_expr func_env f.return in
   let Sast.Expr(_, ret_type) = return in
+  if ret_type = Unconst then fdecl_unconst_error id else
   let fdecl = {
     fname = name;
     params = param_ids;
     body = body;
     return = return;
   } in
-  (* TO DO: RAISE ERROR IF FUNCTION RETURN TYPE IS UNCONSTRAINED *)
   let param_types = 
     List.map (fun name -> (VarMap.find name func_env.scope).s_type) f.params in
   let f_type = { param_types = param_types; return_type = ret_type } in
+  (* TODO: update function type in env' to be f_type *)
   env', Sast.Expr(Sast.Fdecl(fdecl), Func(f_type))
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
     | [] -> env, List.rev acc
-    | param :: tl -> let env', name = add_to_scope env param Unconst in
+    | param :: tl -> let env', name = add_to_local env param Unconst in
         aux env' (name :: acc) tl
   in aux env [] param_list
 
