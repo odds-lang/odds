@@ -252,14 +252,16 @@ and check_unop env op e =
   match op with
     | Not -> begin match typ with
       | Bool -> env', Sast.Expr(Sast.Unop(op, ew), Bool)
-      (* constrain types here *)
-      | Unconst -> env', Sast.Expr(Sast.Unop(op, ew), Bool)
+      (* Attempt to constrain variable type of ew to Bool *)
+      | Unconst -> let env', ew' = constrain_ssid env' ew Bool in
+          env', Sast.Expr(Sast.Unop(op, ew'), Bool)
       | _ as t -> unop_error op t
     end
     | Sub -> begin match typ with
       | Num -> env', Sast.Expr(Sast.Unop(op, ew), Num)
-      (* constrain types here *)
-      | Unconst -> env', Sast.Expr(Sast.Unop(op, ew), Num)
+      (* Attempt to constrain variable type of ew to Num *)
+      | Unconst -> let env', ew' = constrain_ssid env' ew Num in
+          env', Sast.Expr(Sast.Unop(op, ew'), Num)
       | _ as t -> unop_error op t
     end
 
