@@ -87,8 +87,16 @@ let print_env env =
 
 exception Semantic_Error of string
 
+(* 
+ * Utility function for error reporting. Slices of the static scoping number
+ * and underscore from the end of and ss_id.
+ *)
+let slice_off_ssid id = 
+  let len_upto_ssid = String.rindex id '_' in
+  String.sub id 0 len_upto_ssid
+
 let var_error id =
-  let message = sprintf "Use of variable '%s' is undefined in current scope" id
+  let message = sprintf "Variable '%s' is undefined in current scope" id
   in raise (Semantic_Error message)
 
 let unop_error op t = 
@@ -104,15 +112,26 @@ let binop_error t1 op t2 =
 
 let fcall_error id f =
   let name = match id with
-    | Sast.Id(name) -> name
+    | Sast.Id(name) -> slice_off_ssid name
     | _ -> raise 
         (Semantic_Error "Sast.Call provided non-ID as first argument") in
   let message = sprintf "Invalid call of function '%s' with type %s"
     name (str_of_func f) in
   raise (Semantic_Error message)
 
+let attempt_to_call_non_function_error id typ =
+  let id = match id with
+    | Sast.Id(id) -> slice_off_ssid id
+    (* TO DO: Update this message *)
+    | _ -> raise
+        (Semantic_Error "Analyzer.check_func_call provided non-ID as first argument") in
+  let message = 
+    sprintf "Attempting to call a non-function: %s is not a function; %s has type %s" 
+      id id (str_of_type typ) in
+  raise (Semantic_Error message)
+
 let assign_error id typ =
-  let message = sprintf "Invalid assignment of id %s to type %s"
+  let message = sprintf "Invalid assignment of id '%s' to type %s"
     id (str_of_type typ) in
   raise (Semantic_Error message)
 
@@ -317,7 +336,7 @@ and check_func_call env id args =
   let Sast.Expr(id, typ) = ew in
   let f = match typ with
     | Sast.Func(f) -> f
-    | _ -> raise (Semantic_Error "Attempting to call a non-function") in
+    | _ -> attempt_to_call_non_function_error id typ in
   let args = check_func_call_args env' id f args in
   env', Sast.Expr(Sast.Call(ew, args), f.return_type)
 
