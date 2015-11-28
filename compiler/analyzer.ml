@@ -135,13 +135,18 @@ let fdecl_unconst_error id =
 let ss_counter = ref (-1)
 
 (* Given a string x, get a unique id x_# to use as the next variable *)
-let get_ss_id name =
+let get_ssid name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
 
+(* Given an ssid my_var_#, return the original key ID my_var *)
+let id_of_ssid ssid =
+  let id_len = String.rindex ssid '_' in
+  String.sub ssid 0 id_len
+
 (* Add 'id' with type 's_type' to the environment scope *)
 let add_to_scope env id s_type =
-  let ss_id = get_ss_id id in
+  let ss_id = get_ssid id in
   let var = { name = ss_id; s_type = s_type } in
   let env' = {
     params = env.params;
@@ -152,9 +157,9 @@ let add_to_scope env id s_type =
 (*
  * Add param with 'id' and type Unconst to the environment params, erasing it
  * from the environment scope
-*)
+ *)
 let add_to_params env id =
-  let ss_id = get_ss_id id in 
+  let ss_id = get_ssid id in 
   let var = { name = ss_id; s_type = Unconst } in
   let env' = {
     params = VarMap.add id var env.params;
@@ -167,11 +172,29 @@ let add_to_params env id =
  * Type inference and constraining
  ***********************************)
 
-(* Update the type for given key 'id' in env *)
-let update_type env id typ =
+(* Update the type for given id corresponding to given 'ssid' in env *)
+let update_type env ssid typ =
+  let id = id_of_ssid ssid in
   if VarMap.mem id env.scope then (VarMap.find id env.scope).s_type <- typ else
   if VarMap.mem id env.params then (VarMap.find id env.params).s_type <- typ
   else var_error id
+
+(* 
+ * Attempt to constrain an ID in an expression one level down. E.g. !x would
+ * constrain x to a boolean and x + y would constrain both x and y to integers,
+ * but !(x == y) would not constrain either variable.
+ *
+ * Takes the current environment, type to constrain, and an expression wrapper
+ * in which to search for an ID. Returns the newly constrained environment and
+ * expression wrapper on success, or their old values on failure.
+ *)
+let constrain_ssid env ew typ =
+  let Sast.Expr(e, _) = ew in
+  match e with
+    | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
+    | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
+    | _ -> env, ew
+
 
 (* Type Inference/Type Constraints *)
 (* This function looks to see if any of the constraints applied in the
@@ -330,7 +353,7 @@ and check_fdecl env id f =
   let env', name = add_to_scope env id Unconst in
 
   (* Evaluate parameters, body, and return statement in local environment *)
-  let func_env, param_ids = check_fdecl_params env' f.params in
+  let func_env, param_ssids = check_fdecl_params env' f.params in
   let func_env, body = check_stmts func_env f.body in
   let func_env, return = check_expr func_env f.return in
   let Sast.Expr(_, ret_type) = return in
@@ -339,19 +362,22 @@ and check_fdecl env id f =
   (* Construct function declaration *)
   let fdecl = {
     fname = name;
-    params = param_ids;
+    params = param_ssids;
     body = body;
     return = return;
   } in
 
   (* Evaluate parameter and function types *)
   let param_types = 
-    List.map (fun name -> (VarMap.find name func_env.params).s_type) f.params in
+    let type_of_param ssid =
+      let var = VarMap.find (id_of_ssid ssid) func_env.params in
+      var.s_type in
+    List.map type_of_param param_ssids in
   let f_type = Func({ param_types = param_types; return_type = ret_type }) in
   
-  (* Update function type in environment and return expression *)
-  let _ = update_type env' id f_type in
-  env', Sast.Expr(Sast.Fdecl(fdecl), f_type)
+  (* Update function type in environment and return expression wrapper *)
+  let old_ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
+  constrain_ssid env' old_ew f_type
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
