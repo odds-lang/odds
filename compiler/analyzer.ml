@@ -142,6 +142,11 @@ let fdecl_unconst_error id =
     "Invalid declaration of function '%s' with unconstrained return value" id in
   raise (Semantic_Error message)
 
+let constrain_error old_type const =
+  let message = sprintf "Invalid attempt to change unconstrained type %s to %s"
+    (str_of_type old_type) (str_of_type const) in
+  raise (Semantic_Error message)
+
 
 (********************
  * Scoping
@@ -200,7 +205,8 @@ let update_type env ssid typ =
  * expression wrapper on success, or their old values on failure.
  *)
 let constrain_ew env ew typ =
-  let Sast.Expr(e, _) = ew in
+  let Sast.Expr(e, old_typ) = ew in
+  if old_typ <> Unconst then constrain_error old_typ typ else
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
@@ -290,6 +296,8 @@ and check_binop env e1 op e2 =
   let env', ew2 = check_expr env' e2 in
   let Sast.Expr(_, typ2) = ew2 in
   match op with
+    
+    (* Numeric operations *)
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
       let is_num = function
         | Num | Unconst -> true
@@ -304,14 +312,16 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Num in
         env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
+
+    (* Equality operations - overloaded, no constraining can be done *)
     | Eq | Neq -> 
       let is_valid_equality = function
-        | Num | Bool | String -> true
-        (* No constraining can be done on overloaded equality operator *)
+        | Num | Bool | String | Unconst -> true
         | _ -> false in 
       if is_valid_equality typ1 && is_valid_equality typ2 then 
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
+
     (*| And | Or ->
       let is_bool = function
         | Bool -> true
@@ -378,6 +388,8 @@ and check_fdecl env id f =
   let func_env, body = check_stmts func_env f.body in
   let func_env, return = check_expr func_env f.return in
   let Sast.Expr(_, ret_type) = return in
+
+  (* Unconstrained function return types are not allowed *)
   if ret_type = Unconst then fdecl_unconst_error id else
 
   (* Construct function declaration *)
