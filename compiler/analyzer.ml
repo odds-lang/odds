@@ -188,7 +188,7 @@ let update_type env ssid typ =
  * in which to search for an ID. Returns the newly constrained environment and
  * expression wrapper on success, or their old values on failure.
  *)
-let constrain_ssid env ew typ =
+let constrain_ew env ew typ =
   let Sast.Expr(e, _) = ew in
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
@@ -253,14 +253,14 @@ and check_unop env op e =
     | Not -> begin match typ with
       | Bool -> env', Sast.Expr(Sast.Unop(op, ew), Bool)
       (* Attempt to constrain variable type of ew to Bool *)
-      | Unconst -> let env', ew' = constrain_ssid env' ew Bool in
+      | Unconst -> let env', ew' = constrain_ew env' ew Bool in
           env', Sast.Expr(Sast.Unop(op, ew'), Bool)
       | _ as t -> unop_error op t
     end
     | Sub -> begin match typ with
       | Num -> env', Sast.Expr(Sast.Unop(op, ew), Num)
       (* Attempt to constrain variable type of ew to Num *)
-      | Unconst -> let env', ew' = constrain_ssid env' ew Num in
+      | Unconst -> let env', ew' = constrain_ew env' ew Num in
           env', Sast.Expr(Sast.Unop(op, ew'), Num)
       | _ as t -> unop_error op t
     end
@@ -378,8 +378,8 @@ and check_fdecl env id f =
   let f_type = Func({ param_types = param_types; return_type = ret_type }) in
   
   (* Update function type in environment and return expression wrapper *)
-  let old_ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
-  constrain_ssid env' old_ew f_type
+  let ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
+  constrain_ew env' ew f_type
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
