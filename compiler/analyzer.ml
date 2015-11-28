@@ -12,11 +12,15 @@ open Ast
 open Sast
 open Printf
 
+
+(********************
+ * Environment
+ ********************)
+
 module VarMap = Map.Make(String)
 
-(* Environment *)
 type environment = {
-  locals: Sast.var VarMap.t;
+  params: Sast.var VarMap.t;
   scope: Sast.var VarMap.t;
 }
 
@@ -29,11 +33,15 @@ let builtins = VarMap.add "print" {
 } builtins
 
 let root_env = {
-  locals = VarMap.empty;
+  params = VarMap.empty;
   scope = builtins;
 }
 
-(* Utilities *)
+
+(********************
+ * Utilities
+ ********************)
+
 let rec str_of_type = function
   | Num -> "Num"
   | String -> "String"
@@ -60,7 +68,23 @@ let str_of_binop = function
   | Greater -> ">"  | Geq -> ">="
   (*| And -> "&&"     | Or -> "||"*)
 
-(* Exceptions *)
+let print_env env =
+  let print_var id var =
+    let line = sprintf "\t%s --> { name: %s; s_type: %s; }"
+    id var.name (str_of_type var.s_type) in
+    print_endline line in
+  let str_of_varmap name vm =
+    let header = sprintf "%s:" name in
+    print_endline header; VarMap.iter print_var vm in
+  print_endline "";
+  str_of_varmap "env params" env.params;
+  str_of_varmap "env scope" env.scope
+
+
+(********************
+ * Exceptions
+ ********************)
+
 exception Semantic_Error of string
 
 let var_error id =
@@ -102,29 +126,52 @@ let fdecl_unconst_error id =
     "Invalid declaration of function '%s' with unconstrained return value" id in
   raise (Semantic_Error message)
 
-(* Static scoping variable counter *)
+
+(********************
+ * Scoping
+ ********************)
+
+(* Variable counter to prevent naming conflicts *)
 let ss_counter = ref (-1)
+
+(* Given a string x, get a unique id x_# to use as the next variable *)
 let get_ss_id name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
 
+(* Add 'id' with type 's_type' to the environment scope *)
 let add_to_scope env id s_type =
   let ss_id = get_ss_id id in
   let var = { name = ss_id; s_type = s_type } in
   let env' = {
-    locals = env.locals;
+    params = env.params;
     scope = VarMap.add id var env.scope;
   } in
   env', ss_id
 
-let add_to_local env id s_type =
+(*
+ * Add param with 'id' and type Unconst to the environment params, erasing it
+ * from the environment scope
+*)
+let add_to_params env id =
   let ss_id = get_ss_id id in 
-  let var = { name = ss_id; s_type = s_type } in
+  let var = { name = ss_id; s_type = Unconst } in
   let env' = {
-    locals = VarMap.add id var env.locals;
+    params = VarMap.add id var env.params;
     scope = VarMap.remove id env.scope;
   } in
   env', ss_id
+
+
+(***********************************
+ * Type inference and constraining
+ ***********************************)
+
+(* Update the type for given key 'id' in env *)
+let update_type env id typ =
+  if VarMap.mem id env.scope then (VarMap.find id env.scope).s_type <- typ else
+  if VarMap.mem id env.params then (VarMap.find id env.params).s_type <- typ
+  else var_error id
 
 (* Type Inference/Type Constraints *)
 (* This function looks to see if any of the constraints applied in the
@@ -149,7 +196,11 @@ let add_to_local env id s_type =
   VarMap.iter debugger p_scope; { parent_env with scope = p_scope }*)
 
 
-(* Checks *)
+(************************************************
+ * Semantic checking and tree SAST construction
+ ************************************************)
+
+(* Branching point *)
 let rec check_expr env = function
   | Ast.Num_lit(x) -> env, Sast.Expr(Sast.Num_lit(x), Num)
   | Ast.String_lit(s) -> env, Sast.Expr(Sast.String_lit(s), String)
@@ -163,13 +214,15 @@ let rec check_expr env = function
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f
 
+(* Find string key 'id' in the environment if it exists *)
 and check_id env id =
   let var =
     if VarMap.mem id env.scope then VarMap.find id env.scope else
-    if VarMap.mem id env.locals then VarMap.find id env.locals else
+    if VarMap.mem id env.params then VarMap.find id env.params else
     var_error id in
   env, Sast.Expr(Sast.Id(var.name), var.s_type)
 
+(* Unary operators *)
 and check_unop env op e =
   let env', ew = check_expr env e in
   let Sast.Expr(_, typ) = ew in
@@ -180,13 +233,14 @@ and check_unop env op e =
       | Unconst -> env', Sast.Expr(Sast.Unop(op, ew), Bool)
       | _ as t -> unop_error op t
     end
-    | Sub -> begin match typ with 
+    | Sub -> begin match typ with
       | Num -> env', Sast.Expr(Sast.Unop(op, ew), Num)
       (* constrain types here *)
       | Unconst -> env', Sast.Expr(Sast.Unop(op, ew), Num)
       | _ as t -> unop_error op t
     end
 
+(* Binary operators *)
 and check_binop env e1 op e2 =
   let env', ew1 = check_expr env e1 in
   let Sast.Expr(_, typ1) = ew1 in
@@ -224,6 +278,7 @@ and check_binop env e1 op e2 =
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2*)
 
+(* Function calling *)
 and check_func_call env id args =
   let env', ew = check_expr env id in
   let Sast.Expr(id, typ) = ew in
@@ -245,6 +300,7 @@ and check_func_call_args env id f args =
   (* TODO: don't throw away env from args here *)
   aux [] f.param_types (List.map (fun e -> snd(check_expr env e)) args)
 
+(* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
   | _ as ew -> let env', ew' = check_expr env ew in
@@ -253,11 +309,12 @@ and check_assign env id = function
       let env', name = add_to_scope env' id typ in
       env', Sast.Expr(Sast.Assign(name, ew'), typ)
 
+(* Lists *)
 and check_list env l =
   if List.length l = 0 then env, Sast.Expr(Sast.List([]), List(Unconst)) else
   let rec aux acc const = function
     | [] -> Sast.Expr(Sast.List(List.rev acc), List(const))
-    | (Sast.Expr(e, typ) as ew) :: tl ->
+    | (Sast.Expr(_, typ) as ew) :: tl ->
       (* TODO: constrain type to const *)
       if typ = const || const = Unconst then
         aux (ew :: acc) const tl
@@ -267,32 +324,43 @@ and check_list env l =
   let Sast.Expr(_, const) = List.hd ew_list in
   env, aux [] const ew_list
 
+(* Function declaration *)
 and check_fdecl env id f =
+  (* Add function name to scope to allow recursion *)
   let env', name = add_to_scope env id Unconst in
+
+  (* Evaluate parameters, body, and return statement in local environment *)
   let func_env, param_ids = check_fdecl_params env' f.params in
   let func_env, body = check_stmts func_env f.body in
   let func_env, return = check_expr func_env f.return in
   let Sast.Expr(_, ret_type) = return in
   if ret_type = Unconst then fdecl_unconst_error id else
+
+  (* Construct function declaration *)
   let fdecl = {
     fname = name;
     params = param_ids;
     body = body;
     return = return;
   } in
+
+  (* Evaluate parameter and function types *)
   let param_types = 
-    List.map (fun name -> (VarMap.find name func_env.scope).s_type) f.params in
-  let f_type = { param_types = param_types; return_type = ret_type } in
-  (* TODO: update function type in env' to be f_type *)
-  env', Sast.Expr(Sast.Fdecl(fdecl), Func(f_type))
+    List.map (fun name -> (VarMap.find name func_env.params).s_type) f.params in
+  let f_type = Func({ param_types = param_types; return_type = ret_type }) in
+  
+  (* Update function type in environment and return expression *)
+  let _ = update_type env' id f_type in
+  env', Sast.Expr(Sast.Fdecl(fdecl), f_type)
 
 and check_fdecl_params env param_list =
   let rec aux env acc = function
     | [] -> env, List.rev acc
-    | param :: tl -> let env', name = add_to_local env param Unconst in
+    | param :: tl -> let env', name = add_to_params env param in
         aux env' (name :: acc) tl
   in aux env [] param_list
 
+(* Statements *)
 and check_stmt env = function
   | Ast.Do(e) -> let env', ew = check_expr env e in env', Sast.Do(ew)
 
@@ -303,5 +371,6 @@ and check_stmts env stmt_list =
         aux env' (e :: acc) tl
   in aux env [] stmt_list
 
+(* Program entry point *)
 let check_ast ast = 
   let _, sast = check_stmts root_env ast in sast
