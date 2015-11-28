@@ -12,7 +12,6 @@ open Ast
 open Sast
 open Printf
 
-
 (********************
  * Environment
  ********************)
@@ -41,6 +40,11 @@ let root_env = {
 (********************
  * Utilities
  ********************)
+
+(* Given an ssid my_var_#, return the original key ID my_var *)
+let id_of_ssid ssid =
+  let id_len = String.rindex ssid '_' in
+  String.sub ssid 0 id_len
 
 let rec str_of_type = function
   | Num -> "Num"
@@ -87,14 +91,6 @@ let print_env env =
 
 exception Semantic_Error of string
 
-(* 
- * Utility function for error reporting. Slices of the static scoping number
- * and underscore from the end of and ss_id.
- *)
-let slice_off_ssid id = 
-  let len_upto_ssid = String.rindex id '_' in
-  String.sub id 0 len_upto_ssid
-
 let var_error id =
   let message = sprintf "Variable '%s' is undefined in current scope" id
   in raise (Semantic_Error message)
@@ -112,22 +108,23 @@ let binop_error t1 op t2 =
 
 let fcall_error id f =
   let name = match id with
-    | Sast.Id(name) -> slice_off_ssid name
+    | Sast.Id(name) -> id_of_ssid name
     | _ -> raise 
         (Semantic_Error "Sast.Call provided non-ID as first argument") in
   let message = sprintf "Invalid call of function '%s' with type %s"
     name (str_of_func f) in
   raise (Semantic_Error message)
 
-let attempt_to_call_non_function_error id typ =
+let fcall_nonfunction_error id typ =
   let id = match id with
-    | Sast.Id(id) -> slice_off_ssid id
+    | Sast.Id(id) -> id_of_ssid id
     (* TO DO: Update this message *)
-    | _ -> raise
-        (Semantic_Error "Analyzer.check_func_call provided non-ID as first argument") in
-  let message = 
-    sprintf "Attempting to call a non-function: %s is not a function; %s has type %s" 
-      id id (str_of_type typ) in
+    | _ -> let message = 
+      "Analyzer.check_func_call provided non-ID as first argument" in
+      raise (Semantic_Error message) in
+  let message = sprintf 
+    "Attempting to call a non-function: %s is not a function; %s has type %s" 
+    id id (str_of_type typ) in
   raise (Semantic_Error message)
 
 let assign_error id typ =
@@ -157,11 +154,6 @@ let ss_counter = ref (-1)
 let get_ssid name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
-
-(* Given an ssid my_var_#, return the original key ID my_var *)
-let id_of_ssid ssid =
-  let id_len = String.rindex ssid '_' in
-  String.sub ssid 0 id_len
 
 (* Add 'id' with type 's_type' to the environment scope *)
 let add_to_scope env id s_type =
@@ -336,7 +328,7 @@ and check_func_call env id args =
   let Sast.Expr(id, typ) = ew in
   let f = match typ with
     | Sast.Func(f) -> f
-    | _ -> attempt_to_call_non_function_error id typ in
+    | _ -> fcall_nonfunction_error id typ in
   let args = check_func_call_args env' id f args in
   env', Sast.Expr(Sast.Call(ew, args), f.return_type)
 
