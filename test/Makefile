@@ -10,7 +10,7 @@ all:
 test: build
 	./scanner_test.sh
 	./parser_test.sh
-	./compiler_test.sh
+	./pass_test.sh
 	./fail_test.sh
 
 build:

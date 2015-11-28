@@ -65,7 +65,7 @@ rule token = parse
 
 (* End-of-File *)
 | eof { EOF }
-| _ as c { raise (Failure("illegal character " ^ Char.escaped c)) }
+| _ as c { failwith("illegal character " ^ Char.escaped c) }
 
 and comment = parse
 | "*/"    { token lexbuf }

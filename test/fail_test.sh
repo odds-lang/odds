@@ -7,7 +7,7 @@ RED='\033[0;31m'
 
 INPUT_FILES="compiler/fail/*.ods"
 TMP_FILE="temp.py"
-printf "${CYAN}Running compiler tests...\n${NC}"
+printf "${CYAN}Running compiler 'fail' tests...\n${NC}"
 
 for input_file in $INPUT_FILES; do
     expected_error_file=${input_file/.ods/.out}

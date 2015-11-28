@@ -1,7 +1,0 @@
-do 42
-do 42.1
-do "forty-two"
-
-do print(42)
-do print(42.1)
-do print("forty-two")
