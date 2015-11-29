@@ -342,20 +342,20 @@ and check_func_call env id args =
   let f = match typ with
     | Sast.Func(f) -> f
     | _ -> fcall_nonfunction_error id typ in
-  let args = check_func_call_args env' id f args in
+  let env', args = check_func_call_args env' id f args in
   env', Sast.Expr(Sast.Call(ew, args), f.return_type)
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then fcall_error id f else
-  let rec aux acc param_types = function
-    | [] -> List.rev acc
-    | (Sast.Expr(_, typ) as ew) :: tl -> let const = List.hd param_types in
-      (* TODO: constrain types if possible within function? *)
-      if (typ = const || const = Unconst) then
-        aux (ew :: acc) (List.tl param_types) tl
+  let rec aux env acc param_types = function
+    | [] -> env, List.rev acc
+    | e :: tl -> let env', ew = check_expr env e in
+      let Sast.Expr(_, typ) = ew in
+      let const = List.hd param_types in
+      if typ = const || const = Unconst then
+        aux env' (ew :: acc) (List.tl param_types) tl
       else fcall_error id f in
-  (* TODO: don't throw away env from args here *)
-  aux [] f.param_types (List.map (fun e -> snd(check_expr env e)) args)
+  aux env [] f.param_types args
 
 (* Assignment *)
 and check_assign env id = function
