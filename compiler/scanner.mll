@@ -11,6 +11,8 @@
 { 
   open Ast
   open Parser
+
+  exception Illegal_Character of string
 }
 
 let numeric = ['0'-'9']
@@ -69,6 +71,12 @@ rule token = parse
 
 (* Identifiers *)
 | ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | numeric)* as lxm { ID(lxm) }
+
+(* Invalid Token *)
+| _ as char { 
+    let message = "Illegal Character '" ^ Char.escaped char ^ "'" in
+    raise (Illegal_Character message)
+  }
 
 and comment = parse
 | "*/"    { token lexbuf }

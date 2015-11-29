@@ -30,6 +30,7 @@ let rec txt_of_expr = function
   | Num_lit(x) -> sprintf "Num_lit(%s)" (txt_of_num x)
   | String_lit(x) -> sprintf "String_lit(%s)" x
   | Bool_lit(x) -> sprintf "Bool_lit(%s)" (string_of_bool x)
+  | Void_lit -> "Void_lit"
   | Id(x) -> sprintf "Id(%s)" x
   | Unop(op, e) -> sprintf "Unop(%s, %s)" (txt_of_unop op) (txt_of_expr e)
   | Binop(e1, op, e2) -> sprintf "Binop(%s, %s, %s)"
@@ -42,17 +43,8 @@ let rec txt_of_expr = function
 
 (* Function declarations *)
 and txt_of_fdecl f =
-  "Fdecl({ " ^
-    "params=" ^ (txt_of_exprs f.params) ^
-    " ; body=" ^ (txt_of_stmts f.body) ^ 
-    " ; return=" ^ (txt_of_expr f.return) ^
-  " })"
-
-and txt_of_exprs exprs =
-  let rec aux acc = function
-    | [] -> sprintf "[%s]" (String.concat " ; " (List.rev acc))
-    | expr :: tl -> aux (txt_of_expr expr :: acc) tl
-  in aux [] exprs
+  sprintf "Fdecl({ params=[%s] ; body=%s ; return = %s })"
+    (String.concat " ; " f.params) (txt_of_stmts f.body) (txt_of_expr f.return)
 
 (* Lists *)
 and txt_of_list = function

@@ -1,10 +1,10 @@
 # Odds: compiler Makefile
 #  - builds and manages all compiler components
 
-OCAMLC=ocamlc
-OCAMLLEX=ocamllex
-OCAMLYACC=ocamlyacc
-OBJS=parser.cmo scanner.cmo analyzer.cmo generator.cmo odds.cmo
+OCAMLC = ocamlc
+OCAMLLEX = ocamllex
+OCAMLYACC = ocamlyacc
+OBJS = parser.cmo scanner.cmo analyzer.cmo generator.cmo odds.cmo
 
 default: odds
 
