@@ -206,10 +206,13 @@ let update_type env ssid typ =
  *)
 let constrain_ew env ew typ =
   let Sast.Expr(e, old_typ) = ew in
-  if old_typ <> Unconst then constrain_error old_typ typ else
   match e with
-    | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
-    | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
+    | Sast.Id(ssid) -> 
+        if old_typ <> Unconst then constrain_error old_typ typ
+        else update_type env ssid typ; env, Sast.Expr(e, typ)
+    | Sast.Fdecl(f) -> 
+        if old_typ <> Unconst then constrain_error old_typ typ
+        else update_type env f.fname typ; env, Sast.Expr(e, typ)
     | _ -> env, ew
 
 
@@ -357,26 +360,32 @@ and check_func_call_args env id f args =
 (* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
-  | _ as ew -> let env', ew' = check_expr env ew in
-      let Sast.Expr(_, typ) = ew' in
+  | _ as e -> let env', ew = check_expr env e in
+      let Sast.Expr(_, typ) = ew in
       if typ = Void then assign_error id Void else
       let env', name = add_to_scope env' id typ in
-      env', Sast.Expr(Sast.Assign(name, ew'), typ)
+      env', Sast.Expr(Sast.Assign(name, ew), typ)
 
 (* Lists *)
 and check_list env l =
-  if List.length l = 0 then env, Sast.Expr(Sast.List([]), List(Unconst)) else
-  let rec aux acc const = function
-    | [] -> Sast.Expr(Sast.List(List.rev acc), List(const))
+  (* Evaluate list elements, transforming to sast types and storing list type *)
+  let rec process_list env acc const = function
+    | [] -> env, List.rev acc, const
+    | e :: tl -> let env', ew = check_expr env e in
+      if const <> Unconst then process_list env' (ew :: acc) const tl else
+      let Sast.Expr(_, typ) = ew in process_list env' (ew :: acc) typ tl in
+  let env', l', const = process_list env [] Unconst l in
+  
+  (* Check list elements against constraint type, constrain if possible *)
+  let rec check_list_elems env acc = function
+    | [] -> env, Sast.Expr(Sast.List(List.rev acc), List(const))
     | (Sast.Expr(_, typ) as ew) :: tl ->
-      (* TODO: constrain type to const *)
-      if typ = const || const = Unconst then
-        aux (ew :: acc) const tl
+      if typ = const || const = Unconst then check_list_elems env (ew :: acc) tl
+      else if typ = Unconst then
+        let env', ew' = constrain_ew env ew const in
+        check_list_elems env' (ew' :: acc) tl
       else list_error (List(const)) typ in
-  (* TODO: don't throw away env from args here *)
-  let ew_list = List.map (fun e -> snd(check_expr env e)) l in
-  let Sast.Expr(_, const) = List.hd ew_list in
-  env, aux [] const ew_list
+  check_list_elems env' [] l'
 
 (* Function declaration *)
 and check_fdecl env id f =
@@ -390,7 +399,8 @@ and check_fdecl env id f =
   let Sast.Expr(_, ret_type) = return in
 
   (* Unconstrained function return types are not allowed *)
-  if ret_type = Unconst then fdecl_unconst_error id else
+  if ret_type = Unconst || ret_type = List(Unconst)
+  then fdecl_unconst_error id else
 
   (* Construct function declaration *)
   let fdecl = {
