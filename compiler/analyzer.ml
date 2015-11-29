@@ -359,8 +359,14 @@ and check_list env l =
 
 (* Function declaration *)
 and check_fdecl env id f =
-  (* Add function name to scope to allow recursion *)
-  let env', name = add_to_scope env id Unconst in
+  
+  (* Add function name to scope with unconstrined param types and return type
+   * to allow recursion *)
+  let unconst_func_type = Func({
+    param_types = Array.to_list (Array.make (List.length f.params) Unconst);
+    return_type = Unconst;
+  }) in 
+  let env', name = add_to_scope env id unconst_func_type in
 
   (* Evaluate parameters, body, and return statement in local environment *)
   let func_env, param_ssids = check_fdecl_params env' f.params in
