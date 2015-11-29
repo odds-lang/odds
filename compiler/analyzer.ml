@@ -216,36 +216,6 @@ let constrain_ew env ew typ =
     | _ -> env, ew
 
 
-(* ATTENTION: THIS FUNCTION IS ~PROBABLY~ NO LONGER NECCESSARY
- * This function looks to see if any of the constraints applied in the
- * child env should be applied to any of the variables in the parent env.
- *)
-(*let add_constraints parent_env child_env =  
-  let add_constraint raw_id p_var c_varmap = 
-    if p_var.s_type = Sast.Unconst then
-      let c_var = VarMap.find raw_id c_varmap in 
-      if (p_var.name = c_var.name) && (c_var.s_type != Sast.Unconst) then
-       let _ =  p_var.s_type <- c_var.s_type in true 
-      else false
-    else false 
-  in
-  (* returns true if constraint added, otherwise false. Debug Only. *)
-  let debugger raw_id p_var c_varmap = 
-    (* This function for debugging purposes only *)
-    if add_constraint raw_id p_var c_varmap then 
-      let message = sprintf 
-          "constrained var with raw id: %s, ss_id: %s, type: %s\n"
-          raw_id p_var.name (str_of_type p_var.s_type) in
-      print_string message 
-  in
-  let debug_params raw_id p_var = debugger raw_id p_var child_env.params and
-  debug_scope raw_id p_var = debugger raw_id p_var child_env.scope in 
-  
-  let _ = VarMap.iter debug_params parent_env.params in
-  VarMap.iter debug_scope parent_env.scope
-*)
-
-
 (************************************************
  * Semantic checking and tree SAST construction
  ************************************************)
