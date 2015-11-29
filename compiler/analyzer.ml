@@ -206,13 +206,10 @@ let update_type env ssid typ =
  *)
 let constrain_ew env ew typ =
   let Sast.Expr(e, old_typ) = ew in
+  if old_typ <> Unconst && old_typ <> typ then constrain_error old_typ typ else
   match e with
-    | Sast.Id(ssid) -> 
-        if old_typ <> Unconst then constrain_error old_typ typ
-        else update_type env ssid typ; env, Sast.Expr(e, typ)
-    | Sast.Fdecl(f) -> 
-        if old_typ <> Unconst then constrain_error old_typ typ
-        else update_type env f.fname typ; env, Sast.Expr(e, typ)
+    | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
+    | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
     | _ -> env, ew
 
 
