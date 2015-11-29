@@ -14,7 +14,7 @@ let num = ['0'-'9']
 let whitespace = [' ' '\n' '\r']
 
 rule token = parse
-  
+ 
 (* Whitespace *)
 | whitespace*    { token lexbuf }
 
@@ -53,9 +53,6 @@ rule token = parse
 (* Declarative Keywords *)
 | "do"    { DO }
 
-(* End-of-File *)
-| eof { EOF }
-
 (* Literals *)
 | num+ as intlit { INT_LITERAL(int_of_string intlit) }
 | num* '.' num+ as floatlit { FLOAT_LITERAL(float_of_string floatlit) }
@@ -65,6 +62,10 @@ rule token = parse
 
 (* Identifiers *)
 | ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | num)* as lxm { ID(lxm) }
+
+(* End-of-File *)
+| eof { EOF }
+| _ as c { failwith("illegal character " ^ Char.escaped c) }
 
 and comment = parse
 | "*/"    { token lexbuf }
