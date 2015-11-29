@@ -354,6 +354,9 @@ and check_func_call_args env id f args =
       let const = List.hd param_types in
       if typ = const || const = Unconst then
         aux env' (ew :: acc) (List.tl param_types) tl
+      else if typ = Unconst then
+        let env', ew' = constrain_ew env ew const in
+        aux env' (ew' :: acc) (List.tl param_types) tl
       else fcall_error id f in
   aux env [] f.param_types args
 
