@@ -12,7 +12,6 @@ open Ast
 open Sast
 open Printf
 
-
 (********************
  * Environment
  ********************)
@@ -41,6 +40,11 @@ let root_env = {
 (********************
  * Utilities
  ********************)
+
+(* Given an ssid my_var_#, return the original key ID my_var *)
+let id_of_ssid ssid =
+  let id_len = String.rindex ssid '_' in
+  String.sub ssid 0 id_len
 
 let rec str_of_type = function
   | Num -> "Num"
@@ -88,7 +92,7 @@ let print_env env =
 exception Semantic_Error of string
 
 let var_error id =
-  let message = sprintf "Use of variable '%s' is undefined in current scope" id
+  let message = sprintf "Variable '%s' is undefined in current scope" id
   in raise (Semantic_Error message)
 
 let unop_error op t = 
@@ -104,15 +108,27 @@ let binop_error t1 op t2 =
 
 let fcall_error id f =
   let name = match id with
-    | Sast.Id(name) -> name
+    | Sast.Id(name) -> id_of_ssid name
     | _ -> raise 
         (Semantic_Error "Sast.Call provided non-ID as first argument") in
   let message = sprintf "Invalid call of function '%s' with type %s"
     name (str_of_func f) in
   raise (Semantic_Error message)
 
+let fcall_nonfunction_error id typ =
+  let id = match id with
+    | Sast.Id(id) -> id_of_ssid id
+    (* TO DO: Update this message *)
+    | _ -> let message = 
+      "Analyzer.check_func_call provided non-ID as first argument" in
+      raise (Semantic_Error message) in
+  let message = sprintf 
+    "Attempting to call a non-function: %s is not a function; %s has type %s" 
+    id id (str_of_type typ) in
+  raise (Semantic_Error message)
+
 let assign_error id typ =
-  let message = sprintf "Invalid assignment of id %s to type %s"
+  let message = sprintf "Invalid assignment of id '%s' to type %s"
     id (str_of_type typ) in
   raise (Semantic_Error message)
 
@@ -124,6 +140,11 @@ let list_error list_type elem_type =
 let fdecl_unconst_error id =
   let message = sprintf
     "Invalid declaration of function '%s' with unconstrained return value" id in
+  raise (Semantic_Error message)
+
+let constrain_error old_type const =
+  let message = sprintf "Invalid attempt to change unconstrained type %s to %s"
+    (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
 
 
@@ -138,11 +159,6 @@ let ss_counter = ref (-1)
 let get_ssid name =
   ss_counter := !ss_counter + 1;
   sprintf "%s_%d" name !ss_counter
-
-(* Given an ssid my_var_#, return the original key ID my_var *)
-let id_of_ssid ssid =
-  let id_len = String.rindex ssid '_' in
-  String.sub ssid 0 id_len
 
 (* Add 'id' with type 's_type' to the environment scope *)
 let add_to_scope env id s_type =
@@ -189,34 +205,12 @@ let update_type env ssid typ =
  * expression wrapper on success, or their old values on failure.
  *)
 let constrain_ew env ew typ =
-  let Sast.Expr(e, _) = ew in
+  let Sast.Expr(e, old_typ) = ew in
+  if old_typ <> Unconst && old_typ <> typ then constrain_error old_typ typ else
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
     | _ -> env, ew
-
-
-(* Type Inference/Type Constraints *)
-(* This function looks to see if any of the constraints applied in the
- * child should be applied to any of the variables in the parent env *)
-(*let add_constraints child_env parent_env =  
-  let c_scope = child_env.scope and p_scope = parent_env.scope in
-  let add_constraint raw_id p_var = 
-    if p_var.s_type = Sast.Unconst then
-      let c_var = VarMap.find raw_id c_scope in 
-      if (p_var.name = c_var.name) && (c_var.s_type != Sast.Unconst) then
-       let _ =  p_var.s_type <- c_var.s_type in true 
-      else false
-    else false in
-    (* returns true if constraint added, otherwise false. 
-     * For debugging purposes only. *)
-  let debugger raw_id p_var = (* This function for debugging purposes only *)
-    if add_constraint raw_id p_var then 
-      let message = sprintf 
-          "constrained var with raw id: %s, ss_id: %s, type: %s\n"
-          raw_id p_var.name (str_of_type p_var.s_type) in
-      print_string message in
-  VarMap.iter debugger p_scope; { parent_env with scope = p_scope }*)
 
 
 (************************************************
@@ -272,27 +266,32 @@ and check_binop env e1 op e2 =
   let env', ew2 = check_expr env' e2 in
   let Sast.Expr(_, typ2) = ew2 in
   match op with
+    
+    (* Numeric operations *)
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
       let is_num = function
-        | Num -> true
-        (* constrain types here *)
-        | Unconst -> true
+        | Num | Unconst -> true
         | _ -> false in 
       if is_num typ1 && is_num typ2 then 
         let result_type = match op with
           | Add | Sub | Mult | Div | Mod | Pow -> Num
           | Less | Leq | Greater | Geq -> Bool
           | _ -> binop_error typ1 op typ2 in
-        env', Sast.Expr(Sast.Binop(ew1, op, ew2), result_type)
+        (* Constrain variable types to Num if neccessary *)
+        let env', ew1' = constrain_ew env' ew1 Num in
+        let env', ew2' = constrain_ew env' ew2 Num in
+        env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
+
+    (* Equality operations - overloaded, no constraining can be done *)
     | Eq | Neq -> 
       let is_valid_equality = function
-        | Num | Bool | String -> true
-        (* No constraining can be done on overloaded equality operator *)
+        | Num | Bool | String | Unconst -> true
         | _ -> false in 
       if is_valid_equality typ1 && is_valid_equality typ2 then 
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
+
     (*| And | Or ->
       let is_bool = function
         | Bool -> true
@@ -309,45 +308,54 @@ and check_func_call env id args =
   let Sast.Expr(id, typ) = ew in
   let f = match typ with
     | Sast.Func(f) -> f
-    | _ -> raise (Semantic_Error "Attempting to call a non-function") in
-  let args = check_func_call_args env' id f args in
+    | _ -> fcall_nonfunction_error id typ in
+  let env', args = check_func_call_args env' id f args in
   env', Sast.Expr(Sast.Call(ew, args), f.return_type)
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then fcall_error id f else
-  let rec aux acc param_types = function
-    | [] -> List.rev acc
-    | (Sast.Expr(_, typ) as ew) :: tl -> let const = List.hd param_types in
-      (* TODO: constrain types if possible within function? *)
-      if (typ = const || const = Unconst) then
-        aux (ew :: acc) (List.tl param_types) tl
+  let rec aux env acc param_types = function
+    | [] -> env, List.rev acc
+    | e :: tl -> let env', ew = check_expr env e in
+      let Sast.Expr(_, typ) = ew in
+      let const = List.hd param_types in
+      if typ = const || const = Unconst then
+        aux env' (ew :: acc) (List.tl param_types) tl
+      else if typ = Unconst then
+        let env', ew' = constrain_ew env ew const in
+        aux env' (ew' :: acc) (List.tl param_types) tl
       else fcall_error id f in
-  (* TODO: don't throw away env from args here *)
-  aux [] f.param_types (List.map (fun e -> snd(check_expr env e)) args)
+  aux env [] f.param_types args
 
 (* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f
-  | _ as ew -> let env', ew' = check_expr env ew in
-      let Sast.Expr(_, typ) = ew' in
+  | _ as e -> let env', ew = check_expr env e in
+      let Sast.Expr(_, typ) = ew in
       if typ = Void then assign_error id Void else
       let env', name = add_to_scope env' id typ in
-      env', Sast.Expr(Sast.Assign(name, ew'), typ)
+      env', Sast.Expr(Sast.Assign(name, ew), typ)
 
 (* Lists *)
 and check_list env l =
-  if List.length l = 0 then env, Sast.Expr(Sast.List([]), List(Unconst)) else
-  let rec aux acc const = function
-    | [] -> Sast.Expr(Sast.List(List.rev acc), List(const))
+  (* Evaluate list elements, transforming to sast types and storing list type *)
+  let rec process_list env acc const = function
+    | [] -> env, List.rev acc, const
+    | e :: tl -> let env', ew = check_expr env e in
+      if const <> Unconst then process_list env' (ew :: acc) const tl else
+      let Sast.Expr(_, typ) = ew in process_list env' (ew :: acc) typ tl in
+  let env', l', const = process_list env [] Unconst l in
+  
+  (* Check list elements against constraint type, constrain if possible *)
+  let rec check_list_elems env acc = function
+    | [] -> env, Sast.Expr(Sast.List(List.rev acc), List(const))
     | (Sast.Expr(_, typ) as ew) :: tl ->
-      (* TODO: constrain type to const *)
-      if typ = const || const = Unconst then
-        aux (ew :: acc) const tl
+      if typ = const || const = Unconst then check_list_elems env (ew :: acc) tl
+      else if typ = Unconst then
+        let env', ew' = constrain_ew env ew const in
+        check_list_elems env' (ew' :: acc) tl
       else list_error (List(const)) typ in
-  (* TODO: don't throw away env from args here *)
-  let ew_list = List.map (fun e -> snd(check_expr env e)) l in
-  let Sast.Expr(_, const) = List.hd ew_list in
-  env, aux [] const ew_list
+  check_list_elems env' [] l'
 
 (* Function declaration *)
 and check_fdecl env id f =
@@ -359,7 +367,10 @@ and check_fdecl env id f =
   let func_env, body = check_stmts func_env f.body in
   let func_env, return = check_expr func_env f.return in
   let Sast.Expr(_, ret_type) = return in
-  if ret_type = Unconst then fdecl_unconst_error id else
+
+  (* Unconstrained function return types are not allowed *)
+  if ret_type = Unconst || ret_type = List(Unconst)
+  then fdecl_unconst_error id else
 
   (* Construct function declaration *)
   let fdecl = {

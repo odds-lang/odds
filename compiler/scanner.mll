@@ -58,9 +58,6 @@ rule token = parse
 (* Declarative Keywords *)
 | "do"    { DO }
 
-(* End-of-File *)
-| eof { EOF }
-
 (* Literals *)
 | numeric+ as intlit { NUM_LITERAL(Ast.Num_int(int_of_string intlit)) }
 | numeric* '.' numeric+ as floatlit 
@@ -77,6 +74,10 @@ rule token = parse
     let message = "Illegal Character '" ^ Char.escaped char ^ "'" in
     raise (Illegal_Character message)
   }
+
+(* End-of-File *)
+| eof { EOF }
+| _ as c { failwith("illegal character " ^ Char.escaped c) }
 
 and comment = parse
 | "*/"    { token lexbuf }
