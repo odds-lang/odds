@@ -116,7 +116,7 @@ let fcall_error id f =
     name (str_of_func f) in
   raise (Semantic_Error message)
 
-let fcall_nonfunction_error id typ =
+let call_nonfunction_error id typ =
   let id = match id with
     | Sast.Id(id) -> id_of_ssid id
     (* TO DO: Update this message *)
@@ -322,11 +322,18 @@ and check_binop env e1 op e2 =
 and check_func_call env id args =
   let env', ew = check_expr env id in
   let Sast.Expr(id, typ) = ew in
-  let f = match typ with
-    | Sast.Func(f) -> f
-    | _ -> fcall_nonfunction_error id typ in
+  let env', ew', f = match typ with
+    | Sast.Func(f) -> env', ew, f
+    | Unconst -> 
+        let f = {
+          param_types = Array.to_list (Array.make (List.length args) Unconst);
+          return_type = Unconst;
+        } in 
+        let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
+    | _ -> call_nonfunction_error id typ in
+  
   let env', args = check_func_call_args env' id f args in
-  env', Sast.Expr(Sast.Call(ew, args), f.return_type)
+  env', Sast.Expr(Sast.Call(ew', args), f.return_type)
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then fcall_error id f else
