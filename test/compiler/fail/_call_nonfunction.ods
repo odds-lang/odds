@@ -1,0 +1,2 @@
+do f = 5
+do f("Hello, world!")
