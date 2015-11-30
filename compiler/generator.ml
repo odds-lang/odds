@@ -13,9 +13,7 @@ open Sast
 open Printf
 
 (* Indentation *)
-let rec indent_of_num str = function
-    | 0 -> str
-    | _ as num -> indent_of_num (str ^ "  ") (num - 1) 
+let indent_of_num indent = String.make indent '\t'
 
 (* Unary operators *)
 let txt_of_unop = function
@@ -48,12 +46,12 @@ let rec txt_of_expr indent = function
   | Bool_lit(b) -> String.capitalize (string_of_bool(b))
   | Void_lit -> "None"
   | Id(id) -> id
-  | Unop(op, ew) -> sprintf "(%s%s)" 
-      (txt_of_unop op) 
+  | Unop(op, ew) -> sprintf "(%s%s)"
+      (txt_of_unop op)
       (txt_of_expr_wrapper indent ew)
   | Binop(ew1, op, ew2) -> sprintf "(%s %s %s)"
-      (txt_of_expr_wrapper indent ew1) 
-      (txt_of_binop op) 
+      (txt_of_expr_wrapper indent ew1)
+      (txt_of_binop op)
       (txt_of_expr_wrapper indent ew2)
   | Call(id, args) -> sprintf "%s(%s)"
       (txt_of_expr_wrapper indent id) (txt_of_list indent args)
@@ -67,25 +65,25 @@ and txt_of_expr_wrapper indent = function
 and txt_of_list indent = function
   | [] -> ""
   | [x] -> txt_of_expr_wrapper indent x
-  | _ as l -> 
+  | _ as l ->
     let strs = List.map (fun x -> txt_of_expr_wrapper indent x) l
-    in String.concat ", " strs 
+    in String.concat ", " strs
 
 and txt_of_fdecl indent f =
     let params = String.concat ", " f.params in
     let body = txt_of_stmts (indent + 1) f.body in
     let return = txt_of_expr_wrapper indent f.return in
-    sprintf "def %s(%s):\n\n%s\n%sreturn %s\n" 
-      f.fname 
-      params 
-      body 
-      (indent_of_num "" (indent+1))
+    sprintf "def %s(%s):\n\n%s\n%sreturn %s\n"
+      f.fname
+      params
+      body
+      (indent_of_num (indent+1))
       return
 
 (* Statements *)
 and txt_of_stmt indent = function
-  | Sast.Do(ew) -> sprintf "%s%s" 
-      (indent_of_num "" indent) 
+  | Sast.Do(ew) -> sprintf "%s%s"
+      (indent_of_num indent)
       (txt_of_expr_wrapper indent ew)
 
 and txt_of_stmts indent stmt_list =
@@ -95,7 +93,7 @@ and txt_of_stmts indent stmt_list =
   in aux indent [] stmt_list
 
 (* Code generation entry point *)
-let gen_program output_file sast = 
-  let txt = txt_of_stmts 0 sast in 
+let gen_program output_file sast =
+  let txt = txt_of_stmts 0 sast in
   let file = open_out output_file in
     fprintf file "%s\n" txt; close_out file
