@@ -8,7 +8,7 @@
  *  - Lilly Wang
  *)
 
-type action = Compile | Help
+type action = Compile | Help 
 
 let get_help =
   "Odds Usage: odds.sh <flag> <input_file> <output_file>\n" ^
@@ -17,7 +17,8 @@ let get_help =
 
 let _ =
   let action =
-    List.assoc Sys.argv.(1) [("-c", Compile) ; ("-h", Help)] in
+    List.assoc Sys.argv.(1) 
+      [("-c", Compile) ; ("-h", Help)] in
   if action = Help then print_endline get_help else
     let lexbuf = Lexing.from_channel stdin in 
     let output_file = Sys.argv.(2) in

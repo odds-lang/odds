@@ -14,8 +14,8 @@ open Printf
 
 (* Indentation *)
 let rec indent_of_num str = function
-    | 0 -> printf "hi";str
-    | _ as num -> printf "hello";indent_of_num (str ^ "  ") (num - 1) 
+    | 0 -> str
+    | _ as num -> indent_of_num (str ^ "  ") (num - 1) 
 
 (* Unary operators *)
 let txt_of_unop = function
@@ -74,8 +74,13 @@ and txt_of_list indent = function
 and txt_of_fdecl indent f =
     let params = String.concat ", " f.params in
     let body = txt_of_stmts (indent + 1) f.body in
-    let return = txt_of_expr_wrapper (indent + 1) f.return in
-    sprintf "def %s(%s):\n\n%s\nreturn %s\n" f.fname params body return
+    let return = txt_of_expr_wrapper indent f.return in
+    sprintf "def %s(%s):\n\n%s\n%sreturn %s\n" 
+      f.fname 
+      params 
+      body 
+      (indent_of_num "" (indent+1))
+      return
 
 (* Statements *)
 and txt_of_stmt indent = function
@@ -90,7 +95,7 @@ and txt_of_stmts indent stmt_list =
   in aux indent [] stmt_list
 
 (* Code generation entry point *)
-let gen_program output_file sast =
-  let text = txt_of_stmts 0 sast in
+let gen_program output_file sast = 
+  let txt = txt_of_stmts 0 sast in 
   let file = open_out output_file in
-  fprintf file "%s\n" text; close_out file
+    fprintf file "%s\n" txt; close_out file
