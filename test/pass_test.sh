@@ -5,9 +5,9 @@ CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 
-INPUT_FILES="compiler/*.ods"
+INPUT_FILES="compiler/pass/*.ods"
 TMP_FILE=$(mktemp "compiled.XXXXX")
-printf "${CYAN}Running compiler tests...\n${NC}"
+printf "${CYAN}Running compiler 'pass' tests...\n${NC}"
 
 for input_file in $INPUT_FILES; do
     python_file=${input_file/.ods/.py}
