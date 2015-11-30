@@ -102,7 +102,7 @@ let unop_error op t =
 
 let binop_error t1 op t2 = 
   let message =
-    sprintf "Invalid use of binary operator '%s' with type %s and %s" 
+    sprintf "Invalid use of binary operator '%s' with types %s and %s" 
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Semantic_Error message)
 
@@ -118,13 +118,10 @@ let fcall_error id f =
 let fcall_nonfunction_error id typ =
   let id = match id with
     | Sast.Id(id) -> id_of_ssid id
-    (* TO DO: Update this message *)
-    | _ -> let message = 
-      "Analyzer.check_func_call provided non-ID as first argument" in
-      raise (Semantic_Error message) in
-  let message = sprintf 
-    "Attempting to call a non-function: %s is not a function; %s has type %s" 
-    id id (str_of_type typ) in
+    | _ -> raise 
+        (Semantic_Error "Sast.Call provided non-ID as first argument") in
+  let message = sprintf "Attempting to call %s type '%s' as a function" 
+    (str_of_type typ) id in
   raise (Semantic_Error message)
 
 let assign_error id typ =

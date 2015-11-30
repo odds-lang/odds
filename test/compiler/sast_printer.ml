@@ -80,7 +80,5 @@ let _ =
     let sast_str = str_of_stmts sast in
     print_endline sast_str
   with 
-    | Scanner.Illegal_Character(m) -> 
-        eprintf "Exception raised in Scanner:\n  %s\n\n" m
-    | Analyzer.Semantic_Error(m) ->
-        eprintf "Exception raised in Analyzer:\n  %s\n\n" m
+    | Scanner.Illegal_Character(m) -> eprintf "Scanner Exception: %s\n" m
+    | Analyzer.Semantic_Error(m) -> eprintf "Analyzer Exception: %s\n" m
