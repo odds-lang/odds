@@ -211,6 +211,12 @@ let constrain_ew env ew typ =
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
+    | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(func_typ)), _) -> 
+        if func_typ.return_type <> Unconst then 
+          constrain_error func_typ.return_type typ
+        else
+          let func_typ' = Func({ func_typ with return_type = typ }) in
+          update_type env ssid func_typ'; env, Sast.Expr(e, typ)
     | _ -> env, ew
 
 (* This function is the same as constrain_ew, except instead of constraining
