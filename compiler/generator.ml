@@ -69,7 +69,7 @@ and txt_of_list indent = function
   | [x] -> txt_of_expr_wrapper indent x
   | _ as l -> 
     let strs = List.map (fun x -> txt_of_expr_wrapper indent x) l
-    in String.concat "," strs 
+    in String.concat ", " strs 
 
 and txt_of_fdecl indent f =
     let params = String.concat ", " f.params in
