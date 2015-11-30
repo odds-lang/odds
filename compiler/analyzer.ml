@@ -213,6 +213,14 @@ let constrain_ew env ew typ =
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
     | _ -> env, ew
 
+(* This function is the same as constrain_ew, except instead of constraining
+ * expression_wrappers, it constrains expressions. This function only modifies
+ * the env and does not return an expression wrapper. 
+ *)
+let constrain_e env e typ = match e with
+  | Sast.Id(ssid) -> update_type env ssid typ; env
+  | _ -> env
+
 
 (************************************************
  * Semantic checking and tree SAST construction
@@ -310,18 +318,30 @@ and check_func_call env id args =
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then fcall_error id f else
-  let rec aux env acc param_types = function
-    | [] -> env, List.rev acc
+  let rec aux env acc acc_param_types param_types = function
+    | [] -> env, List.rev acc, List.rev acc_param_types
     | e :: tl -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       let const = List.hd param_types in
       if typ = const || const = Any then
-        aux env' (ew :: acc) (List.tl param_types) tl
+        aux env' (ew :: acc) (const :: acc_param_types) (List.tl param_types) tl
+      (* To Do: What if user passes unconstrained variable to unconstrained function? *)
+      else if const = Unconst && typ <> Unconst then
+        aux env' (ew :: acc) (typ :: acc_param_types) (List.tl param_types) tl
       else if typ = Unconst then
         let env', ew' = constrain_ew env ew const in
-        aux env' (ew' :: acc) (List.tl param_types) tl
+        aux env' (ew' :: acc) (const :: acc_param_types) (List.tl param_types) tl
       else fcall_error id f in
-  aux env [] f.param_types args
+  let env', args', param_types' = aux env [] [] f.param_types args in
+  
+  if param_types' <> f.param_types then 
+    let f_type = Func({
+      param_types = param_types'; 
+      return_type = f.return_type;
+    }) in 
+    let env' = constrain_e env' id f_type in env', args'
+  else env', args'
+
 
 (* Assignment *)
 and check_assign env id = function
