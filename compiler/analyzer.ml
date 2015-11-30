@@ -326,7 +326,7 @@ and check_func_call env id args =
     | Sast.Func(f) -> env', ew, f
     | Unconst -> 
         let f = {
-          param_types = Array.to_list (Array.make (List.length args) Unconst);
+          param_types = List.map (fun _ -> Unconst) args;
           return_type = Unconst;
         } in 
         let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
@@ -398,7 +398,7 @@ and check_fdecl env id f =
   (* Add function name to scope with unconstrined param types and return type
    * to allow recursion *)
   let unconst_func_type = Func({
-    param_types = Array.to_list (Array.make (List.length f.params) Unconst);
+    param_types = List.map (fun _ -> Unconst) f.params;
     return_type = Unconst;
   }) in 
   let env', name = add_to_scope env id unconst_func_type in
