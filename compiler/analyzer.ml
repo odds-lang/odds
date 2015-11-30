@@ -229,7 +229,7 @@ let rec check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
-  | Ast.Fdecl(f) -> check_fdecl env "anon" f
+  | Ast.Fdecl(f) -> check_fdecl env "anon" f true
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
@@ -329,7 +329,7 @@ and check_func_call_args env id f args =
 
 (* Assignment *)
 and check_assign env id = function
-  | Ast.Fdecl(f) -> check_fdecl env id f
+  | Ast.Fdecl(f) -> check_fdecl env id f false
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       if typ = Void then assign_error id Void else
@@ -358,7 +358,7 @@ and check_list env l =
   check_list_elems env' [] l'
 
 (* Function declaration *)
-and check_fdecl env id f =
+and check_fdecl env id f anon=
   (* Add function name to scope to allow recursion *)
   let env', name = add_to_scope env id Unconst in
 
@@ -378,6 +378,7 @@ and check_fdecl env id f =
     params = param_ssids;
     body = body;
     return = return;
+    is_anon = anon;
   } in
 
   (* Evaluate parameter and function types *)
