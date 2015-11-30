@@ -138,6 +138,12 @@ let list_error list_type elem_type =
     (str_of_type elem_type) (str_of_type list_type) in
   raise (Semantic_Error message)
 
+let recursive_type_mismatch_error f_id expected_type typ = 
+  let message = sprintf 
+    "Invalid recursive function call of function '%s' with type %s when type %s was expected" 
+    f_id (str_of_type typ) (str_of_type expected_type) in
+  raise (Semantic_Error message)
+
 let fdecl_unconst_error id =
   let message = sprintf
     "Invalid declaration of function '%s' with unconstrained return value" id in
@@ -394,11 +400,52 @@ and check_fdecl env id f =
   let func_env, param_ssids = check_fdecl_params env' f.params in
   let func_env, body = check_stmts func_env f.body in
   let func_env, return = check_expr func_env f.return in
-  let Sast.Expr(_, ret_type) = return in
 
+  (* Evaluate parameter and function types *)
+  let rec check_params_type_mismatch env acc func_param_types = function
+    | [] -> env, List.rev acc
+    | ssid :: tl -> 
+        let var = VarMap.find (id_of_ssid ssid) func_env.params and
+        func_param_type = List.hd func_param_types in  
+        (* If both the param var and func_param_type remain unconstrained, 
+         * this parameter can be of any type *)
+        if var.s_type = Unconst && func_param_type = Unconst then 
+          check_params_type_mismatch env (Any :: acc) (List.tl func_param_types) tl
+        (* If the param var and func_param_type are both not Unconst and they 
+         * are the same type, then everything is OK *)
+        else if var.s_type = func_param_type then
+          check_params_type_mismatch env (func_param_type :: acc) (List.tl func_param_types) tl
+        (* If the param var's type is constrained, but the func_param_type
+         * remains unconstrained, constrain the func_param_type *)
+        else if func_param_type = Unconst then
+          check_params_type_mismatch env (var.s_type :: acc) (List.tl func_param_types) tl
+        (* If the func_param_type is constrained, but the func var's type
+         * remains unconstrained, constrain the var's type *)
+        else if var.s_type = Unconst then
+          let env' = constrain_e func_env (Sast.Id(ssid)) func_param_type in 
+          check_params_type_mismatch env' (func_param_type :: acc) (List.tl func_param_types) tl
+        (* If the param var's type does not equal the func_param_type, then 
+         * there is a type mismatch error *)
+        else if var.s_type <> func_param_type then 
+          recursive_type_mismatch_error id var.s_type func_param_type
+        (* TEMPORARY CONDITION FOR TESTING - should never be reached *)
+        else
+          failwith "check_params_type_mismatch in Analyzer is not working correctly" in
+  let param_types = 
+    let typ = (VarMap.find id func_env.scope).s_type in
+    match typ with
+      | Func(func) -> func.param_types
+      | _ -> failwith "check_params_type_mismatch in Analyzer is not working correctly" in
+  let func_env, param_types' = check_params_type_mismatch func_env [] param_types param_ssids in
+  
+  (* Re-evaluate function return type to see if it has been constrained above *)
+  let func_env, return = check_expr func_env f.return in
+  
   (* Unconstrained function return types are not allowed *)
-  if ret_type = Unconst || ret_type = List(Unconst)
-  then fdecl_unconst_error id else
+  let Sast.Expr(_, ret_type) = return in
+  if ret_type = Unconst || ret_type = List(Unconst) then 
+    fdecl_unconst_error id 
+  else
 
   (* Construct function declaration *)
   let fdecl = {
@@ -408,13 +455,7 @@ and check_fdecl env id f =
     return = return;
   } in
 
-  (* Evaluate parameter and function types *)
-  let param_types = 
-    let type_of_param ssid =
-      let var = VarMap.find (id_of_ssid ssid) func_env.params in
-      if var.s_type = Unconst then Any else var.s_type in
-    List.map type_of_param param_ssids in
-  let f_type = Func({ param_types = param_types; return_type = ret_type }) in
+  let f_type = Func({ param_types = param_types'; return_type = ret_type }) in
   
   (* Update function type in environment and return expression wrapper *)
   let ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
