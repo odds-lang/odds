@@ -12,6 +12,11 @@ open Ast
 open Sast
 open Printf
 
+(* Indentation *)
+let rec indent_of_num str = function
+    | 0 -> printf "hi";str
+    | _ as num -> printf "hello";indent_of_num (str ^ "  ") (num - 1) 
+
 (* Unary operators *)
 let txt_of_unop = function
   | Not -> "not "
@@ -37,47 +42,55 @@ let txt_of_binop = function
   | Geq -> ">="
 
 (* Expressions *)
-let rec txt_of_expr = function
+let rec txt_of_expr indent = function
   | Num_lit(n) -> txt_of_num n
   | String_lit(s) -> sprintf "\"%s\"" s
   | Bool_lit(b) -> String.capitalize (string_of_bool(b))
   | Void_lit -> "None"
   | Id(id) -> id
-  | Unop(op, ew) -> sprintf "(%s%s)" (txt_of_unop op) (txt_of_expr_wrapper ew)
+  | Unop(op, ew) -> sprintf "(%s%s)" 
+      (txt_of_unop op) 
+      (txt_of_expr_wrapper indent ew)
   | Binop(ew1, op, ew2) -> sprintf "(%s %s %s)"
-      (txt_of_expr_wrapper ew1) (txt_of_binop op) (txt_of_expr_wrapper ew2)
+      (txt_of_expr_wrapper indent ew1) 
+      (txt_of_binop op) 
+      (txt_of_expr_wrapper indent ew2)
   | Call(id, args) -> sprintf "%s(%s)"
-      (txt_of_expr_wrapper id) (txt_of_list args)
-  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr_wrapper e)
-  | List(l) -> sprintf "[%s]" (txt_of_list l)
-  | Fdecl(f) -> txt_of_fdecl f
+      (txt_of_expr_wrapper indent id) (txt_of_list indent args)
+  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr_wrapper indent e)
+  | List(l) -> sprintf "[%s]" (txt_of_list indent l)
+  | Fdecl(f) -> txt_of_fdecl indent f
 
-and txt_of_expr_wrapper = function
-  | Expr(e, _) -> txt_of_expr e
+and txt_of_expr_wrapper indent = function
+  | Expr(e, _) -> txt_of_expr indent e
 
-and txt_of_list = function
+and txt_of_list indent = function
   | [] -> ""
-  | [x] -> txt_of_expr_wrapper x
-  | _ as l -> String.concat ", " (List.map txt_of_expr_wrapper l)
+  | [x] -> txt_of_expr_wrapper indent x
+  | _ as l -> 
+    let strs = List.map (fun x -> txt_of_expr_wrapper indent x) l
+    in String.concat "," strs 
 
-and txt_of_fdecl f =
+and txt_of_fdecl indent f =
     let params = String.concat ", " f.params in
-    let body = txt_of_stmts f.body in
-    let return = txt_of_expr_wrapper f.return in
-    sprintf "def %s(%s):\n{\n%s\nreturn %s\n}" f.fname params body return
+    let body = txt_of_stmts (indent + 1) f.body in
+    let return = txt_of_expr_wrapper (indent + 1) f.return in
+    sprintf "def %s(%s):\n\n%s\nreturn %s\n" f.fname params body return
 
 (* Statements *)
-and txt_of_stmt = function
-  | Sast.Do(ew) -> sprintf "%s" (txt_of_expr_wrapper ew)
+and txt_of_stmt indent = function
+  | Sast.Do(ew) -> sprintf "%s%s" 
+      (indent_of_num "" indent) 
+      (txt_of_expr_wrapper indent ew)
 
-and txt_of_stmts stmt_list =
-  let rec aux acc = function
+and txt_of_stmts indent stmt_list =
+  let rec aux indent acc = function
     | [] -> String.concat "\n" (List.rev acc)
-    | stmt :: tl -> aux (txt_of_stmt stmt :: acc) tl
-  in aux [] stmt_list
+    | stmt :: tl -> aux indent ((txt_of_stmt indent stmt) :: acc) tl
+  in aux indent [] stmt_list
 
 (* Code generation entry point *)
 let gen_program output_file sast =
-  let text = txt_of_stmts sast in
+  let text = txt_of_stmts 0 sast in
   let file = open_out output_file in
   fprintf file "%s\n" text; close_out file
