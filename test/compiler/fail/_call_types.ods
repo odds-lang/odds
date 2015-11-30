@@ -1,0 +1,2 @@
+do sum = (x, y) -> return x + y
+do sum(1, "hello")
