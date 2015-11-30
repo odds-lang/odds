@@ -28,7 +28,7 @@ let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; } builtins
 let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; } builtins
 let builtins = VarMap.add "print" {
   name = "print";
-  s_type = Func({ param_types = [Unconst]; return_type = Void; });
+  s_type = Func({ param_types = [Any]; return_type = Void; });
 } builtins
 
 let root_env = {
@@ -53,6 +53,7 @@ let rec str_of_type = function
   | Void -> "Void"
   | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
+  | Any -> "Any"
   | Unconst -> "Unconst"
 
 and str_of_func f =
@@ -283,14 +284,9 @@ and check_binop env e1 op e2 =
         env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
 
-    (* Equality operations - overloaded, no constraining can be done *)
-    | Eq | Neq -> 
-      let is_valid_equality = function
-        | Num | Bool | String | Unconst -> true
-        | _ -> false in 
-      if is_valid_equality typ1 && is_valid_equality typ2 then 
-        env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
-      else binop_error typ1 op typ2
+    (* Equality operations - overloaded, no constraining can be done, can take
+     * any type *)
+    | Eq | Neq -> env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
 
     (*| And | Or ->
       let is_bool = function
@@ -319,7 +315,7 @@ and check_func_call_args env id f args =
     | e :: tl -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       let const = List.hd param_types in
-      if typ = const || const = Unconst then
+      if typ = const || const = Any then
         aux env' (ew :: acc) (List.tl param_types) tl
       else if typ = Unconst then
         let env', ew' = constrain_ew env ew const in
@@ -390,7 +386,7 @@ and check_fdecl env id f =
   let param_types = 
     let type_of_param ssid =
       let var = VarMap.find (id_of_ssid ssid) func_env.params in
-      var.s_type in
+      if var.s_type = Unconst then Any else var.s_type in
     List.map type_of_param param_ssids in
   let f_type = Func({ param_types = param_types; return_type = ret_type }) in
   

@@ -18,6 +18,7 @@ type data_type =
   | Void
   | List of data_type
   | Func of func
+  | Any
   | Unconst
 
 and func = {
