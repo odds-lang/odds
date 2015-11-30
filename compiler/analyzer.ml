@@ -103,29 +103,38 @@ let unop_error op t =
 
 let binop_error t1 op t2 = 
   let message =
-    sprintf "Invalid use of binary operator '%s' with type %s and %s" 
+    sprintf "Invalid use of binary operator '%s' with types %s and %s" 
     (str_of_binop op) (str_of_type t1) (str_of_type t2) in
   raise (Semantic_Error message)
 
-let fcall_error id f =
-  let name = match id with
-    | Sast.Id(name) -> id_of_ssid name
-    | _ -> raise 
-        (Semantic_Error "Sast.Call provided non-ID as first argument") in
-  let message = sprintf "Invalid call of function '%s' with type %s"
-    name (str_of_func f) in
+let fcall_nonid_error () =
+  let message = "Sast.Call provided non-ID as first argument" in
   raise (Semantic_Error message)
 
-let call_nonfunction_error id typ =
+let fcall_nonfunc_error id typ =
   let id = match id with
-    | Sast.Id(id) -> id_of_ssid id
-    (* TO DO: Update this message *)
-    | _ -> let message = 
-      "Analyzer.check_func_call provided non-ID as first argument" in
-      raise (Semantic_Error message) in
-  let message = sprintf 
-    "Attempting to call a non-function: %s is not a function; %s has type %s" 
-    id id (str_of_type typ) in
+    | Sast.Id(ssid) -> id_of_ssid ssid
+    | _ -> fcall_nonid_error () in
+  let message = sprintf "Attempting to call %s type '%s' as a function" 
+    (str_of_type typ) id in
+  raise (Semantic_Error message)
+
+let fcall_length_error id num_params num_args =
+  let name = match id with
+    | Sast.Id(name) -> id_of_ssid name
+    | _ -> fcall_nonid_error () in
+  let message =
+    sprintf "Function '%s' expects %d arguments but was called with %d instead"
+    name num_params num_args in
+  raise (Semantic_Error message)
+
+let fcall_argtype_error id typ const =
+  let name = match id with
+    | Sast.Id(name) -> id_of_ssid name
+    | _ -> fcall_nonid_error () in
+  let message = sprintf
+    "Function '%s' expected argument of type %s but was passed %s instead"
+    name (str_of_type const) (str_of_type typ) in
   raise (Semantic_Error message)
 
 let assign_error id typ =
@@ -217,12 +226,16 @@ let constrain_ew env ew typ =
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
-    | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(func_typ)), _) -> 
-        if func_typ.return_type <> Unconst then 
-          constrain_error func_typ.return_type typ
+    | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(f)), _) ->
+        let old_type = (VarMap.find (id_of_ssid ssid) env.scope).s_type in
+        let old_ret_type = match old_type with
+          | Sast.Func(old_f) -> old_f.return_type
+          | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ in
+        if f.return_type <> Unconst && f.return_type <> old_ret_type then 
+          constrain_error old_ret_type f.return_type
         else
-          let func_typ' = Func({ func_typ with return_type = typ }) in
-          update_type env ssid func_typ'; env, Sast.Expr(e, typ)
+          let f' = Func({ f with return_type = typ }) in
+          update_type env ssid f'; env, Sast.Expr(e, typ)
     | _ -> env, ew
 
 (* This function is the same as constrain_ew, except instead of constraining
@@ -330,13 +343,13 @@ and check_func_call env id args =
           return_type = Unconst;
         } in 
         let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
-    | _ -> call_nonfunction_error id typ in
-  
+    | _ -> fcall_nonfunc_error id typ in
   let env', args = check_func_call_args env' id f args in
   env', Sast.Expr(Sast.Call(ew', args), f.return_type)
 
 and check_func_call_args env id f args =
-  if List.length f.param_types <> List.length args then fcall_error id f else
+  if List.length f.param_types <> List.length args then
+    fcall_length_error id (List.length f.param_types) (List.length args) else
   let rec aux env acc acc_param_types param_types = function
     | [] -> env, List.rev acc, List.rev acc_param_types
     | e :: tl -> let env', ew = check_expr env e in
@@ -350,7 +363,7 @@ and check_func_call_args env id f args =
       else if typ = Unconst then
         let env', ew' = constrain_ew env ew const in
         aux env' (ew' :: acc) (const :: acc_param_types) (List.tl param_types) tl
-      else fcall_error id f in
+      else fcall_argtype_error id typ const in
   let env', args', param_types' = aux env [] [] f.param_types args in
   
   if param_types' <> f.param_types then 
@@ -360,7 +373,6 @@ and check_func_call_args env id f args =
     }) in 
     let env' = constrain_e env' id f_type in env', args'
   else env', args'
-
 
 (* Assignment *)
 and check_assign env id = function
@@ -394,7 +406,7 @@ and check_list env l =
 
 (* Function declaration *)
 and check_fdecl env id f =
-  
+
   (* Add function name to scope with unconstrined param types and return type
    * to allow recursion *)
   let unconst_func_type = Func({
