@@ -22,6 +22,7 @@ type expr =
   | Assign of string * expr
   | Call of expr * expr list
   | List of expr list
+  | Def of fdecl
 
 (* Function Declarations *)
 and fdecl = {
@@ -34,7 +35,6 @@ and fdecl = {
 (* Statements *)
 and stmt =
   | Do of expr     (* set foo = bar + 3 *)
-  | Def of fdecl
 
 (* Program entry point *)
 type program = stmt list

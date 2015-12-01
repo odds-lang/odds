@@ -32,7 +32,7 @@ let rec past_expr stmts = function
       stmts', Assign(id, e)
   | Sast.List(wl) -> let stmts', l = past_list stmts wl in stmts', List(l)
   | Sast.Fdecl(f) -> if f.is_anon = true then past_fdecl_anon stmts f
-      else stmts, past_fdecl stmts f
+      else past_fdecl stmts f
 
 and past_expr_unwrap stmts = function
   | Sast.Expr(e, _) -> past_expr stmts e
@@ -45,18 +45,21 @@ and past_list stmts expr_list =
   in aux stmts [] expr_list
 
 and past_fdecl_anon stmts sast_f =
-  let f = past_fdecl stmts sast_f in let stmts' = (f :: stmts) in
-    stmts', Id(f.name)
+  let stmts', def = past_fdecl stmts sast_f in
+  let s = (def :: stmts') in
+  match def with
+    | Def(f) -> s, Id(f.name)
+    | _ as f -> s, f (* hacky fix *)
 
 and past_fdecl stmts sast_f =
   let b = past_stmts sast_f.body in
-  let e = past_expr_unwrap stmts sast_f.return in
+  let stmts', e = past_expr_unwrap stmts sast_f.return in
   let f = {
-    fname = sast_f.name;
+    name = sast_f.fname;
     params = sast_f.params;
     body = b;
     return = e;
-  } in Def(f)
+  } in stmts', Def(f)
 
 and past_stmt stmts stmt = function
   | Sast.Do(we) -> past_expr_unwrap stmts we
