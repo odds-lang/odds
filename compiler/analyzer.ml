@@ -158,6 +158,12 @@ let fdecl_unconst_error id =
     "Invalid declaration of function '%s' with unconstrained return value" id in
   raise (Semantic_Error message)
 
+let fdecl_reassign_error id typ =
+  let message = sprintf
+    "Invalid attempt to reassign function identifier '%s' to type %s"
+    id (str_of_type typ) in
+  raise (Semantic_Error message)
+
 let constrain_error old_type const =
   let message = sprintf "Invalid attempt to change unconstrained type %s to %s"
     (str_of_type old_type) (str_of_type const) in
@@ -406,14 +412,22 @@ and check_list env l =
 
 (* Function declaration *)
 and check_fdecl env id f =
-
-  (* Add function name to scope with unconstrined param types and return type
+  (* Add function name to scope with unconstrained param types and return type
    * to allow recursion *)
-  let unconst_func_type = Func({
+  let f_type = Func({
     param_types = List.map (fun _ -> Unconst) f.params;
     return_type = Unconst;
   }) in 
-  let env', name = add_to_scope env id unconst_func_type in
+  
+  (* Check if attempting to reassign an identifier belonging to the parent
+   * function. If so, fail. If not, add the function to scope *)
+  let env', name = 
+    if VarMap.mem id env.scope then
+      let old_type = (VarMap.find id env.scope).s_type in
+      match old_type with
+        | Func(f) when f.return_type = Unconst -> fdecl_reassign_error id f_type
+        | _ -> add_to_scope env id f_type
+    else add_to_scope env id f_type in
 
   (* Evaluate parameters, body, and return statement in local environment *)
   let func_env, param_ssids = check_fdecl_params env' f.params in
@@ -454,7 +468,7 @@ and check_fdecl env id f =
     let typ = (VarMap.find id func_env.scope).s_type in
     match typ with
       | Func(func) -> func.param_types
-      | _ -> failwith "check_params_type_mismatch in Analyzer is not working correctly" in
+      | _ -> fdecl_reassign_error id typ in
   let func_env, param_types' = check_params_type_mismatch func_env [] param_types param_ssids in
   
   (* Re-evaluate function return type to see if it has been constrained above *)
