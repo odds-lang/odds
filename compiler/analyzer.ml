@@ -220,14 +220,14 @@ let update_type env ssid typ =
  * in which to search for an ID. Returns the newly constrained environment and
  * expression wrapper on success, or their old values on failure.
  *)
-let constrain_ew env ew typ =
+let rec constrain_ew env ew typ =
   let Sast.Expr(e, old_typ) = ew in
   if old_typ <> Unconst && old_typ <> typ then constrain_error old_typ typ else
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
     | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(f)), _) ->
-        let old_type = (VarMap.find (id_of_ssid ssid) env.scope).s_type in
+        let _, Sast.Expr(_, old_type) = check_id env (id_of_ssid ssid) in
         let old_ret_type = match old_type with
           | Sast.Func(old_f) -> old_f.return_type
           | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ in
@@ -242,7 +242,7 @@ let constrain_ew env ew typ =
  * expression_wrappers, it constrains expressions. This function only modifies
  * the env and does not return an expression wrapper. 
  *)
-let constrain_e env e typ = match e with
+and constrain_e env e typ = match e with
   | Sast.Id(ssid) -> update_type env ssid typ; env
   | _ -> env
 
@@ -252,7 +252,7 @@ let constrain_e env e typ = match e with
  ************************************************)
 
 (* Branching point *)
-let rec check_expr env = function
+and check_expr env = function
   | Ast.Num_lit(x) -> env, Sast.Expr(Sast.Num_lit(x), Num)
   | Ast.String_lit(s) -> env, Sast.Expr(Sast.String_lit(s), String)
   | Ast.Bool_lit(b) -> env, Sast.Expr(Sast.Bool_lit(b), Bool)
