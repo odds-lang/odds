@@ -85,6 +85,19 @@ let print_env env =
   str_of_varmap "env params" env.params;
   str_of_varmap "env scope" env.scope
 
+(*
+let is_unconst = function
+  | Unconst -> true
+  | Func(func) -> List.mem Unconst func.param_types
+  | _ -> false
+
+let rec unconst_to_any = function
+  | Unconst -> Any
+  | Func(func) -> 
+      let param_types' = List.map unconst_to_any func.param_types in
+      Func({ func with param_types = param_types' })
+  | _ as typ -> typ
+*)
 
 (********************
  * Exceptions
@@ -432,9 +445,12 @@ and check_fdecl env id f =
   (* Evaluate parameters, body, and return statement in local environment *)
   let func_env, param_ssids = check_fdecl_params env' f.params in
   let func_env, body = check_stmts func_env f.body in
-  let func_env, return = check_expr func_env f.return in
+  let func_env, _ = check_expr func_env f.return in
 
-  (* Evaluate parameter and function types *)
+  (* Evaluate parameter and function types. Check if the types of the 
+   * parameters in the function's type are the same as the types of the 
+   * paramter variables themselves. If not, throw an error. Constrain Unconst 
+   * paramters - in both the function's type and as variables - where possible *)
   let rec check_params_type_mismatch env acc func_param_types = function
     | [] -> env, List.rev acc
     | ssid :: tl -> 
@@ -488,6 +504,7 @@ and check_fdecl env id f =
     return = return;
   } in
 
+  (* Construct function type *)
   let f_type = Func({ param_types = param_types'; return_type = ret_type }) in
   
   (* Update function type in environment and return expression wrapper *)
