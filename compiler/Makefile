@@ -4,7 +4,7 @@
 OCAMLC = ocamlc
 OCAMLLEX = ocamllex
 OCAMLYACC = ocamlyacc
-OBJS = parser.cmo scanner.cmo analyzer.cmo generator.cmo odds.cmo
+OBJS = parser.cmo scanner.cmo analyzer.cmo pythonizer.cmo generator.cmo odds.cmo
 
 default: odds
 
@@ -35,12 +35,15 @@ analyzer.cmo: sast.cmi ast.cmi
 analyzer.cmx: sast.cmi ast.cmi
 generator.cmo: sast.cmi ast.cmi
 generator.cmx: sast.cmi ast.cmi
-odds.cmo: scanner.cmo parser.cmi generator.cmo analyzer.cmo
-odds.cmx: scanner.cmx parser.cmx generator.cmx analyzer.cmx
+odds.cmo: scanner.cmo parser.cmi generator.cmo analyzer.cmo pythonizer.cmo
+odds.cmx: scanner.cmx parser.cmx generator.cmx analyzer.cmx pythonizer.cmx
 parser.cmo: ast.cmi parser.cmi
 parser.cmx: ast.cmi parser.cmi
+pythonizer.cmo: past.cmi sast.cmi ast.cmi
+pythonizer.cmx: past.cmi sast.cmi ast.cmi
 scanner.cmo: parser.cmi ast.cmi
 scanner.cmx: parser.cmx ast.cmi
 ast.cmi:
 parser.cmi: ast.cmi
 sast.cmi: ast.cmi
+past.cmi: ast.cmi

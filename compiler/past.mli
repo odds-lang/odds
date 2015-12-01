@@ -14,6 +14,7 @@ open Ast
 type expr = 
   | Num_lit of Ast.num
   | String_lit of string
+  | Void_lit
   | Bool_lit of bool
   | Unop of Ast.unop * expr
   | Binop of expr * Ast.binop * expr
