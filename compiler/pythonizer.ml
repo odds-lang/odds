@@ -45,15 +45,17 @@ and past_list stmts expr_list =
   in aux stmts [] expr_list
 
 and past_fdecl_anon stmts sast_f =
-  let f = past_fdecl sast_f in let stmts' = (f :: stmts) in
-    stmts', Id(f.id)
+  let f = past_fdecl stmts sast_f in let stmts' = (f :: stmts) in
+    stmts', Id(f.name)
 
-and past_fdecl sast_f =
+and past_fdecl stmts sast_f =
+  let b = past_stmts sast_f.body in
+  let e = past_expr_unwrap stmts sast_f.return in
   let f = {
     fname = sast_f.name;
     params = sast_f.params;
-    body = sast_f.body;
-    return = sast_f.return;
+    body = b;
+    return = e;
   } in Def(f)
 
 and past_stmt stmts stmt = function
