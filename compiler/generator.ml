@@ -13,7 +13,7 @@ open Past
 open Printf
 
 (* Indentation *)
-let indent_of_num indent = String.make indent '\t'
+let indent_of_num indent = String.make (4 * indent) ' '
 
 (* Unary operators *)
 let txt_of_unop = function
@@ -72,11 +72,11 @@ and txt_of_fdecl indent f =
     let params = String.concat ", " f.p_params in
     let body = txt_of_stmts (indent + 1) f.p_body in
     let return = txt_of_expr indent f.p_return in
-    sprintf "def %s(%s):\n\n%s\n%sreturn %s\n"
+    sprintf "def %s(%s):%s\n%sreturn %s\n"
       f.p_name
       params
-      body
-      (indent_of_num (indent+1))
+      (if String.length body > 0 then "\n" ^ body else "")
+      (indent_of_num (indent + 1))
       return
 
 (* Statements *)
