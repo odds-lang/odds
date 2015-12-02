@@ -85,25 +85,12 @@ let print_env env =
   str_of_varmap "env params" env.params;
   str_of_varmap "env scope" env.scope
 
-(*
-let is_unconst = function
-  | Unconst -> true
-  | Func(func) -> List.mem Unconst func.param_types
-  | _ -> false
-
-let rec unconst_to_any = function
-  | Unconst -> Any
-  | Func(func) -> 
-      let param_types' = List.map unconst_to_any func.param_types in
-      Func({ func with param_types = param_types' })
-  | _ as typ -> typ
-*)
-
 (********************
  * Exceptions
  ********************)
 
 exception Semantic_Error of string
+exception Collect_Constraints_Error
 
 let var_error id =
   let message = sprintf "Variable '%s' is undefined in current scope" id
@@ -182,7 +169,6 @@ let constrain_error old_type const =
     (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
 
-
 (********************
  * Scoping
  ********************)
@@ -247,9 +233,10 @@ let rec constrain_ew env ew typ =
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
     | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(f)), _) ->
         let _, Sast.Expr(_, old_type) = check_id env (id_of_ssid ssid) in
-        let old_ret_type = match old_type with
+        let old_ret_type = begin match old_type with
           | Sast.Func(old_f) -> old_f.return_type
-          | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ in
+          | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ 
+        end in
         if f.return_type <> Unconst && f.return_type <> old_ret_type then 
           constrain_error old_ret_type f.return_type
         else
@@ -265,6 +252,33 @@ and constrain_e env e typ = match e with
   | Sast.Id(ssid) -> update_type env ssid typ; env
   | _ -> env
 
+(* Collects possible constraints and returns type that is as constrained as 
+ * possible.
+ *)
+and collect_constraints typ1 typ2 = match typ1 with
+  | Unconst -> typ2
+  | Func(func1) -> 
+      begin match typ2 with
+        | Unconst -> typ1
+        | Func(func2) -> 
+            let params1 = func1.param_types and params2 = func2.param_types and
+              ret1 = func1.return_type and ret2 = func2.return_type in
+            let params' = List.map2 collect_constraints params1 params2 and 
+              ret' = collect_constraints ret1 ret2 in
+            Func({ param_types = params'; return_type = ret'; })
+        | _ -> raise Collect_Constraints_Error
+      end
+  | _  -> 
+      if typ1 = typ2 || typ2 = Unconst then typ1 
+      else raise Collect_Constraints_Error
+
+(* Turns Unconst types to Any *)
+and unconst_to_any = function
+  | Unconst -> Any
+  | Func(func) -> 
+      let param_types' = List.map unconst_to_any func.param_types in
+      Func({ func with param_types = param_types' })
+  | _ as typ -> typ
 
 (************************************************
  * Semantic checking and tree SAST construction
@@ -372,17 +386,23 @@ and check_func_call_args env id f args =
   let rec aux env acc acc_param_types param_types = function
     | [] -> env, List.rev acc, List.rev acc_param_types
     | e :: tl -> let env', ew = check_expr env e in
-      let Sast.Expr(_, typ) = ew in
-      let const = List.hd param_types in
-      if typ = const || const = Any then
-        aux env' (ew :: acc) (const :: acc_param_types) (List.tl param_types) tl
-      (* To Do: What if user passes unconstrained variable to unconstrained function? *)
-      else if const = Unconst && typ <> Unconst then
-        aux env' (ew :: acc) (typ :: acc_param_types) (List.tl param_types) tl
-      else if typ = Unconst then
-        let env', ew' = constrain_ew env ew const in
-        aux env' (ew' :: acc) (const :: acc_param_types) (List.tl param_types) tl
-      else fcall_argtype_error id typ const in
+        let Sast.Expr(_, typ) = ew in
+        let param_type = List.hd param_types in
+        if typ = param_type || param_type = Any then
+          aux env' (ew :: acc) (param_type :: acc_param_types) (List.tl param_types) tl
+        (* TO DO: What if user passes unconstrained variable to unconstrained function? *)
+        else
+          let constrained_param = try collect_constraints typ param_type
+            with
+              | Collect_Constraints_Error -> fcall_argtype_error id typ param_type
+              | _ as e -> raise e in
+          let env', ew' = 
+            if typ <> constrained_param then 
+              constrain_ew env ew constrained_param 
+            else env', ew in
+          aux env' (ew' :: acc) (constrained_param :: acc_param_types) 
+            (List.tl param_types) tl in
+        
   let env', args', param_types' = aux env [] [] f.param_types args in
   
   if param_types' <> f.param_types then 
@@ -455,31 +475,30 @@ and check_fdecl env id f =
     | [] -> env, List.rev acc
     | ssid :: tl -> 
         let var = VarMap.find (id_of_ssid ssid) func_env.params and
-        func_param_type = List.hd func_param_types in  
-        (* If both the param var and func_param_type remain unconstrained, 
-         * this parameter can be of any type *)
-        if var.s_type = Unconst && func_param_type = Unconst then 
-          check_params_type_mismatch env (Any :: acc) (List.tl func_param_types) tl
-        (* If the param var and func_param_type are both not Unconst and they 
-         * are the same type, then everything is OK *)
-        else if var.s_type = func_param_type then
-          check_params_type_mismatch env (func_param_type :: acc) (List.tl func_param_types) tl
-        (* If the param var's type is constrained, but the func_param_type
-         * remains unconstrained, constrain the func_param_type *)
-        else if func_param_type = Unconst then
-          check_params_type_mismatch env (var.s_type :: acc) (List.tl func_param_types) tl
-        (* If the func_param_type is constrained, but the func var's type
-         * remains unconstrained, constrain the var's type *)
-        else if var.s_type = Unconst then
-          let env' = constrain_e func_env (Sast.Id(ssid)) func_param_type in 
-          check_params_type_mismatch env' (func_param_type :: acc) (List.tl func_param_types) tl
-        (* If the param var's type does not equal the func_param_type, then 
-         * there is a type mismatch error *)
-        else if var.s_type <> func_param_type then 
-          recursive_type_mismatch_error id var.s_type func_param_type
-        (* TEMPORARY CONDITION FOR TESTING - should never be reached *)
-        else
-          failwith "check_params_type_mismatch in Analyzer is not working correctly" in
+          func_param_type = List.hd func_param_types in
+        
+        (* Constrain Param to extent possible *)
+        let constrained_param = 
+          try collect_constraints var.s_type func_param_type
+          with 
+            | Collect_Constraints_Error -> 
+                recursive_type_mismatch_error id var.s_type func_param_type
+            | _ as e -> raise e in
+
+        (* Convert remaining Unconst to Any *)
+        let constrained_param' = unconst_to_any constrained_param in
+
+        (* If constrained_param has constraints not present in var, then 
+         * constrain var's type *)
+        let func_env' = 
+          if var.s_type <> constrained_param' then
+            constrain_e func_env (Sast.Id(ssid)) constrained_param'
+          else func_env in
+        
+        (* Recurse *)
+        check_params_type_mismatch func_env' (constrained_param' :: acc) 
+          (List.tl func_param_types) tl in
+        
   let param_types = 
     let typ = (VarMap.find id func_env.scope).s_type in
     match typ with
@@ -489,10 +508,10 @@ and check_fdecl env id f =
   
   (* Re-evaluate function return type to see if it has been constrained above *)
   let func_env, return = check_expr func_env f.return in
-  
+
   (* Unconstrained function return types are not allowed *)
   let Sast.Expr(_, ret_type) = return in
-  if ret_type = Unconst || ret_type = List(Unconst) then 
+  if ret_type = Any || ret_type = List(Unconst) then 
     fdecl_unconst_error id 
   else
 
