@@ -1,0 +1,7 @@
+[
+    Do(Unop(Not, Bool_lit(true))) ;
+    Do(Unop(Not, Bool_lit(false))) ;
+    Do(Binop(Bool_lit(true), And, Bool_lit(false))) ;
+    Do(Binop(Bool_lit(true), Or, Bool_lit(false))) ;
+    Do(Unop(Not, Binop(Bool_lit(true), Or, Bool_lit(false))))
+]

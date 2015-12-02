@@ -65,13 +65,15 @@ let str_of_unop = function
   | Not -> "!"      | Sub -> "-"
 
 let str_of_binop = function
+  (* Arithmetic *)
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
+  (* Boolean *)
+  | Or -> "||"      | And -> "&&"
   | Eq -> "=="      | Neq -> "!="
   | Less -> "<"     | Leq -> "<="
   | Greater -> ">"  | Geq -> ">="
-  (*| And -> "&&"     | Or -> "||"*)
 
 let print_env env =
   let print_var id var =
@@ -355,15 +357,17 @@ and check_binop env e1 op e2 =
      * any type *)
     | Eq | Neq -> env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
 
-    (*| And | Or ->
+    (* Boolean operations *)
+    | Or | And ->
       let is_bool = function
-        | Bool -> true
-        (* constrain types here *)
-        | Unconst -> true
+        | Bool | Unconst -> true
         | _ -> false in
       if is_bool typ1 && is_bool typ2 then
+        (* Constrain variable types to Bool if necessary *)
+        let env', ew1' = constrain_ew env' ew1 Bool in
+        let env', ew2' = constrain_ew env' ew2 Bool in
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
-      else binop_error typ1 op typ2*)
+      else binop_error typ1 op typ2
 
 (* Function calling *)
 and check_func_call env id args =
