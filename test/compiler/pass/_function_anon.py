@@ -1,6 +1,4 @@
 def anon_0():
-
-
-	return "hello"
+    return "hello"
 
 anon_0
