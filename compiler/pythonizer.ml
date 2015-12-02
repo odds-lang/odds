@@ -11,6 +11,7 @@
 open Sast
 open Past
 
+(* Expressions *)
 let rec past_expr stmts = function
   | Sast.Num_lit(n) -> stmts, Past.Num_lit(n)
   | Sast.String_lit(s) -> stmts, Past.String_lit(s)
@@ -36,6 +37,7 @@ let rec past_expr stmts = function
 and past_expr_unwrap stmts = function
   | Sast.Expr(e, _) -> past_expr stmts e
 
+(* Lists *)
 and past_list stmts expr_list =
   let rec aux stmts acc = function
     | [] -> stmts, List.rev acc
@@ -43,6 +45,7 @@ and past_list stmts expr_list =
         aux stmts' (e :: acc) tl
   in aux stmts [] expr_list
 
+(* Functions *)
 and past_fdecl_anon stmts sast_f =
   let stmts', def = past_fdecl stmts sast_f in
   let stmts' = (Past.Stmt(def) :: stmts') in
@@ -60,6 +63,7 @@ and past_fdecl stmts sast_f =
     p_return = e;
   } in stmts', Past.Def(f)
 
+(* Statements *)
 and past_stmt stmts = function
   | Sast.Do(we) -> let stmts', e = past_expr_unwrap stmts we in
       stmts', Past.Stmt(e)
