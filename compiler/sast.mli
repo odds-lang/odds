@@ -18,6 +18,7 @@ type data_type =
   | Void
   | List of data_type
   | Func of func
+  | Any
   | Unconst
 
 and func = {
@@ -52,6 +53,7 @@ and fdecl = {
   params: string list;    (* Parameters *)
   body: stmt list;        (* Function Body *)
   return: expr_wrapper;   (* Return *)
+  is_anon: bool;          (* Anonymous? *)
 }
 
 (* Statements *)
