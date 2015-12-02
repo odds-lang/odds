@@ -1,6 +1,4 @@
 [
-    Do(Unop(Not, Bool_lit(true))) ;
-    Do(Unop(Not, Bool_lit(false))) ;
     Do(Binop(Num_lit(1), Eq, Num_lit(1))) ;
     Do(Binop(Num_lit(41), Neq, Num_lit(42))) ;
     Do(Binop(Num_lit(41), Less, Num_lit(42))) ;

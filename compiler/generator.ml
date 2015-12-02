@@ -29,6 +29,8 @@ let txt_of_binop = function
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
+  | Or -> "or"
+  | And -> "and"
   | Eq -> "=="
   | Neq -> "!="
   | Less -> "<"

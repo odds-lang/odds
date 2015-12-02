@@ -1,0 +1,5 @@
+do !true
+do !false
+do true && false
+do true || false
+do !(true || false)
