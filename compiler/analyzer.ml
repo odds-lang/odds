@@ -255,6 +255,7 @@ and constrain_e env e typ = match e with
 (* Collects possible constraints and returns type that is as constrained as 
  * possible.
  *)
+(* TODO: FIX THIS ERROR OCCURS WHEN ANY *)
 and collect_constraints typ1 typ2 = match typ1 with
   | Unconst -> typ2
   | Func(func1) -> 
