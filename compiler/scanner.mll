@@ -10,12 +10,11 @@
 
 { 
   open Parser
-
   exception Illegal_Character of string
 }
 
 let numeric = ['0'-'9']
-let whitespace = [' ' '\n' '\r']
+let whitespace = [' ' '\n' '\r' '\t']
 
 rule token = parse
 
