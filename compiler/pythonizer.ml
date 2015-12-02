@@ -46,7 +46,7 @@ and past_list stmts expr_list =
 and past_fdecl_anon stmts sast_f =
   let stmts', def = past_fdecl stmts sast_f in
   let stmts' = (def :: stmts') in
-  let Past.Def(f) = def in
+  match def with
     | Past.Def(f) -> stmts', Past.Id(f.p_name)
     | _ -> failwith "past_fdecl() returned non Past.Def type"
 
