@@ -1,0 +1,3 @@
+do call = (x, y) ->
+  do print("Hello, world!")
+  return x + y

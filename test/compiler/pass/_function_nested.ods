@@ -1,0 +1,6 @@
+do foo = (x, y) ->
+  do bar = (a, b) ->
+    do print("Hello, world!")
+    return a + b
+  do z = bar(1, 2)
+  return x + z
