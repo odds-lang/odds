@@ -11,7 +11,7 @@
 { open Parser }
 
 let num = ['0'-'9']
-let whitespace = [' ' '\n' '\r']
+let whitespace = [' ' '\n' '\r' '\t']
 
 rule token = parse
  
