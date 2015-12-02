@@ -24,6 +24,7 @@ let _ =
     let output_file = Sys.argv.(2) in
     let ast = Parser.program Scanner.token lexbuf in
     let sast = Analyzer.check_ast ast in
+    let past = Pythonizer.generate_past sast in
     match action with
-      | Compile -> Generator.gen_program output_file sast
+      | Compile -> Generator.gen_program output_file past
       | Help -> ()

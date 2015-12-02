@@ -9,7 +9,7 @@
  *)
 
 open Ast
-open Sast
+open Past
 open Printf
 
 (* Indentation *)
@@ -44,37 +44,34 @@ let rec txt_of_expr indent = function
   | Num_lit(n) -> txt_of_num n
   | String_lit(s) -> sprintf "\"%s\"" s
   | Bool_lit(b) -> String.capitalize (string_of_bool(b))
-  | Void_lit -> "None"
+  | None_lit -> "None"
   | Id(id) -> id
-  | Unop(op, ew) -> sprintf "(%s%s)"
+  | Unop(op, e) -> sprintf "(%s%s)"
       (txt_of_unop op)
-      (txt_of_expr_wrapper indent ew)
-  | Binop(ew1, op, ew2) -> sprintf "(%s %s %s)"
-      (txt_of_expr_wrapper indent ew1)
+      (txt_of_expr indent e)
+  | Binop(e1, op, e2) -> sprintf "(%s %s %s)"
+      (txt_of_expr indent e1)
       (txt_of_binop op)
-      (txt_of_expr_wrapper indent ew2)
+      (txt_of_expr indent e2)
   | Call(id, args) -> sprintf "%s(%s)"
-      (txt_of_expr_wrapper indent id) (txt_of_list indent args)
-  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr_wrapper indent e)
+      (txt_of_expr indent id) (txt_of_list indent args)
+  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr indent e)
   | List(l) -> sprintf "[%s]" (txt_of_list indent l)
-  | Fdecl(f) -> txt_of_fdecl indent f
-
-and txt_of_expr_wrapper indent = function
-  | Expr(e, _) -> txt_of_expr indent e
+  | Def(f) -> txt_of_fdecl indent f
 
 and txt_of_list indent = function
   | [] -> ""
-  | [x] -> txt_of_expr_wrapper indent x
+  | [x] -> txt_of_expr indent x
   | _ as l ->
-    let strs = List.map (fun x -> txt_of_expr_wrapper indent x) l
+    let strs = List.map (fun x -> txt_of_expr indent x) l
     in String.concat ", " strs
 
 and txt_of_fdecl indent f =
-    let params = String.concat ", " f.params in
-    let body = txt_of_stmts (indent + 1) f.body in
-    let return = txt_of_expr_wrapper indent f.return in
+    let params = String.concat ", " f.p_params in
+    let body = txt_of_stmts (indent + 1) f.p_body in
+    let return = txt_of_expr indent f.p_return in
     sprintf "def %s(%s):\n\n%s\n%sreturn %s\n"
-      f.fname
+      f.p_name
       params
       body
       (indent_of_num (indent+1))
@@ -82,9 +79,9 @@ and txt_of_fdecl indent f =
 
 (* Statements *)
 and txt_of_stmt indent = function
-  | Sast.Do(ew) -> sprintf "%s%s"
+  | Past.Stmt(e) -> sprintf "%s%s"
       (indent_of_num indent)
-      (txt_of_expr_wrapper indent ew)
+      (txt_of_expr indent e)
 
 and txt_of_stmts indent stmt_list =
   let rec aux indent acc = function
@@ -93,7 +90,7 @@ and txt_of_stmts indent stmt_list =
   in aux indent [] stmt_list
 
 (* Code generation entry point *)
-let gen_program output_file sast =
-  let txt = txt_of_stmts 0 sast in
+let gen_program output_file past =
+  let txt = txt_of_stmts 0 past in
   let file = open_out output_file in
     fprintf file "%s\n" txt; close_out file
