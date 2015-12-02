@@ -8,30 +8,29 @@
  *  - Lilly Wang
  *)
 
-open Ast
 open Sast
 open Past
 
 let rec past_expr stmts = function
-  | Sast.Num_lit(n) -> stmts, Num_lit(n)
-  | Sast.String_lit(s) -> stmts, String_lit(s)
-  | Sast.Bool_lit(b) -> stmts, Bool_lit(b)
-  | Sast.Void_lit -> stmts, Void_lit
-  | Sast.Id(id) -> stmts, Id(id)
+  | Sast.Num_lit(n) -> stmts, Past.Num_lit(n)
+  | Sast.String_lit(s) -> stmts, Past.String_lit(s)
+  | Sast.Bool_lit(b) -> stmts, Past.Bool_lit(b)
+  | Sast.Void_lit -> stmts, Past.None_lit
+  | Sast.Id(id) -> stmts, Past.Id(id)
   | Sast.Unop(op, we) -> let stmts', e = past_expr_unwrap stmts we in
-      stmts', Unop(op, e)
+      stmts', Past.Unop(op, e)
   | Sast.Binop(we1, op, we2) ->
       let stmts', e1 = past_expr_unwrap stmts we1 in
       let stmts', e2 = past_expr_unwrap stmts we2 in
-      stmts', Binop(e1, op, e2)
+      stmts', Past.Binop(e1, op, e2)
   | Sast.Call(wid, wargs) ->
       let stmts', id = past_expr_unwrap stmts wid in
       let stmts', args = past_list stmts wargs in
-      stmts', Call(id, args)
+      stmts', Past.Call(id, args)
   | Sast.Assign(id, we) -> let stmts', e = past_expr_unwrap stmts we in
-      stmts', Assign(id, e)
-  | Sast.List(wl) -> let stmts', l = past_list stmts wl in stmts', List(l)
-  | Sast.Fdecl(f) -> if f.is_anon = true then past_fdecl_anon stmts f
+      stmts', Past.Assign(id, e)
+  | Sast.List(wl) -> let stmts', l = past_list stmts wl in stmts', Past.List(l)
+  | Sast.Fdecl(f) -> if f.is_anon then past_fdecl_anon stmts f
       else past_fdecl stmts f
 
 and past_expr_unwrap stmts = function
@@ -46,31 +45,31 @@ and past_list stmts expr_list =
 
 and past_fdecl_anon stmts sast_f =
   let stmts', def = past_fdecl stmts sast_f in
-  let s = (def :: stmts') in
+  let stmts' = (def :: stmts') in
   match def with
-    | Def(f) -> s, Id(f.name)
-    | _ as f -> s, f (* hacky fix *)
+    | Past.Def(f) -> stmts', Past.Id(f.p_name)
+    | _ as f -> stmts', f (* hacky fix *)
 
 and past_fdecl stmts sast_f =
   let b = past_stmts sast_f.body in
   let stmts', e = past_expr_unwrap stmts sast_f.return in
   let f = {
-    name = sast_f.fname;
-    params = sast_f.params;
-    body = b;
-    return = e;
-  } in stmts', Def(f)
+    p_name = sast_f.fname;
+    p_params = sast_f.params;
+    p_body = b;
+    p_return = e;
+  } in stmts', Past.Def(f)
 
-and past_stmt stmts stmt = function
-  | Sast.Do(we) -> past_expr_unwrap stmts we
+and past_stmt stmts = function
+  | Sast.Do(we) -> let stmts', e = past_expr_unwrap stmts we in
+      stmts', Past.Stmt(e)
 
 and past_stmts stmt_list = 
   let rec aux acc = function
     | [] -> List.rev acc
-    | stmt :: tl -> let stmts, e = past_stmt acc stmt in
-        aux (e :: stmts) tl
+    | stmt :: tl -> let stmts, s = past_stmt acc stmt in
+        aux (s :: stmts) tl
   in aux [] stmt_list
 
 (* Program entry point *)
-let generate_past sast = 
-  past = past_stmts sast
+let generate_past sast = past_stmts sast

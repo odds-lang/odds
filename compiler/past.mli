@@ -14,7 +14,7 @@ open Ast
 type expr = 
   | Num_lit of Ast.num
   | String_lit of string
-  | Void_lit
+  | None_lit
   | Bool_lit of bool
   | Unop of Ast.unop * expr
   | Binop of expr * Ast.binop * expr
@@ -26,15 +26,15 @@ type expr =
 
 (* Function Declarations *)
 and fdecl = {
-  name: string;          (* Function Name *)
-  params: string list;   (* Parameters *)
-  body: stmt list;       (* Function Body *)
-  return: expr;          (* Return *)
+  p_name: string;          (* Function Name *)
+  p_params: string list;   (* Parameters *)
+  p_body: stmt list;       (* Function Body *)
+  p_return: expr;          (* Return *)
 }
 
 (* Statements *)
 and stmt =
-  | Do of expr     (* set foo = bar + 3 *)
+  | Stmt of expr     (* set foo = bar + 3 *)
 
 (* Program entry point *)
 type program = stmt list
