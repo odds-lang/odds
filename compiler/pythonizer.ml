@@ -46,9 +46,9 @@ and past_list stmts expr_list =
 and past_fdecl_anon stmts sast_f =
   let stmts', def = past_fdecl stmts sast_f in
   let stmts' = (def :: stmts') in
-  match def with
+  let Past.Def(f) = def in
     | Past.Def(f) -> stmts', Past.Id(f.p_name)
-    | _ as f -> stmts', f (* hacky fix *)
+    | _ -> failwith "past_fdecl() returned non Past.Def type"
 
 and past_fdecl stmts sast_f =
   let b = past_stmts sast_f.body in
@@ -67,8 +67,8 @@ and past_stmt stmts = function
 and past_stmts stmt_list = 
   let rec aux acc = function
     | [] -> List.rev acc
-    | stmt :: tl -> let stmts, s = past_stmt acc stmt in
-        aux (s :: stmts) tl
+    | stmt :: tl -> let stmts', s = past_stmt acc stmt in
+        aux (s :: stmts') tl
   in aux [] stmt_list
 
 (* Program entry point *)
