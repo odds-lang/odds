@@ -59,6 +59,7 @@ let rec txt_of_expr indent = function
   | List(l) -> sprintf "[%s]" (txt_of_list indent l)
   | Def(f) -> txt_of_fdecl indent f
 
+(* Lists *)
 and txt_of_list indent = function
   | [] -> ""
   | [x] -> txt_of_expr indent x
@@ -66,6 +67,7 @@ and txt_of_list indent = function
     let strs = List.map (fun x -> txt_of_expr indent x) l
     in String.concat ", " strs
 
+(* Functions *)
 and txt_of_fdecl indent f =
     let params = String.concat ", " f.p_params in
     let body = txt_of_stmts (indent + 1) f.p_body in
