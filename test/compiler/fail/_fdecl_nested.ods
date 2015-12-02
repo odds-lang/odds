@@ -1,0 +1,5 @@
+do sum = (x, y, z) ->
+    do aux = (a, b) -> return a + b
+    return aux(x, y) + z
+
+do sum(1, true, 3)
