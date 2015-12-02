@@ -241,7 +241,7 @@ let rec constrain_ew env ew typ =
           constrain_error old_ret_type f.return_type
         else
           let f' = Func({ f with return_type = typ }) in
-          update_type env ssid f'; env, Sast.Expr(e, typ)
+          update_type env ssid f'; env, Sast.Expr(e, f')
     | _ -> env, ew
 
 (* This function is the same as constrain_ew, except instead of constraining
@@ -367,7 +367,7 @@ and check_binop env e1 op e2 =
 (* Function calling *)
 and check_func_call env id args =
   let env', ew = check_expr env id in
-  let Sast.Expr(id, typ) = ew in
+  let Sast.Expr(id', typ) = ew in
   let env', ew', f = match typ with
     | Sast.Func(f) -> env', ew, f
     | Unconst -> 
@@ -376,8 +376,12 @@ and check_func_call env id args =
           return_type = Unconst;
         } in 
         let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
-    | _ -> fcall_nonfunc_error id typ in
-  let env', args = check_func_call_args env' id f args in
+    | _ -> fcall_nonfunc_error id' typ in
+  let env', args = check_func_call_args env' id' f args in
+  let env', ew' = check_expr env' id in
+  (* NEEDED TO ADD ABOVE LINE SO THAT ew' GETS UPDATED APPROPRIATELY 
+   * ACCORDING TO CONSTRAINTS PLACED IN CHECK FUNC CALL ARGS - THIS IS HACKEY
+   * LIKELY THERE IS A BETTER WAY OF DOING THIS, BUT PERHAPS NOT *)
   env', Sast.Expr(Sast.Call(ew', args), f.return_type)
 
 and check_func_call_args env id f args =
@@ -397,8 +401,8 @@ and check_func_call_args env id f args =
               | Collect_Constraints_Error -> fcall_argtype_error id typ param_type
               | _ as e -> raise e in
           let env', ew' = 
-            if typ <> constrained_param then 
-              constrain_ew env ew constrained_param 
+            if typ <> constrained_param then
+              constrain_ew env ew constrained_param
             else env', ew in
           aux env' (ew' :: acc) (constrained_param :: acc_param_types) 
             (List.tl param_types) tl in
@@ -406,11 +410,9 @@ and check_func_call_args env id f args =
   let env', args', param_types' = aux env [] [] f.param_types args in
   
   if param_types' <> f.param_types then 
-    let f_type = Func({
-      param_types = param_types'; 
-      return_type = f.return_type;
-    }) in 
-    let env' = constrain_e env' id f_type in env', args'
+    let f_type = Func({ f with param_types = param_types'; }) in 
+    let env' = constrain_e env' id f_type in 
+    env', args'
   else env', args'
 
 (* Assignment *)
