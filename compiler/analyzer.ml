@@ -28,7 +28,7 @@ let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; } builtins
 let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; } builtins
 let builtins = VarMap.add "print" {
   name = "print";
-  s_type = Func({ param_types = [Unconst]; return_type = Void; });
+  s_type = Func({ param_types = [Any]; return_type = Void; });
 } builtins
 
 let root_env = {
@@ -53,6 +53,7 @@ let rec str_of_type = function
   | Void -> "Void"
   | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
+  | Any -> "Any"
   | Unconst -> "Unconst"
 
 and str_of_func f =
@@ -84,12 +85,12 @@ let print_env env =
   str_of_varmap "env params" env.params;
   str_of_varmap "env scope" env.scope
 
-
 (********************
  * Exceptions
  ********************)
 
 exception Semantic_Error of string
+exception Collect_Constraints_Error
 
 let var_error id =
   let message = sprintf "Variable '%s' is undefined in current scope" id
@@ -112,7 +113,7 @@ let fcall_nonid_error () =
 
 let fcall_nonfunc_error id typ =
   let id = match id with
-    | Sast.Id(id) -> id_of_ssid id
+    | Sast.Id(ssid) -> id_of_ssid ssid
     | _ -> fcall_nonid_error () in
   let message = sprintf "Attempting to call %s type '%s' as a function" 
     (str_of_type typ) id in
@@ -146,16 +147,27 @@ let list_error list_type elem_type =
     (str_of_type elem_type) (str_of_type list_type) in
   raise (Semantic_Error message)
 
+let recursive_type_mismatch_error f_id expected_type typ = 
+  let message = sprintf 
+    "Invalid recursive function call of function '%s' with type %s when type %s was expected" 
+    f_id (str_of_type typ) (str_of_type expected_type) in
+  raise (Semantic_Error message)
+
 let fdecl_unconst_error id =
   let message = sprintf
     "Invalid declaration of function '%s' with unconstrained return value" id in
+  raise (Semantic_Error message)
+
+let fdecl_reassign_error id typ =
+  let message = sprintf
+    "Invalid attempt to reassign function identifier '%s' to type %s"
+    id (str_of_type typ) in
   raise (Semantic_Error message)
 
 let constrain_error old_type const =
   let message = sprintf "Invalid attempt to change unconstrained type %s to %s"
     (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
-
 
 (********************
  * Scoping
@@ -213,21 +225,68 @@ let update_type env ssid typ =
  * in which to search for an ID. Returns the newly constrained environment and
  * expression wrapper on success, or their old values on failure.
  *)
-let constrain_ew env ew typ =
+let rec constrain_ew env ew typ =
   let Sast.Expr(e, old_typ) = ew in
   if old_typ <> Unconst && old_typ <> typ then constrain_error old_typ typ else
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
     | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
+    | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(f)), _) ->
+        let _, Sast.Expr(_, old_type) = check_id env (id_of_ssid ssid) in
+        let old_ret_type = begin match old_type with
+          | Sast.Func(old_f) -> old_f.return_type
+          | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ 
+        end in
+        if f.return_type <> Unconst && f.return_type <> old_ret_type then 
+          constrain_error old_ret_type f.return_type
+        else
+          let f' = Func({ f with return_type = typ }) in
+          update_type env ssid f'; env, Sast.Expr(e, f')
     | _ -> env, ew
 
+(* This function is the same as constrain_ew, except instead of constraining
+ * expression_wrappers, it constrains expressions. This function only modifies
+ * the env and does not return an expression wrapper. 
+ *)
+and constrain_e env e typ = match e with
+  | Sast.Id(ssid) -> update_type env ssid typ; env
+  | _ -> env
+
+(* Collects possible constraints and returns type that is as constrained as 
+ * possible.
+ *)
+(* TODO: FIX THIS ERROR OCCURS WHEN ANY *)
+and collect_constraints typ1 typ2 = match typ1 with
+  | Unconst -> typ2
+  | Func(func1) -> 
+      begin match typ2 with
+        | Unconst -> typ1
+        | Func(func2) -> 
+            let params1 = func1.param_types and params2 = func2.param_types and
+              ret1 = func1.return_type and ret2 = func2.return_type in
+            let params' = List.map2 collect_constraints params1 params2 and 
+              ret' = collect_constraints ret1 ret2 in
+            Func({ param_types = params'; return_type = ret'; })
+        | _ -> raise Collect_Constraints_Error
+      end
+  | _  -> 
+      if typ1 = typ2 || typ2 = Unconst then typ1 
+      else raise Collect_Constraints_Error
+
+(* Turns Unconst types to Any *)
+and unconst_to_any = function
+  | Unconst -> Any
+  | Func(func) -> 
+      let param_types' = List.map unconst_to_any func.param_types in
+      Func({ func with param_types = param_types' })
+  | _ as typ -> typ
 
 (************************************************
  * Semantic checking and tree SAST construction
  ************************************************)
 
 (* Branching point *)
-let rec check_expr env = function
+and check_expr env = function
   | Ast.Num_lit(x) -> env, Sast.Expr(Sast.Num_lit(x), Num)
   | Ast.String_lit(s) -> env, Sast.Expr(Sast.String_lit(s), String)
   | Ast.Bool_lit(b) -> env, Sast.Expr(Sast.Bool_lit(b), Bool)
@@ -292,14 +351,9 @@ and check_binop env e1 op e2 =
         env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
 
-    (* Equality operations - overloaded, no constraining can be done *)
-    | Eq | Neq -> 
-      let is_valid_equality = function
-        | Num | Bool | String | Unconst -> true
-        | _ -> false in 
-      if is_valid_equality typ1 && is_valid_equality typ2 then 
-        env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
-      else binop_error typ1 op typ2
+    (* Equality operations - overloaded, no constraining can be done, can take
+     * any type *)
+    | Eq | Neq -> env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
 
     (*| And | Or ->
       let is_bool = function
@@ -314,28 +368,53 @@ and check_binop env e1 op e2 =
 (* Function calling *)
 and check_func_call env id args =
   let env', ew = check_expr env id in
-  let Sast.Expr(id, typ) = ew in
-  let f = match typ with
-    | Sast.Func(f) -> f
-    | _ -> fcall_nonfunc_error id typ in
-  let env', args = check_func_call_args env' id f args in
-  env', Sast.Expr(Sast.Call(ew, args), f.return_type)
+  let Sast.Expr(id', typ) = ew in
+  let env', ew', f = match typ with
+    | Sast.Func(f) -> env', ew, f
+    | Unconst -> 
+        let f = {
+          param_types = List.map (fun _ -> Unconst) args;
+          return_type = Unconst;
+        } in 
+        let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
+    | _ -> fcall_nonfunc_error id' typ in
+  let env', args = check_func_call_args env' id' f args in
+  let env', ew' = check_expr env' id in
+  (* NEEDED TO ADD ABOVE LINE SO THAT ew' GETS UPDATED APPROPRIATELY 
+   * ACCORDING TO CONSTRAINTS PLACED IN CHECK FUNC CALL ARGS - THIS IS HACKEY
+   * LIKELY THERE IS A BETTER WAY OF DOING THIS, BUT PERHAPS NOT *)
+  env', Sast.Expr(Sast.Call(ew', args), f.return_type)
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then
     fcall_length_error id (List.length f.param_types) (List.length args) else
-  let rec aux env acc param_types = function
-    | [] -> env, List.rev acc
+  let rec aux env acc acc_param_types param_types = function
+    | [] -> env, List.rev acc, List.rev acc_param_types
     | e :: tl -> let env', ew = check_expr env e in
-      let Sast.Expr(_, typ) = ew in
-      let const = List.hd param_types in
-      if typ = const || const = Unconst then
-        aux env' (ew :: acc) (List.tl param_types) tl
-      else if typ = Unconst then
-        let env', ew' = constrain_ew env ew const in
-        aux env' (ew' :: acc) (List.tl param_types) tl
-      else fcall_argtype_error id typ const in
-  aux env [] f.param_types args
+        let Sast.Expr(_, typ) = ew in
+        let param_type = List.hd param_types in
+        if typ = param_type || param_type = Any then
+          aux env' (ew :: acc) (param_type :: acc_param_types) (List.tl param_types) tl
+        (* TO DO: What if user passes unconstrained variable to unconstrained function? *)
+        else
+          let constrained_param = try collect_constraints typ param_type
+            with
+              | Collect_Constraints_Error -> fcall_argtype_error id typ param_type
+              | _ as e -> raise e in
+          let env', ew' = 
+            if typ <> constrained_param then
+              constrain_ew env ew constrained_param
+            else env', ew in
+          aux env' (ew' :: acc) (constrained_param :: acc_param_types) 
+            (List.tl param_types) tl in
+        
+  let env', args', param_types' = aux env [] [] f.param_types args in
+  
+  if param_types' <> f.param_types then 
+    let f_type = Func({ f with param_types = param_types'; }) in 
+    let env' = constrain_e env' id f_type in 
+    env', args'
+  else env', args'
 
 (* Assignment *)
 and check_assign env id = function
@@ -369,18 +448,75 @@ and check_list env l =
 
 (* Function declaration *)
 and check_fdecl env id f =
-  (* Add function name to scope to allow recursion *)
-  let env', name = add_to_scope env id Unconst in
+  (* Add function name to scope with unconstrained param types and return type
+   * to allow recursion *)
+  let f_type = Func({
+    param_types = List.map (fun _ -> Unconst) f.params;
+    return_type = Unconst;
+  }) in 
+  
+  (* Check if attempting to reassign an identifier belonging to the parent
+   * function. If so, fail. If not, add the function to scope *)
+  let env', name = 
+    if VarMap.mem id env.scope then
+      let old_type = (VarMap.find id env.scope).s_type in
+      match old_type with
+        | Func(f) when f.return_type = Unconst -> fdecl_reassign_error id f_type
+        | _ -> add_to_scope env id f_type
+    else add_to_scope env id f_type in
 
   (* Evaluate parameters, body, and return statement in local environment *)
   let func_env, param_ssids = check_fdecl_params env' f.params in
   let func_env, body = check_stmts func_env f.body in
+  let func_env, _ = check_expr func_env f.return in
+
+  (* Evaluate parameter and function types. Check if the types of the 
+   * parameters in the function's type are the same as the types of the 
+   * paramter variables themselves. If not, throw an error. Constrain Unconst 
+   * paramters - in both the function's type and as variables - where possible *)
+  let rec check_params_type_mismatch env acc func_param_types = function
+    | [] -> env, List.rev acc
+    | ssid :: tl -> 
+        let var = VarMap.find (id_of_ssid ssid) func_env.params and
+          func_param_type = List.hd func_param_types in
+        
+        (* Constrain Param to extent possible *)
+        let constrained_param = 
+          try collect_constraints var.s_type func_param_type
+          with 
+            | Collect_Constraints_Error -> 
+                recursive_type_mismatch_error id var.s_type func_param_type
+            | _ as e -> raise e in
+
+        (* Convert remaining Unconst to Any *)
+        let constrained_param' = unconst_to_any constrained_param in
+
+        (* If constrained_param has constraints not present in var, then 
+         * constrain var's type *)
+        let func_env' = 
+          if var.s_type <> constrained_param' then
+            constrain_e func_env (Sast.Id(ssid)) constrained_param'
+          else func_env in
+        
+        (* Recurse *)
+        check_params_type_mismatch func_env' (constrained_param' :: acc) 
+          (List.tl func_param_types) tl in
+        
+  let param_types = 
+    let typ = (VarMap.find id func_env.scope).s_type in
+    match typ with
+      | Func(func) -> func.param_types
+      | _ -> fdecl_reassign_error id typ in
+  let func_env, param_types' = check_params_type_mismatch func_env [] param_types param_ssids in
+  
+  (* Re-evaluate function return type to see if it has been constrained above *)
   let func_env, return = check_expr func_env f.return in
-  let Sast.Expr(_, ret_type) = return in
 
   (* Unconstrained function return types are not allowed *)
-  if ret_type = Unconst || ret_type = List(Unconst)
-  then fdecl_unconst_error id else
+  let Sast.Expr(_, ret_type) = return in
+  if ret_type = Any || ret_type = List(Unconst) then 
+    fdecl_unconst_error id 
+  else
 
   (* Construct function declaration *)
   let fdecl = {
@@ -390,13 +526,8 @@ and check_fdecl env id f =
     return = return;
   } in
 
-  (* Evaluate parameter and function types *)
-  let param_types = 
-    let type_of_param ssid =
-      let var = VarMap.find (id_of_ssid ssid) func_env.params in
-      var.s_type in
-    List.map type_of_param param_ssids in
-  let f_type = Func({ param_types = param_types; return_type = ret_type }) in
+  (* Construct function type *)
+  let f_type = Func({ param_types = param_types'; return_type = ret_type }) in
   
   (* Update function type in environment and return expression wrapper *)
   let ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
