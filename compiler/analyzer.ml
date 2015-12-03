@@ -108,7 +108,6 @@ let bool_error t =
     (str_of_type t) in
   raise (Semantic_Error message)
 
- 
 let binop_error t1 op t2 = 
   let message =
     sprintf "Invalid use of binary operator '%s' with types %s and %s" 
@@ -176,6 +175,17 @@ let constrain_error old_type const =
   let message = sprintf "Invalid attempt to change unconstrained type %s to %s"
     (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
+
+let constrain_if_error =
+  let message = sprintf "Attempt to create conditional with two unconstrained outputs"
+    in
+  raise (Semantic_Error message)
+
+let mismatch_if_error typ1 typ2 = 
+  let message = sprintf "Invalid attempt to return two types from if, else of  %s & %s"
+    (str_of_type typ1) (str_of_type typ2) in
+  raise (Semantic_Error message)
+
 
 (********************
  * Scoping
@@ -320,7 +330,16 @@ and check_if env e1 e2 e3 =
   let Sast.Expr(_, typ2) = ew2 in
   let env', ew3 = check_expr env' e3 in
   let Sast.Expr(_, typ3) = ew3 in
-    env', Sast.Expr(Sast.If(ew1, ew2, ew3), Bool)
+  let eq = typ2 == typ3 in
+  let uc_2 = typ2 == Unconst in 
+  let env' = match (eq, uc_2) with 
+    | true, false -> env 
+    | true, true -> constrain_if_error
+    | false, true -> let env, _ = constrain_ew env' ew2 typ3 in env
+    | _ -> if typ3 == Unconst then 
+        let env, _ = constrain_ew env' ew3 typ2 in env
+        else mismatch_if_error typ2 typ3 
+  in env', Sast.Expr(Sast.If(ew1, ew2, ew3), Bool)
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
