@@ -1,7 +1,8 @@
 [
-    Do(Int_lit(42)) ; 
-    Do(Float_lit(42.1)) ; 
+    Do(Num_lit(42)) ; 
+    Do(Num_lit(42.1)) ; 
     Do(String_lit(forty-two)) ; 
     Do(Bool_lit(true)) ; 
-    Do(Bool_lit(false))
+    Do(Bool_lit(false)) ;
+    Do(Void_lit)
 ]

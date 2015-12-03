@@ -3,3 +3,4 @@ do 42.1
 do "forty-two"
 do true
 do false
+do void

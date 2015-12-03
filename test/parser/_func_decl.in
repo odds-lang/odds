@@ -1,0 +1,4 @@
+do sum = (x, y) ->
+    do print(x)
+    do print(y)
+    return x + y

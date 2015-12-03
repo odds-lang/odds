@@ -1,0 +1,15 @@
+[
+    Do(
+        Assign(
+            sum,
+            Fdecl({
+                params=[x ; y] ;
+                body=[
+                    Do(Call(Id(print), [Id(x)])) ;
+                    Do(Call(Id(print), [Id(y)]))
+                ] ;
+                return=Binop(Id(x), Add, Id(y))
+            })
+        )
+    )
+]

@@ -41,8 +41,7 @@
 %token <string> ID
 
 /* Literals */
-%token <int> INT_LITERAL
-%token <float> FLOAT_LITERAL
+%token <Ast.num> NUM_LITERAL
 %token <string> STRING_LITERAL
 %token <bool> BOOL_LITERAL
 %token VOID_LITERAL
@@ -51,6 +50,8 @@
 %nonassoc IF THEN ELSE
 %right ASN
 %nonassoc RETURN
+%left OR
+%left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
 %left PLUS MINUS
@@ -76,16 +77,35 @@ stmt:
 
 /* Expressions */
 expr:
-  | literal                      { $1 }
-  | arith                        { $1 }
-  | boolean                      { $1 }
-  | ID                           { Id($1) }
-  | ID ASN expr                  { Assign($1, $3) }
-  | ID LPAREN list_opt RPAREN    { Call(Id($1), $3) }
-  | LBRACE list_opt RBRACE       { List($2) }
-  | LPAREN expr RPAREN           { $2 }
+  | literal                     { $1 }
+  | arith                       { $1 }
+  | boolean                     { $1 }
+  | ID                          { Id($1) }
+  | ID ASN expr                 { Assign($1, $3) }
+  | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
+  | LBRACE list_opt RBRACE      { List($2) }
+  | LPAREN expr RPAREN          { $2 }
+  | fdecl                       { Fdecl($1) }
   | IF expr THEN expr ELSE expr  { If($2, $4, $6) }
 
+/* Function declaration */
+fdecl:
+  | LPAREN fparam_opt FDELIM stmt_list RETURN expr
+    { {
+      params = $2;
+      body = List.rev $4;
+      return = $6;
+    } }
+
+fparam_opt:
+  | /* nothing */               { [] }
+  | fparam_list                 { List.rev $1 }
+
+fparam_list:
+  | ID                          { [$1] }
+  | fparam_list COMMA ID        { $3 :: $1 }
+
+/* Lists and function calling */
 list_opt:
   | /* nothing */                { [] }
   | list                         { List.rev $1 }
@@ -105,17 +125,19 @@ arith:
   | expr POWER expr              { Binop($1, Pow, $3) }
 
 boolean:
-  | NOT expr                     { Unop(Not, $2) }
-  | expr EQ expr                 { Binop($1, Eq, $3) }
-  | expr NEQ expr                { Binop($1, Neq, $3) }
-  | expr LCAR expr               { Binop($1, Less, $3) }
-  | expr LEQ expr                { Binop($1, Leq, $3) }
-  | expr RCAR expr               { Binop($1, Greater, $3) }
-  | expr GEQ expr                { Binop($1, Geq, $3) }
+  | NOT expr                    { Unop(Not, $2) }
+  | expr OR expr                { Binop($1, Or, $3) }
+  | expr AND expr               { Binop($1, And, $3) }
+  | expr EQ expr                { Binop($1, Eq, $3) }
+  | expr NEQ expr               { Binop($1, Neq, $3) }
+  | expr LCAR expr              { Binop($1, Less, $3) }
+  | expr LEQ expr               { Binop($1, Leq, $3) }
+  | expr RCAR expr              { Binop($1, Greater, $3) }
+  | expr GEQ expr               { Binop($1, Geq, $3) }
 
 /* Literals */
 literal:
-  | INT_LITERAL                  { Int_lit($1) }
-  | FLOAT_LITERAL                { Float_lit($1) }
-  | STRING_LITERAL               { String_lit($1) }
-  | BOOL_LITERAL                 { Bool_lit($1) }
+  | NUM_LITERAL                 { Num_lit($1) }
+  | STRING_LITERAL              { String_lit($1) }
+  | BOOL_LITERAL                { Bool_lit($1) }
+  | VOID_LITERAL                { Void_lit }

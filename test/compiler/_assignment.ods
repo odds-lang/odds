@@ -1,3 +1,0 @@
-do x = 4
-do x = 5
-do print(x)

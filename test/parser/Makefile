@@ -1,7 +1,7 @@
 # Odds: test/parser Makefile
 #  - builds the parserize executable for printing parsed strings from stdin
 
-OCAMLC=ocamlc
+OCAMLC = ocamlc
 OBJS = ../../compiler/parser.cmo ../../compiler/scanner.cmo parserize.cmo
 INCLUDES = -I ../../compiler
 

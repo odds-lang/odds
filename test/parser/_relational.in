@@ -1,5 +1,3 @@
-do !true
-do !false
 do 1 == 1
 do 41 != 42
 do 41 < 42

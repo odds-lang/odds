@@ -9,25 +9,31 @@
  *)
 
 open Ast
+open Past
 open Printf
 
-module StringMap = Map.Make(String)
+(* Indentation *)
+let indent_of_num indent = String.make (4 * indent) ' '
 
-let ss_counter = ref (-1) (* Static Scoping Variable Counter *)
-
-let get_ss_id name = 
-  ss_counter := !ss_counter + 1;
-  sprintf "%s_%d" name !ss_counter
+(* Unary operators *)
+let txt_of_unop = function
+  | Not -> "not "
+  | Sub -> "-"
 
 (* Binary operators *)
-let txt_of_op = function
+let txt_of_num = function
+  | Num_int(i) -> string_of_int i
+  | Num_float(f) -> string_of_float f
+
+let txt_of_binop = function
   | Add -> "+"
   | Sub -> "-"
   | Mult -> "*"
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
-  | Not -> "not "
+  | Or -> "or"
+  | And -> "and"
   | Eq -> "=="
   | Neq -> "!="
   | Less -> "<"
@@ -39,50 +45,64 @@ let txt_of_op = function
 let txt_of_cond i t e = sprintf "if %s:\n{\n%s\n}\nelse:\n{\n%s\n}" i t e
 
 (* Expressions *)
-let rec txt_of_expr env = function
-  | Int_lit(i) -> env, string_of_int(i)
-  | Float_lit(f) -> env, string_of_float(f)
-  | String_lit(s) -> env, sprintf "\"%s\"" s
-  | Bool_lit(b) -> env, String.capitalize (string_of_bool(b))
-  | Id(e) -> env, if StringMap.mem e env then StringMap.find e env else e
-  | Unop(op, e) -> let _, e = txt_of_expr env e in 
-      env, sprintf "(%s%s)" (txt_of_op op) e
-  | Binop(e1, op, e2) -> 
-      let _, e1 = txt_of_expr env e1 and _, e2 = txt_of_expr env e2 in
-      env, sprintf "(%s %s %s)" e1 (txt_of_op op) e2
-  | Call(f, args) -> let _, id = txt_of_expr env f in
-      env, txt_of_func_call env id args
-  | Assign(id, e) ->
-      let ss_id = get_ss_id id and _, e = txt_of_expr env e in
-      StringMap.add id ss_id env, sprintf "%s = %s" ss_id e
-  | List(l) -> let e = txt_of_list env l in env, sprintf "[%s]" e
-  | If(e1, e2, e3) -> let _, i = txt_of_expr env e1
-      and _, t = txt_of_expr env e2 and _, e = txt_of_expr env e3 in
-      env, txt_of_cond i t e
+let rec txt_of_expr indent = function
+  | Num_lit(n) -> txt_of_num n
+  | String_lit(s) -> sprintf "\"%s\"" s
+  | Bool_lit(b) -> String.capitalize (string_of_bool(b))
+  | None_lit -> "None"
+  | Id(id) -> id
+  | Unop(op, e) -> sprintf "(%s%s)"
+      (txt_of_unop op)
+      (txt_of_expr indent e)
+  | Binop(e1, op, e2) -> sprintf "(%s %s %s)"
+      (txt_of_expr indent e1)
+      (txt_of_binop op)
+      (txt_of_expr indent e2)
+  | Call(id, args) -> sprintf "%s(%s)"
+      (txt_of_expr indent id) (txt_of_list indent args)
+  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr indent e)
+  | List(l) -> sprintf "[%s]" (txt_of_list indent l)
+  | Def(f) -> txt_of_fdecl indent f 
+  | If(e1, e2, e3) -> 
+      let i = txt_of_expr indent e1
+      and t = txt_of_expr indent e2 
+      and e = txt_of_expr indent e3 in
+      txt_of_cond i t e
 
-(* Function calls *)
-and txt_of_func_call env f args = match f with
-  | "print" -> sprintf "print(%s)" (txt_of_list env args)
-  | _ ->  sprintf "%s(%s)" f (txt_of_list env args)
-
-and txt_of_list env = function
+(* Lists *)
+and txt_of_list indent = function
   | [] -> ""
-  | [x] -> snd (txt_of_expr env x)
-  | _ as l -> String.concat ", " (List.map (fun e -> snd (txt_of_expr env e)) l)
+  | [x] -> txt_of_expr indent x
+  | _ as l ->
+    let strs = List.map (fun x -> txt_of_expr indent x) l
+    in String.concat ", " strs
+
+(* Functions *)
+and txt_of_fdecl indent f =
+    let params = String.concat ", " f.p_params in
+    let body = txt_of_stmts (indent + 1) f.p_body in
+    let return = txt_of_expr indent f.p_return in
+    sprintf "def %s(%s):%s\n%sreturn %s"
+      f.p_name
+      params
+      (if String.length body > 0 then "\n" ^ body else "")
+      (indent_of_num (indent + 1))
+      return
 
 (* Statements *)
-let txt_of_stmt env = function
-  | Do(e) -> let env, e = txt_of_expr env e in env, sprintf "%s" e
+and txt_of_stmt indent = function
+  | Past.Stmt(e) -> sprintf "%s%s"
+      (indent_of_num indent)
+      (txt_of_expr indent e)
 
-let txt_of_stmts stmt_list = 
-  let rec process_stmts env acc = function
+and txt_of_stmts indent stmt_list =
+  let rec aux indent acc = function
     | [] -> String.concat "\n" (List.rev acc)
-    | stmt :: tl -> let updated_env, stmt_txt = txt_of_stmt env stmt in
-        process_stmts updated_env (stmt_txt :: acc) tl
-  in process_stmts StringMap.empty [] stmt_list
+    | stmt :: tl -> aux indent ((txt_of_stmt indent stmt) :: acc) tl
+  in aux indent [] stmt_list
 
 (* Code generation entry point *)
-let gen_program output_file program =
-  let code = txt_of_stmts program in 
+let gen_program output_file past =
+  let txt = txt_of_stmts 0 past in
   let file = open_out output_file in
-  fprintf file "%s\n" code; close_out file
+    fprintf file "%s\n" txt; close_out file
