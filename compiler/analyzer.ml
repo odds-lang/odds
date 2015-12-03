@@ -252,27 +252,50 @@ and constrain_e env e typ = match e with
   | Sast.Id(ssid) -> update_type env ssid typ; env
   | _ -> env
 
+
+and collect_constraints typ1 typ2 = 
 (* Collects possible constraints and returns type that is as constrained as 
- * possible.
- *)
-(* TODO: FIX THIS ERROR OCCURS WHEN ANY *)
-and collect_constraints typ1 typ2 = match typ1 with
-  | Unconst -> if typ2 <> Any then typ2 else Unconst
-  | Func(func1) -> 
-      begin match typ2 with
-        | Unconst -> if typ1 <> Any then typ1 else Unconst
-        | Func(func2) -> 
-            let params1 = func1.param_types and params2 = func2.param_types and
-              ret1 = func1.return_type and ret2 = func2.return_type in
-            let params' = List.map2 collect_constraints params1 params2 and 
-              ret' = collect_constraints ret1 ret2 in
-            Func({ param_types = params'; return_type = ret'; })
-        | _ -> raise Collect_Constraints_Error
-      end
-  | _  -> 
-      if typ1 = typ2 || typ2 = Unconst || typ2 = Any then 
-        if typ1 <> Any then typ1 else Unconst 
-      else raise Collect_Constraints_Error
+ * possible. Any is always converted to Unconst. *)
+  let rec collect_constraints_overwrite_any typ1 typ2 = match typ1 with
+    | Unconst -> if typ2 <> Any then typ2 else Unconst
+    | Func(func1) -> 
+        begin match typ2 with
+          | Unconst -> if typ1 <> Any then typ1 else Unconst
+          | Func(func2) -> 
+              let params1 = func1.param_types and params2 = func2.param_types and
+                ret1 = func1.return_type and ret2 = func2.return_type in
+              let params' = List.map2 collect_constraints_overwrite_any params1 params2 and 
+                ret' = collect_constraints_overwrite_any ret1 ret2 in
+              Func({ param_types = params'; return_type = ret'; })
+          | _ -> raise Collect_Constraints_Error
+        end
+    | _  -> 
+        if typ1 = typ2 || typ2 = Unconst || typ2 = Any then 
+          if typ1 <> Any then typ1 else Unconst 
+        else raise Collect_Constraints_Error
+
+  (* Collects possible constraints and returns type that is as constrained as 
+   * possible. Any remains. *)
+  and collect_constraints_keep_any typ1 typ2 = match typ1 with
+    | Unconst -> typ2
+    | Any -> Any
+    | Func(func1) -> 
+        begin match typ2 with
+          | Unconst -> typ1
+          | Any -> Any
+          | Func(func2) -> 
+              let params1 = func1.param_types and params2 = func2.param_types and
+                ret1 = func1.return_type and ret2 = func2.return_type in
+              let params' = List.map2 collect_constraints_keep_any params1 params2 and 
+                ret' = collect_constraints_keep_any ret1 ret2 in
+              Func({ param_types = params'; return_type = ret'; })
+          | _ -> raise Collect_Constraints_Error
+        end
+    | _  -> 
+        if typ2 = Any then Any
+        else if typ1 = typ2 || typ2 = Unconst then typ1
+        else raise Collect_Constraints_Error
+  in collect_constraints_overwrite_any typ1 typ2, collect_constraints_keep_any typ1 typ2
 
 (* Turns Unconst types to Any *)
 and unconst_to_any = function
@@ -395,16 +418,15 @@ and check_func_call_args env id f args =
         let Sast.Expr(_, typ) = ew in
         let param_type = List.hd param_types in
         (* TO DO: What if user passes unconstrained variable to unconstrained function? *)
-        let constrained_param = try collect_constraints typ param_type
+        let constrained, constrained_w_any = try collect_constraints typ param_type
           with
             | Collect_Constraints_Error -> fcall_argtype_error id typ param_type
             | _ as e -> raise e in
-        let constrained_param = unconst_to_any constrained_param in
         let env', ew' = 
-          if typ <> constrained_param then
-            constrain_ew env ew constrained_param
+          if typ <> constrained then
+            constrain_ew env ew constrained
           else env', ew in
-        aux env' (ew' :: acc) (constrained_param :: acc_param_types) 
+        aux env' (ew' :: acc) (constrained_w_any :: acc_param_types) 
           (List.tl param_types) tl in
         
   let env', args', param_types' = aux env [] [] f.param_types args in
@@ -480,7 +502,7 @@ and check_fdecl env id f anon =
           func_param_type = List.hd func_param_types in
         
         (* Constrain Param to extent possible *)
-        let constrained_param = 
+        let constrained, constrained_w_any = 
           try collect_constraints var.s_type func_param_type
           with 
             | Collect_Constraints_Error -> 
@@ -488,17 +510,17 @@ and check_fdecl env id f anon =
             | _ as e -> raise e in
 
         (* Convert remaining Unconst to Any *)
-        let constrained_param' = unconst_to_any constrained_param in
+        let constrained_w_any = unconst_to_any constrained_w_any in
 
         (* If constrained_param has constraints not present in var, then 
          * constrain var's type *)
         let func_env' = 
-          if var.s_type <> constrained_param' then
-            constrain_e func_env (Sast.Id(ssid)) constrained_param'
+          if var.s_type <> constrained then
+            constrain_e func_env (Sast.Id(ssid)) constrained
           else func_env in
         
         (* Recurse *)
-        check_params_type_mismatch func_env' (constrained_param' :: acc) 
+        check_params_type_mismatch func_env' (constrained_w_any :: acc) 
           (List.tl func_param_types) tl in
         
   let param_types = 
@@ -513,7 +535,7 @@ and check_fdecl env id f anon =
 
   (* Unconstrained function return types are not allowed *)
   let Sast.Expr(_, ret_type) = return in
-  if ret_type = Any || ret_type = List(Unconst) then
+  if ret_type = Unconst || ret_type = List(Unconst) then
     fdecl_unconst_error id
   else
 
