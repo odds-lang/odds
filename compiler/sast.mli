@@ -47,6 +47,7 @@ and expr =
   | Call of expr_wrapper * expr_wrapper list
   | List of expr_wrapper list
   | Fdecl of fdecl
+  | If of expr_wrapper * expr_wrapper * expr_wrapper
 
 and fdecl = {
   fname: string;          (* Function Name *)

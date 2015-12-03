@@ -103,6 +103,12 @@ let unop_error op t =
     (str_of_unop op) (str_of_type t) in
   raise (Semantic_Error message)
 
+let bool_error t = 
+  let message = sprintf "Expected type boolean, instead had type %s"
+    (str_of_type t) in
+  raise (Semantic_Error message)
+
+ 
 let binop_error t1 op t2 = 
   let message =
     sprintf "Invalid use of binary operator '%s' with types %s and %s" 
@@ -300,6 +306,21 @@ and check_expr env = function
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
+  | Ast.If(e1, e2, e3) -> check_if env e1 e2 e3
+
+(* Ensure e1 is a boolean, e2 and e3 are the same type *)
+and check_if env e1 e2 e3 = 
+  let env', ew1 = check_expr env e1 in
+  let Sast.Expr(_, typ1) = ew1 in
+  let env', ew1' = match typ1 with  
+    | Unconst -> constrain_ew env' ew1 Bool 
+    | Bool -> env, ew1
+    | _ as t -> bool_error t in
+  let env', ew2 = check_expr env' e2 in
+  let Sast.Expr(_, typ2) = ew2 in
+  let env', ew3 = check_expr env' e3 in
+  let Sast.Expr(_, typ3) = ew3 in
+    env', Sast.Expr(Sast.If(ew1, ew2, ew3), Bool)
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
