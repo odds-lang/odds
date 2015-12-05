@@ -1,3 +1,8 @@
 do call = (x, y) ->
   do print("Hello, world!")
   return x + y
+
+do no_args = () -> return void
+
+do call(40, 2)
+do no_args()
