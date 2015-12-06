@@ -256,7 +256,7 @@ and constrain_e env e typ = match e with
 (* This function takes 2 types. It returns 2 types. The first type returned 
  * will overwrite 'Any' to another type, including, possibly, 'Unconst.' The
  * second type returned will have 'Any' in it, overwriting any other type
- * when neccessary.
+ * when neccessary. TO DO: MAKE THIS CODE SHORTER AND PRETTIER.
  *)
 and collect_constraints typ1 typ2 = 
 (* Collects possible constraints and returns type that is as constrained as 
