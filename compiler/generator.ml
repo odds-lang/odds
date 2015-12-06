@@ -42,7 +42,8 @@ let txt_of_binop = function
   | Geq -> ">="
 
 (* Conditionals *)
-let txt_of_cond i t e = sprintf "if %s:\n{\n%s\n}\nelse:\n{\n%s\n}" i t e
+let txt_of_cond indent i t e = sprintf "%sif %s:\n%s\n%selse:\n%s\n" 
+  (indent_of_num indent) i t (indent_of_num indent) e
 
 (* Expressions *)
 let rec txt_of_expr indent = function
@@ -88,10 +89,11 @@ and txt_of_stmt indent = function
   | Return(e) -> sprintf "%sreturn %s" 
       (indent_of_num indent) (txt_of_expr indent e)
   | If(e1, e2, e3) -> 
-      let i = txt_of_expr indent e1
-      and t = txt_of_stmt indent e2 
-      and e = txt_of_stmt indent e3 in
-      txt_of_cond i t e
+      let inner_ind = indent + 1 in 
+      let i = txt_of_expr inner_ind e1
+      and t = txt_of_stmt inner_ind e2 
+      and e = txt_of_stmt inner_ind e3 in
+      txt_of_cond indent i t e
   | Stmt(e) -> sprintf "%s%s" (indent_of_num indent) (txt_of_expr indent e)
 
 and txt_of_stmts indent stmt_list =

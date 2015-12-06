@@ -176,11 +176,11 @@ let constrain_error old_type const =
     (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
 
-(*let constrain_if_error =
+let constrain_if_error () =
   let message = sprintf "Attempt to create conditional with two unconstrained outputs"
     in
   raise (Semantic_Error message)
-*)
+
 let mismatch_if_error typ1 typ2 = 
   let message = sprintf "Invalid attempt to return two types from if, else of  %s & %s"
     (str_of_type typ1) (str_of_type typ2) in
@@ -316,10 +316,10 @@ and check_expr env = function
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
- (* | Ast.If(e1, e2, e3) -> printf "We have an if statement" ;check_if env e1 e2 e3
+  | Ast.If(e1, e2, e3) -> check_if env e1 e2 e3 "anon" false
 
 (* Ensure e1 is a boolean, e2 and e3 are the same type *)
-and check_if env e1 e2 e3 = 
+and check_if env e1 e2 e3 id ia = 
   let env', ew1 = check_expr env e1 in
   let Sast.Expr(_, typ1) = ew1 in
   let env', ew1' = match typ1 with  
@@ -332,12 +332,20 @@ and check_if env e1 e2 e3 =
   let Sast.Expr(_, typ3) = ew3 in
   let const = try collect_constraints typ2 typ3
   with
-    | Collect_Constraints_Error -> constrain_if_error 
+    | Collect_Constraints_Error -> constrain_if_error () 
     | _ as e -> raise e in
   let env', ew2' = constrain_ew env' ew2 const in
   let env', ew3' = constrain_ew env' ew3 const in 
-  env', Sast.Expr(Sast.If(ew1, ew2', ew3'), const)
-*)
+  let stmt = {
+      cond_name = (get_ssid "cond");
+      cond = ew1;
+      stmt_1 = ew2';
+      stmt_2 = ew3';
+      id_assign = (get_ssid id);
+      is_assigned = ia
+  } in 
+  env', Sast.Expr(Sast.If(stmt), const)
+
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
   let var =
@@ -460,6 +468,7 @@ and check_func_call_args env id f args =
 (* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f false
+  | Ast.If(e1, e2, e3) -> check_if env e1 e2 e3 id true 
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       if typ = Void then assign_error id Void else

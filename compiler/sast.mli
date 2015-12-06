@@ -47,7 +47,16 @@ and expr =
   | Call of expr_wrapper * expr_wrapper list
   | List of expr_wrapper list
   | Fdecl of fdecl
-  | If of expr_wrapper * expr_wrapper * expr_wrapper
+  | If of if_stmt
+
+and if_stmt = {
+  cond_name: string;
+  cond: expr_wrapper;
+  stmt_1: expr_wrapper;
+  stmt_2: expr_wrapper;
+  id_assign: string;
+  is_assigned: bool;
+}
 
 and fdecl = {
   fname: string;          (* Function Name *)

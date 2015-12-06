@@ -31,14 +31,14 @@ let rec past_expr stmts = function
       let stmts', args = past_list stmts wargs in
       stmts', Past.Call(id, args)
   | Sast.List(wl) -> let stmts', l = past_list stmts wl in stmts', Past.List(l)
-  | _ -> (* We shouldn't reach here *) raise (Python_Error "confusing")
+  | _ -> raise (Python_Error "Statement Within Expression")
 
 and mk_stmt stmts = function 
   | Sast.Assign(id, we) -> let stmts', e = past_expr_unwrap stmts we in
       stmts', Past.Assign(id, e)
   | Sast.Fdecl(f) -> if f.is_anon then past_fdecl_anon stmts f
       else past_fdecl stmts f
-  | Sast.If(e1, e2, e3) -> mk_if_function stmts e1 e2 e3
+  | Sast.If(cond) -> mk_if_function stmts cond
   | _ as e -> let stmt', e' = past_expr stmts e in
       stmt', Past.Stmt(e')
  
@@ -57,14 +57,24 @@ and past_list stmts expr_list =
   in aux stmts [] expr_list
 
 (* Functions *)
-and mk_if_function stmts e1 e2 e3 = 
-    let stmts', e1' = past_expr_unwrap stmts e1 in
-    let stmts', e2' = past_expr_unwrap stmts e2 in
-    let stmts', e3' = past_expr_unwrap stmts e3 in
+and mk_if_function stmts cond = 
+    let stmts', e1' = past_expr_unwrap stmts cond.cond in
+    let stmts', e2' = past_expr_unwrap stmts cond.stmt_1 in
+    let stmts', e3' = past_expr_unwrap stmts cond.stmt_2 in
     let r1 = Past.Return(e2') in
     let r2 = Past.Return(e3') in
     let if_stmt = Past.If(e1', r1, r2) in 
-    stmts', if_stmt
+    let func = {
+      p_name = cond.cond_name;
+      p_params = [];
+      p_body = [if_stmt];
+    } in
+    let def = Def(func) in
+    let stmts' = (def:: stmts') in 
+    let call = Past.Call(Past.Id(func.p_name), []) in
+    match cond.is_assigned with
+      | true -> stmts', Past.Assign(cond.id_assign, call)
+      | false -> stmts', Past.Stmt(call)
 
 and past_fdecl_anon stmts sast_f =
   let stmts', def = past_fdecl stmts sast_f in
