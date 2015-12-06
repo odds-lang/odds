@@ -44,8 +44,8 @@ let txt_of_binop = function
   | Geq -> ">="
 
 (* Conditionals *)
-let txt_of_cond indent i t e = sprintf "%sif %s:\n%s\n%selse:\n%s\n" 
-  (indent_of_num indent) i t (indent_of_num indent) e
+let txt_of_cond indent i t e = sprintf "if %s:\n%s\n%selse:\n%s\n" 
+  i t (indent_of_num indent) e
 
 (* Expressions *)
 let rec txt_of_expr indent = function

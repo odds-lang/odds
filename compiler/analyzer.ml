@@ -177,7 +177,7 @@ let constrain_error old_type const =
   raise (Semantic_Error message)
 
 let constrain_if_error () =
-  let message = sprintf "Attempt to create conditional with two unconstrained outputs"
+  let message = sprintf "Attempt to create conditional with invalid types for the if and else"
     in
   raise (Semantic_Error message)
 
