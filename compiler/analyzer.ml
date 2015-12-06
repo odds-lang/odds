@@ -316,7 +316,7 @@ and check_expr env = function
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
-  | Ast.If(e1, e2, e3) -> check_if env e1 e2 e3
+  | Ast.If(e1, e2, e3) -> printf "We have an if statement" ;check_if env e1 e2 e3
 
 (* Ensure e1 is a boolean, e2 and e3 are the same type *)
 and check_if env e1 e2 e3 = 
