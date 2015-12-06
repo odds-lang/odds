@@ -74,22 +74,25 @@ and txt_of_list indent = function
 and txt_of_fdecl indent f =
     let params = String.concat ", " f.p_params in
     let body = txt_of_stmts (indent + 1) f.p_body in
-    sprintf "def %s(%s):%s"
+    sprintf "%sdef %s(%s):%s"
+      (indent_of_num indent)
       f.p_name
       params
       (if String.length body > 0 then "\n" ^ body else "")
 
 (* Statements *)
 and txt_of_stmt indent = function 
-  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr indent e)
+  | Assign(id, e) -> sprintf "%s%s = %s" 
+      (indent_of_num indent) id (txt_of_expr indent e)
   | Def(f) -> txt_of_fdecl indent f 
-  | Return(e) -> sprintf "return %s" (txt_of_expr indent e)
+  | Return(e) -> sprintf "%sreturn %s" 
+      (indent_of_num indent) (txt_of_expr indent e)
   | If(e1, e2, e3) -> 
       let i = txt_of_expr indent e1
       and t = txt_of_stmt indent e2 
       and e = txt_of_stmt indent e3 in
       txt_of_cond i t e
-  | Stmt(e) -> txt_of_expr indent e
+  | Stmt(e) -> sprintf "%s%s" (indent_of_num indent) (txt_of_expr indent e)
 
 and txt_of_stmts indent stmt_list =
   let rec aux indent acc = function
