@@ -23,14 +23,24 @@ type environment = {
   scope: Sast.var VarMap.t;
 }
 
+(* Builtin variables and functions *)
 let builtins = VarMap.empty
-let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; } builtins
-let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; } builtins
+let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; builtin = true; } builtins
+let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; builtin = true; } builtins
 let builtins = VarMap.add "print" {
   name = "print";
   s_type = Func({ param_types = [Any]; return_type = Void; });
+  builtin = true;
 } builtins
 
+(* List builtins *)
+let builtins = VarMap.add "head" {
+  name = "head";
+  s_type = Func({ param_types = [List(Any)]; return_type = Any; });
+  builtin = true;
+} builtins
+
+(* Program entry environment *)
 let root_env = {
   params = VarMap.empty;
   scope = builtins;
@@ -43,7 +53,8 @@ let root_env = {
 
 (* Given an ssid my_var_#, return the original key ID my_var *)
 let id_of_ssid ssid =
-  let id_len = String.rindex ssid '_' in
+  let id_len =
+    try String.rindex ssid '_' with Not_found -> String.length ssid in
   String.sub ssid 0 id_len
 
 let rec str_of_type = function
@@ -125,8 +136,8 @@ let fcall_length_error id num_params num_args =
   let name = match id with
     | Sast.Id(name) -> id_of_ssid name
     | _ -> fcall_nonid_error () in
-  let message =
-    sprintf "Function '%s' expects %d arguments but was called with %d instead"
+  let message = sprintf
+    "Function '%s' expects %d argument(s) but was called with %d instead"
     name num_params num_args in
   raise (Semantic_Error message)
 
@@ -186,7 +197,7 @@ let get_ssid name =
 (* Add 'id' with type 's_type' to the environment scope *)
 let add_to_scope env id s_type =
   let ss_id = get_ssid id in
-  let var = { name = ss_id; s_type = s_type } in
+  let var = { name = ss_id; s_type = s_type; builtin = false; } in
   let env' = {
     params = env.params;
     scope = VarMap.add id var env.scope;
@@ -199,7 +210,7 @@ let add_to_scope env id s_type =
  *)
 let add_to_params env id =
   let ss_id = get_ssid id in 
-  let var = { name = ss_id; s_type = Unconst } in
+  let var = { name = ss_id; s_type = Unconst; builtin = false; } in
   let env' = {
     params = VarMap.add id var env.params;
     scope = VarMap.remove id env.scope;
