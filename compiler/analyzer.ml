@@ -332,9 +332,8 @@ and check_if env e1 e2 e3 =
   let Sast.Expr(_, typ3) = ew3 in
   let const = try collect_constraints typ2 typ3
   with
-    | Collect_Constraints_Error -> (*Call error here *)
+    | Collect_Constraints_Error -> constrain_if_error 
     | _ as e -> raise e in
-
   let env', ew2' = constrain_ew env' ew2 const in
   let env', ew3' = constrain_ew env' ew3 const in 
   env', Sast.Expr(Sast.If(ew1, ew2', ew3'), const)

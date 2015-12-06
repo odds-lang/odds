@@ -60,14 +60,7 @@ let rec txt_of_expr indent = function
       (txt_of_expr indent e2)
   | Call(id, args) -> sprintf "%s(%s)"
       (txt_of_expr indent id) (txt_of_list indent args)
-  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr indent e)
   | List(l) -> sprintf "[%s]" (txt_of_list indent l)
-  | Def(f) -> txt_of_fdecl indent f 
-  | If(e1, e2, e3) -> 
-      let i = txt_of_expr indent e1
-      and t = txt_of_expr indent e2 
-      and e = txt_of_expr indent e3 in
-      txt_of_cond i t e
 
 (* Lists *)
 and txt_of_list indent = function
@@ -81,19 +74,22 @@ and txt_of_list indent = function
 and txt_of_fdecl indent f =
     let params = String.concat ", " f.p_params in
     let body = txt_of_stmts (indent + 1) f.p_body in
-    let return = txt_of_expr indent f.p_return in
-    sprintf "def %s(%s):%s\n%sreturn %s"
+    sprintf "def %s(%s):%s"
       f.p_name
       params
       (if String.length body > 0 then "\n" ^ body else "")
-      (indent_of_num (indent + 1))
-      return
 
 (* Statements *)
-and txt_of_stmt indent = function
-  | Past.Stmt(e) -> sprintf "%s%s"
-      (indent_of_num indent)
-      (txt_of_expr indent e)
+and txt_of_stmt indent = function 
+  | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr indent e)
+  | Def(f) -> txt_of_fdecl indent f 
+  | Return(e) -> sprintf "return %s" (txt_of_expr indent e)
+  | If(e1, e2, e3) -> 
+      let i = txt_of_expr indent e1
+      and t = txt_of_stmt indent e2 
+      and e = txt_of_stmt indent e3 in
+      txt_of_cond i t e
+  | Stmt(e) -> txt_of_expr indent e
 
 and txt_of_stmts indent stmt_list =
   let rec aux indent acc = function
