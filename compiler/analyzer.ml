@@ -330,16 +330,14 @@ and check_if env e1 e2 e3 =
   let Sast.Expr(_, typ2) = ew2 in
   let env', ew3 = check_expr env' e3 in
   let Sast.Expr(_, typ3) = ew3 in
-  let eq = typ2 == typ3 in
-  let uc_2 = typ2 == Unconst in 
-  let env' = match (eq, uc_2) with 
-    | true, false -> env 
-    | true, true -> constrain_if_error
-    | false, true -> let env, _ = constrain_ew env' ew2 typ3 in env
-    | _ -> if typ3 == Unconst then 
-        let env, _ = constrain_ew env' ew3 typ2 in env
-        else mismatch_if_error typ2 typ3 
-  in env', Sast.Expr(Sast.If(ew1, ew2, ew3), Bool)
+  let const = try collect_constraints typ2 typ3
+  with
+    | Collect_Constraints_Error -> (*Call error here *)
+    | _ as e -> raise e in
+
+  let env', ew2' = constrain_ew env' ew2 const in
+  let env', ew3' = constrain_ew env' ew3 const in 
+  env', Sast.Expr(Sast.If(ew1, ew2', ew3'), const)
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
