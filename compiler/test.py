@@ -1,7 +1,7 @@
-def cond_1():
-    if True:
+def cond_0():
+        if True:
         return 5
     else:
         return 4
 
-x_0 = cond_1()
+print(cond_0())

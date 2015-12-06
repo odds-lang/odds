@@ -48,14 +48,13 @@ and expr =
   | List of expr_wrapper list
   | Fdecl of fdecl
   | If of if_stmt
+  | If_Assign of string * if_stmt
 
 and if_stmt = {
   cond_name: string;
   cond: expr_wrapper;
   stmt_1: expr_wrapper;
   stmt_2: expr_wrapper;
-  id_assign: string;
-  is_assigned: bool;
 }
 
 and fdecl = {

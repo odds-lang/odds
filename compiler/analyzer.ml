@@ -341,10 +341,11 @@ and check_if env e1 e2 e3 id ia =
       cond = ew1;
       stmt_1 = ew2';
       stmt_2 = ew3';
-      id_assign = (get_ssid id);
-      is_assigned = ia
   } in 
-  env', Sast.Expr(Sast.If(stmt), const)
+  let stmt' = match ia with 
+    | true -> Sast.If_Assign(id, stmt)
+    | false -> Sast.If(stmt) in 
+  env', Sast.Expr(stmt', const)
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =

@@ -53,6 +53,7 @@ let rec str_of_expr = function
       let f_str = sprintf "(%s) ->\n%s\n%sreturn %s\n" params_txt body_txt 
         (tab_str ()) return_txt in
       tabs := !tabs - 1; f_str
+   | If(cond) -> "if"
 
 and str_of_wrapped_expr_list l = 
   String.concat ", " (List.map str_of_wrapped_expr l)
