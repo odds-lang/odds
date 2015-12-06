@@ -79,6 +79,7 @@ expr:
   | literal                     { $1 }
   | arith                       { $1 }
   | boolean                     { $1 }
+  | dist                        { Dist($1) }
   | ID                          { Id($1) }
   | ID ASN expr                 { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN   { Call(Id($1), $3) }
@@ -111,6 +112,16 @@ list_opt:
 list:
   | expr                        { [$1] }
   | list COMMA expr             { $3 :: $1 }
+
+
+/* Distributions */
+dist:
+  | LCAR expr COMMA expr RCAR VBAR expr
+    { {
+      min = $2;
+      max = $4;
+      dist_func = $7;
+    } }
 
 /* Binary operators */
 arith:
