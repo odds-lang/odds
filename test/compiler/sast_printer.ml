@@ -42,7 +42,7 @@ let rec str_of_expr = function
       let func_name = str_of_wrapped_expr we and 
         args_txt = str_of_wrapped_expr_list we_list in
       sprintf "%s(%s)" func_name args_txt
-  | List(we_list) -> 
+  | Ldecl(we_list) -> 
       let l_txt = str_of_wrapped_expr_list we_list in
       sprintf "[%s]" l_txt
   | Fdecl(fdecl) -> 
