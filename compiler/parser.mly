@@ -49,6 +49,8 @@
 /* Precedence and associativity of each operator */
 %right ASN
 %nonassoc RETURN
+%left OR
+%left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
 %left PLUS MINUS
@@ -122,6 +124,8 @@ arith:
 
 boolean:
   | NOT expr                    { Unop(Not, $2) }
+  | expr OR expr                { Binop($1, Or, $3) }
+  | expr AND expr               { Binop($1, And, $3) }
   | expr EQ expr                { Binop($1, Eq, $3) }
   | expr NEQ expr               { Binop($1, Neq, $3) }
   | expr LCAR expr              { Binop($1, Less, $3) }

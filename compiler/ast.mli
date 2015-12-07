@@ -15,20 +15,22 @@ type unop =
 
 (* Binary operators *)
 type binop =
+  (* Arithmetic *)
   | Add      (* + *)
   | Sub      (* - *)
   | Mult     (* * *)
   | Div      (* / *)
   | Mod      (* % *)
   | Pow      (* ** *)
+  (* Boolean *)
+  | Or       (* || *)
+  | And      (* && *)
   | Eq       (* == *)
   | Neq      (* != *)
   | Less     (* < *)
   | Leq      (* <= *)
   | Greater  (* > *)
   | Geq      (* >= *)
-  (*| And      (* && *)
-  | Or       (* || *)*)
 
 (* Expressions *)
 type num =

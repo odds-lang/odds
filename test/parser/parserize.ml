@@ -14,6 +14,8 @@ let txt_of_binop = function
   | Div -> "Div"
   | Mod -> "Mod"
   | Pow -> "Pow"
+  | Or -> "Or"
+  | And -> "And"
   | Eq -> "Eq"
   | Neq -> "Neq"
   | Less -> "Less"
