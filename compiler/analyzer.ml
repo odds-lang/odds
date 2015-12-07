@@ -256,51 +256,64 @@ and constrain_e env e typ = match e with
 (* This function takes 2 types. It returns 2 types. The first type returned 
  * will overwrite 'Any' to another type, including, possibly, 'Unconst.' The
  * second type returned will have 'Any' in it, overwriting any other type
- * when neccessary. TO DO: MAKE THIS CODE SHORTER AND PRETTIER.
+ * when neccessary. TO DO: MAKE PRETTIER & SHORTER. TO DO: UPDATE FOR DIST TYPE.
  *)
 and collect_constraints typ1 typ2 = 
-(* Collects possible constraints and returns type that is as constrained as 
- * possible. Any is always converted to Unconst. *)
-  let rec collect_constraints_overwrite_any typ1 typ2 = match typ1 with
-    | Unconst -> if typ2 <> Any then typ2 else Unconst
+  (* Helper functions for this function *)
+  let build_func collect_func func1 func2 = 
+    let params1 = func1.param_types and params2 = func2.param_types and
+      ret1 = func1.return_type and ret2 = func2.return_type in
+    let params' = List.map2 collect_func params1 params2 and 
+      ret' = collect_func ret1 ret2 in
+    Func({ param_types = params'; return_type = ret'; })
+  and build_list collect_func l_typ1 l_typ2 = 
+    let l_typ' = collect_func l_typ1 l_typ2 in List(l_typ') in
+
+  (* Collects possible constraints and returns type that is as constrained as 
+   * possible. Any is always converted to Unconst. *)
+  let rec overwrite_any typ1 typ2 = match typ1 with
+    | Any | Unconst -> if typ2 <> Any then typ2 else Unconst
     | Func(func1) -> 
         begin match typ2 with
-          | Unconst -> if typ1 <> Any then typ1 else Unconst
-          | Func(func2) -> 
-              let params1 = func1.param_types and params2 = func2.param_types and
-                ret1 = func1.return_type and ret2 = func2.return_type in
-              let params' = List.map2 collect_constraints_overwrite_any params1 params2 and 
-                ret' = collect_constraints_overwrite_any ret1 ret2 in
-              Func({ param_types = params'; return_type = ret'; })
+          | Any | Unconst -> typ1
+          | Func(func2) -> build_func overwrite_any func1 func2
+          | _ -> raise Collect_Constraints_Error
+        end
+    | List(l_typ1) -> 
+        begin match typ2 with
+          | Any | Unconst -> typ1
+          | List(l_typ2) -> build_list overwrite_any l_typ1 l_typ2
           | _ -> raise Collect_Constraints_Error
         end
     | _  -> 
-        if typ1 = typ2 || typ2 = Unconst || typ2 = Any then 
-          if typ1 <> Any then typ1 else Unconst 
+        if typ1 = typ2 || typ2 = Unconst || typ2 = Any then typ1
         else raise Collect_Constraints_Error
 
   (* Collects possible constraints and returns type that is as constrained as 
    * possible. Any remains. *)
-  and collect_constraints_keep_any typ1 typ2 = match typ1 with
-    | Unconst -> typ2
+  and keep_any typ1 typ2 = match typ1 with
     | Any -> Any
+    | Unconst -> typ2
     | Func(func1) -> 
         begin match typ2 with
-          | Unconst -> typ1
           | Any -> Any
-          | Func(func2) -> 
-              let params1 = func1.param_types and params2 = func2.param_types and
-                ret1 = func1.return_type and ret2 = func2.return_type in
-              let params' = List.map2 collect_constraints_keep_any params1 params2 and 
-                ret' = collect_constraints_keep_any ret1 ret2 in
-              Func({ param_types = params'; return_type = ret'; })
+          | Unconst -> typ1
+          | Func(func2) -> build_func keep_any func1 func2
+          | _ -> raise Collect_Constraints_Error
+        end
+    | List(l_typ1) ->
+        begin match typ2 with
+          | Any -> Any
+          | Unconst -> typ1
+          | List(l_typ2) -> build_list keep_any l_typ1 l_typ2
           | _ -> raise Collect_Constraints_Error
         end
     | _  -> 
         if typ2 = Any then Any
         else if typ1 = typ2 || typ2 = Unconst then typ1
         else raise Collect_Constraints_Error
-  in collect_constraints_overwrite_any typ1 typ2, collect_constraints_keep_any typ1 typ2
+  
+  in overwrite_any typ1 typ2, keep_any typ1 typ2
 
 (* Turns Unconst types to Any *)
 and unconst_to_any = function
@@ -463,7 +476,7 @@ and check_list env l =
   
   (* Check list elements against constraint type, constrain if possible *)
   let rec check_list_elems env acc = function
-    | [] -> env, Sast.Expr(Sast.List(List.rev acc), List(const))
+    | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
     | (Sast.Expr(_, typ) as ew) :: tl ->
       if typ = const || const = Unconst then check_list_elems env (ew :: acc) tl
       else if typ = Unconst then

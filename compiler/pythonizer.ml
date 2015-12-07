@@ -30,7 +30,7 @@ let rec past_expr stmts = function
       stmts', Past.Call(id, args)
   | Sast.Assign(id, we) -> let stmts', e = past_expr_unwrap stmts we in
       stmts', Past.Assign(id, e)
-  | Sast.List(wl) -> let stmts', l = past_list stmts wl in stmts', Past.List(l)
+  | Sast.Ldecl(wl) -> let stmts', l = past_list stmts wl in stmts', Past.List(l)
   | Sast.Fdecl(f) -> if f.is_anon then past_fdecl_anon stmts f
       else past_fdecl stmts f
 
