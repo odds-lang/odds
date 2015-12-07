@@ -1,1 +1,5 @@
 do () -> return "hello"
+
+do y = (x) -> return x() + 1
+
+do y(() -> return 41)
