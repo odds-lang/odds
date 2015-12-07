@@ -49,6 +49,7 @@ type expr =
   | Call of expr * expr list      (* add(1, 2) *)
   | List of expr list             (* [1, 2, 3] *)
   | Fdecl of fdecl                (* (x) -> ... return x *)
+  | If of expr * expr * expr     (* if true then 42 else 43 *)
 
 (* Function Declarations *)
 and fdecl = {

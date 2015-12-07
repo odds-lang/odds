@@ -53,10 +53,21 @@ let rec str_of_expr = function
       let f_str = sprintf "(%s) ->\n%s\n%sreturn %s\n" params_txt body_txt 
         (tab_str ()) return_txt in
       tabs := !tabs - 1; f_str
+   | If(cond) -> sprintf "%s" (str_of_cond cond)
+   | If_Assign(id, cond) -> sprintf "%s = %s" id (str_of_cond cond) 
+
+and str_of_cond cond =
+    let conditional = cond.cond in
+    let first = cond.stmt_1 in 
+    let second = cond.stmt_2 in 
+    sprintf "if (%s)\n  %s\n else  %s" 
+      (str_of_wrapped_expr conditional)
+      (str_of_wrapped_expr first)
+      (str_of_wrapped_expr second)
 
 and str_of_wrapped_expr_list l = 
   String.concat ", " (List.map str_of_wrapped_expr l)
-
+  
 and str_of_wrapped_expr = function
   | Sast.Expr(expr, typ) -> 
       let type_str = Analyzer.str_of_type typ and expr_str = str_of_expr expr in

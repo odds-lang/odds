@@ -47,6 +47,7 @@
 %token VOID_LITERAL
 
 /* Precedence and associativity of each operator */
+%nonassoc IF THEN ELSE
 %right ASN
 %nonassoc RETURN
 %left OR
@@ -68,11 +69,11 @@ program:
   | stmt_list EOF               { List.rev $1 }
 
 stmt_list:
-  | /* nothing */               { [] }
-  | stmt_list stmt              { $2 :: $1 }
+  | /* nothing */                { [] }
+  | stmt_list stmt               { $2 :: $1 }
 
 stmt:
-  | DO expr                     { Do($2) }
+  | DO expr                      { Do($2) }
 
 /* Expressions */
 expr:
@@ -85,6 +86,7 @@ expr:
   | LBRACE list_opt RBRACE      { List($2) }
   | LPAREN expr RPAREN          { $2 }
   | fdecl                       { Fdecl($1) }
+  | IF expr THEN expr ELSE expr  { If($2, $4, $6) }
 
 /* Function declaration */
 fdecl:
@@ -105,22 +107,22 @@ fparam_list:
 
 /* Lists and function calling */
 list_opt:
-  | /* nothing */               { [] }
-  | list                        { List.rev $1 }
+  | /* nothing */                { [] }
+  | list                         { List.rev $1 }
 
 list:
-  | expr                        { [$1] }
-  | list COMMA expr             { $3 :: $1 }
+  | expr                         { [$1] }
+  | list COMMA expr              { $3 :: $1 }
 
 /* Binary operators */
 arith:
-  | MINUS expr                  { Unop(Sub, $2) }
-  | expr PLUS expr              { Binop($1, Add, $3) }
-  | expr MINUS expr             { Binop($1, Sub, $3) }
-  | expr TIMES expr             { Binop($1, Mult, $3) }
-  | expr DIVIDE expr            { Binop($1, Div, $3) }
-  | expr MOD expr               { Binop($1, Mod, $3) }
-  | expr POWER expr             { Binop($1, Pow, $3) }
+  | MINUS expr                   { Unop(Sub, $2) }
+  | expr PLUS expr               { Binop($1, Add, $3) }
+  | expr MINUS expr              { Binop($1, Sub, $3) }
+  | expr TIMES expr              { Binop($1, Mult, $3) }
+  | expr DIVIDE expr             { Binop($1, Div, $3) }
+  | expr MOD expr                { Binop($1, Mod, $3) }
+  | expr POWER expr              { Binop($1, Pow, $3) }
 
 boolean:
   | NOT expr                    { Unop(Not, $2) }
