@@ -44,8 +44,8 @@ let txt_of_binop = function
   | Geq -> ">="
 
 (* Conditionals *)
-let txt_of_cond indent i t e = sprintf "if %s:\n%s\n%selse:\n%s\n" 
-  i t (indent_of_num indent) e
+let txt_of_cond indent i t e = sprintf "%sif %s:\n%s\n%selse:\n%s\n" 
+  (indent_of_num indent) i t (indent_of_num indent) e
 
 (* Expressions *)
 let rec txt_of_expr indent = function
@@ -64,12 +64,6 @@ let rec txt_of_expr indent = function
   | Call(id, args) -> sprintf "%s(%s)"
       (txt_of_expr indent id) (txt_of_list indent args)
   | List(l) -> sprintf "[%s]" (txt_of_list indent l)
-  | If(e1, e2, e3) -> 
-      let inner_ind = indent + 1 in 
-      let i = txt_of_expr inner_ind e1
-      and t = txt_of_stmt inner_ind e2 
-      and e = txt_of_stmt inner_ind e3 in
-      txt_of_cond indent i t e
 
 (* Lists *)
 and txt_of_list indent = function
@@ -96,8 +90,12 @@ and txt_of_stmt indent = function
   | Def(f) -> txt_of_fdecl indent f 
   | Return(e) -> sprintf "%sreturn %s" 
       (indent_of_num indent) (txt_of_expr indent e)
-  | If_Assign(e1, e2, e3) -> (*We should never get here *) 
-      raise (Python_Error "Statement Within Expression")   
+  | If(e1, e2, e3) -> 
+      let inner_ind = indent + 1 in 
+      let i = txt_of_expr inner_ind e1
+      and t = txt_of_stmt inner_ind e2 
+      and e = txt_of_stmt inner_ind e3 in
+      txt_of_cond indent i t e
   | Stmt(e) -> sprintf "%s%s" (indent_of_num indent) (txt_of_expr indent e)
 
 and txt_of_stmts indent stmt_list =
