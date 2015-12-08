@@ -103,9 +103,9 @@ let unop_error op t =
     (str_of_unop op) (str_of_type t) in
   raise (Semantic_Error message)
 
-let bool_error t = 
-  let message = sprintf "Expected type boolean, instead had type %s"
-    (str_of_type t) in
+let typ_mismatch t1 t2 = 
+  let message = sprintf "Expected type %s but got type %s instead"
+    (str_of_type t1) (str_of_type t2) in
   raise (Semantic_Error message)
 
 let binop_error t1 op t2 = 
@@ -176,9 +176,10 @@ let constrain_error old_type const =
     (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
 
-let constrain_if_error () =
-  let message = sprintf "Attempt to create conditional with invalid types for the if and else"
-    in
+let constrain_if_error typ1 typ2 =
+  let message = sprintf 
+    "Attempt to create conditional with mismatch types %s and %s for the if and else"
+    (str_of_type typ1) (str_of_type typ2) in
   raise (Semantic_Error message)
 
 let mismatch_if_error typ1 typ2 = 
@@ -325,14 +326,14 @@ and check_if env e1 e2 e3 id ia =
   let env', ew1' = match typ1 with  
     | Unconst -> constrain_ew env' ew1 Bool 
     | Bool -> env, ew1
-    | _ as t -> bool_error t in
+    | _ as t -> typ_mismatch Bool t in
   let env', ew2 = check_expr env' e2 in
   let Sast.Expr(_, typ2) = ew2 in
   let env', ew3 = check_expr env' e3 in
   let Sast.Expr(_, typ3) = ew3 in
   let const = try collect_constraints typ2 typ3
   with
-    | Collect_Constraints_Error -> constrain_if_error () 
+    | Collect_Constraints_Error -> constrain_if_error typ2 typ3 
     | _ as e -> raise e in
   let env', ew2' = constrain_ew env' ew2 const in
   let env', ew3' = constrain_ew env' ew3 const in 
@@ -343,9 +344,7 @@ and check_if env e1 e2 e3 id ia =
       stmt_2 = ew3';
   } in
   let if_ew = Sast.Expr(Sast.If(stmt), const) in
-  let stmt' = match ia with 
-    | true -> Sast.Assign(id, if_ew)
-    | false -> Sast.If(stmt) in 
+  let stmt' = if ia then Sast.Assign(id, if_ew) else Sast.If(stmt) in 
   env', Sast.Expr(stmt', const)
 
 (* Find string key 'id' in the environment if it exists *)
