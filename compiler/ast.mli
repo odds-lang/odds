@@ -51,7 +51,7 @@ type expr =
   | Dist of dist                  (* < 1, 2 > | normal *)
   | Fdecl of fdecl                (* (x) -> ... return x *)
 
-(* Function Declarations *)
+(* Distribution Declarations *)
 and dist = {
   min: expr;        (* Distribution Minimum *)
   max: expr;        (* Distribution Maximum *)

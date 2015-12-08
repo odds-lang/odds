@@ -19,6 +19,7 @@ type data_type =
   | List of data_type
   | Func of func
   | Any
+  | Dist of dist
   | Unconst
 
 and func = {
@@ -46,7 +47,14 @@ and expr =
   | Assign of string * expr_wrapper
   | Call of expr_wrapper * expr_wrapper list
   | List of expr_wrapper list
+  | Dist of dist
   | Fdecl of fdecl
+
+and dist = {
+  min: expr;        (* Distribution Minimum *)
+  max: expr;        (* Distribution Maximum *)
+  dist_func: expr;  (* Distribution Function *)
+}
 
 and fdecl = {
   fname: string;          (* Function Name *)

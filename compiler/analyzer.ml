@@ -299,6 +299,14 @@ and check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
+  | Ast.Dist(d) -> env,
+      let min = check_expr env d.min in
+      let max = check_expr env d.min in
+      Sast.Expr(Sast.Dist({
+        min = check_expr env d.min;
+        max = check_expr env d.max;
+        dist_func = check_expr env d.dist_func;
+      }), Unconst) (* Should it be Dist? Hardcoded here for now *)
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
 
 (* Find string key 'id' in the environment if it exists *)
