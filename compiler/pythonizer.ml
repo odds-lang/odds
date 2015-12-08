@@ -52,8 +52,8 @@ and past_list stmts expr_list =
 (* Functions *)
 and mk_if_function stmts cond = 
     let stmts', e1' = past_expr_unwrap stmts cond.cond in
-    let stmts', e2' = past_expr_unwrap stmts cond.stmt_1 in
-    let stmts', e3' = past_expr_unwrap stmts cond.stmt_2 in
+    let stmts', e2' = past_expr_unwrap stmts' cond.stmt_1 in
+    let stmts', e3' = past_expr_unwrap stmts' cond.stmt_2 in
     let r1 = Past.Return(e2') in
     let r2 = Past.Return(e3') in
     let if_stmt = Past.If(e1', r1, r2) in 
