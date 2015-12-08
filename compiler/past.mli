@@ -21,6 +21,7 @@ type expr =
   | Id of string
   | Call of expr * expr list
   | List of expr list
+  | Empty
 
 (* Function Declarations *)
 and fdecl = {
