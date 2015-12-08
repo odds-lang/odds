@@ -31,8 +31,8 @@ and fdecl = {
 
 (* Statements *)
 and stmt =
-  | Def of fdecl
   | Return of expr
+  | Def of fdecl
   | If of expr * stmt * stmt
   | Assign of string * expr
   | Stmt of expr     (* set foo = bar + 3 *)
