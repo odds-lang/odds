@@ -48,7 +48,6 @@ and expr =
   | List of expr_wrapper list
   | Fdecl of fdecl
   | If of if_stmt
-  | If_Assign of string * if_stmt
 
 and if_stmt = {
   cond_name: string;

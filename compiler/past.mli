@@ -21,7 +21,6 @@ type expr =
   | Id of string
   | Call of expr * expr list
   | List of expr list
-  | If of expr * stmt * stmt 
 
 (* Function Declarations *)
 and fdecl = {
@@ -34,7 +33,7 @@ and fdecl = {
 and stmt =
   | Def of fdecl
   | Return of expr
-  | If_Assign of expr * stmt * stmt
+  | If of expr * stmt * stmt
   | Assign of string * expr
   | Stmt of expr     (* set foo = bar + 3 *)
 

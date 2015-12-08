@@ -341,9 +341,10 @@ and check_if env e1 e2 e3 id ia =
       cond = ew1;
       stmt_1 = ew2';
       stmt_2 = ew3';
-  } in 
+  } in
+  let if_ew = Sast.Expr(Sast.If(stmt), const) in
   let stmt' = match ia with 
-    | true -> Sast.If_Assign(id, stmt)
+    | true -> Sast.Assign(id, if_ew)
     | false -> Sast.If(stmt) in 
   env', Sast.Expr(stmt', const)
 
