@@ -54,7 +54,6 @@ let rec str_of_expr = function
         (tab_str ()) return_txt in
       tabs := !tabs - 1; f_str
    | If(cond) -> sprintf "%s" (str_of_cond cond)
-   | If_Assign(id, cond) -> sprintf "%s = %s" id (str_of_cond cond) 
 
 and str_of_cond cond =
     let conditional = cond.cond in
