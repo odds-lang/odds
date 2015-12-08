@@ -1,0 +1,1 @@
+do x = if true then () -> return "hello" else () -> return "bye"
