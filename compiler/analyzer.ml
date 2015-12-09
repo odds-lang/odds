@@ -436,8 +436,9 @@ and check_func_call env id args =
         let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
     | _ -> fcall_nonfunc_error id' typ in
   let env', args = check_func_call_args env' id' f args in
+  let ret_typ = check_func_call_ret env' id args f.return_type in
   let env', ew' = check_expr env' id in
-  env', Sast.Expr(Sast.Call(ew', args), f.return_type)
+  env', Sast.Expr(Sast.Call(ew', args), ret_typ)
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then
@@ -466,6 +467,16 @@ and check_func_call_args env id f args =
     let env' = constrain_e env' id f_type in 
     env', args'
   else env', args'
+
+and check_func_call_ret env id args ret_default =
+  let builtin = match id with
+    | Id("head") -> true
+    | _ -> false in
+  if not builtin then ret_default else
+  let Sast.Expr(_, list_typ) = List.hd args in
+  match list_typ with
+    | List(typ) -> typ
+    | _ -> ret_default
 
 (* Assignment *)
 and check_assign env id = function

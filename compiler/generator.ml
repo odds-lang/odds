@@ -55,11 +55,17 @@ let rec txt_of_expr indent = function
       (txt_of_expr indent e1)
       (txt_of_binop op)
       (txt_of_expr indent e2)
-  | Call(id, args) -> sprintf "%s(%s)"
-      (txt_of_expr indent id) (txt_of_list indent args)
+  | Call(id, args) -> txt_of_call indent id args
   | Assign(id, e) -> sprintf "%s = %s" id (txt_of_expr indent e)
   | List(l) -> sprintf "[%s]" (txt_of_list indent l)
   | Def(f) -> txt_of_fdecl indent f
+
+(* Function calls *)
+and txt_of_call indent id args = match id with
+  | Id("head") ->
+      let list_txt = txt_of_expr 0 (List.hd args) in
+      sprintf "(%s[0] if %s else None)" list_txt list_txt
+  | _ -> sprintf "%s(%s)" (txt_of_expr indent id) (txt_of_list indent args)
 
 (* Lists *)
 and txt_of_list indent = function

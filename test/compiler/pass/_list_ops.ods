@@ -1,0 +1,7 @@
+do ints = [1, 2, 3, 4]
+
+/* list head tests */
+do print(head([]))
+do x = head(ints)
+do print(x)
+do print(x + 1)
