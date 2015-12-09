@@ -47,17 +47,17 @@ and expr =
   | Call of expr_wrapper * expr_wrapper list
   | List of expr_wrapper list
   | Fdecl of fdecl
-  | If of if_stmt
+  | If of ifdecl
 
-and if_stmt = {
-  cond_name: string;
+and ifdecl = {
+  c_name: string;
   cond: expr_wrapper;
   stmt_1: expr_wrapper;
   stmt_2: expr_wrapper;
 }
 
 and fdecl = {
-  fname: string;          (* Function Name *)
+  f_name: string;         (* Function Name *)
   params: string list;    (* Parameters *)
   body: stmt list;        (* Function Body *)
   return: expr_wrapper;   (* Return *)

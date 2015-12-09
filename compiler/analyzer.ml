@@ -244,7 +244,7 @@ let rec constrain_ew env ew typ =
   if old_typ <> Unconst && old_typ <> typ then constrain_error old_typ typ else
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
-    | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
+    | Sast.Fdecl(f) -> update_type env f.f_name typ; env, Sast.Expr(e, typ)
     | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(f)), _) ->
         let _, Sast.Expr(_, old_type) = check_id env (id_of_ssid ssid) in
         let old_ret_type = begin match old_type with
@@ -312,7 +312,7 @@ and check_expr env = function
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
-  | Ast.If(e1, e2, e3) -> check_if env e1 e2 e3 "anon" false
+  | Ast.If(i, t, e) -> check_if env i t e
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
@@ -433,7 +433,6 @@ and check_func_call_args env id f args =
 (* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f false
-  | Ast.If(e1, e2, e3) -> check_if env e1 e2 e3 id true
   | Ast.Assign(_, _) -> let message = "Invalid attempt to chain assigns" in
       raise (Semantic_Error message)
   | _ as e -> let env', ew = check_expr env e in
@@ -545,7 +544,7 @@ and check_fdecl env id f anon =
 
   (* Construct function declaration *)
   let fdecl = {
-    fname = name;
+    f_name = name;
     params = param_ssids;
     body = body;
     return = return;
@@ -567,16 +566,16 @@ and check_fdecl_params env param_list =
   in aux env [] param_list
 
 (* Conditionals *)
-and check_if env e1 e2 e3 id ia = 
-  let env', ew1 = check_expr env e1 in
+and check_if env i t e = 
+  let env', ew1 = check_expr env i in
   let Sast.Expr(_, typ1) = ew1 in
   let env', ew1' = match typ1 with  
     | Unconst -> constrain_ew env' ew1 Bool 
     | Bool -> env, ew1
-    | _ as t -> typ_mismatch Bool t in
-  let env', ew2 = check_expr env' e2 in
+    | _ as typ -> typ_mismatch Bool typ in
+  let env', ew2 = check_expr env' t in
   let Sast.Expr(_, typ2) = ew2 in
-  let env', ew3 = check_expr env' e3 in
+  let env', ew3 = check_expr env' e in
   let Sast.Expr(_, typ3) = ew3 in
   let const = try collect_constraints typ2 typ3
   with
@@ -584,15 +583,16 @@ and check_if env e1 e2 e3 id ia =
     | _ as e -> raise e in
   let env', ew2' = constrain_ew env' ew2 const in
   let env', ew3' = constrain_ew env' ew3 const in 
-  let stmt = {
-      cond_name = (get_ssid "cond");
+  let ifdecl = {
+      c_name = (get_ssid "cond");
       cond = ew1;
       stmt_1 = ew2';
       stmt_2 = ew3';
   } in
-  let if_ew = Sast.Expr(Sast.If(stmt), const) in
+  env', Sast.Expr(Sast.If(ifdecl), typ2)
+  (*let if_ew = Sast.Expr(Sast.If(stmt), const) in
   let stmt' = if ia then Sast.Assign(id, if_ew) else Sast.If(stmt) in 
-  env', Sast.Expr(stmt', const)
+  env', Sast.Expr(stmt', const)*)
 
 (* Statements *)
 and check_stmt env = function

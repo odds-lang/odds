@@ -6,10 +6,10 @@ def cond_2():
     if True:
         return anon_0
     return anon_1
-x = cond_2()
-print(x())
-def cond_3():
+x_3 = cond_2()
+print(x_3())
+def cond_4():
     if True:
         return "Hello, world!"
     return "hi there!"
-print(cond_3())
+print(cond_4())

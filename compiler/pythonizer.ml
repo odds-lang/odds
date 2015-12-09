@@ -51,21 +51,19 @@ and past_list stmts expr_list =
 
 (* Functions *)
 and mk_if_function stmts cond = 
-    let stmts', e1' = past_expr_unwrap stmts cond.cond in
-    let stmts', e2' = past_expr_unwrap stmts' cond.stmt_1 in
-    let stmts', e3' = past_expr_unwrap stmts' cond.stmt_2 in
-    let r1 = Past.Return(e2') in
-    let r2 = Past.Return(e3') in
-    let if_stmt = Past.If(e1', r1, r2) in 
-    let func = {
-      p_name = cond.cond_name;
+    let stmts', i = past_expr_unwrap stmts cond.cond in
+    let stmts', t = past_expr_unwrap stmts' cond.stmt_1 in
+    let stmts', e = past_expr_unwrap stmts' cond.stmt_2 in
+    let r1 = Past.Return(t) in
+    let r2 = Past.Return(e) in
+    let if_stmt = Past.If(i, r1, r2) in 
+    let f = {
+      p_name = cond.c_name;
       p_params = [];
       p_body = [if_stmt];
     } in
-    let def = Def(func) in
-    let stmts' = (def :: stmts') in 
-    let call = Past.Call(Past.Id(func.p_name), []) in
-    stmts', call
+    let stmts' = (Def(f) :: stmts') in 
+    stmts', Past.Call(Past.Id(f.p_name), [])
 
 and past_fdecl_anon stmts sast_f =
   let stmts', def = past_fdecl stmts sast_f in
@@ -78,7 +76,7 @@ and past_fdecl stmts sast_f =
   let r = Past.Return(e) in 
   let body = b @ [r] in
   let f = {
-    p_name = sast_f.fname;
+    p_name = sast_f.f_name;
     p_params = sast_f.params;
     p_body = body;
   } in stmts', f
