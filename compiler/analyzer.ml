@@ -578,9 +578,9 @@ and check_if env i t e =
   let env', ew3 = check_expr env' e in
   let Sast.Expr(_, typ3) = ew3 in
   let const = try collect_constraints typ2 typ3
-  with
-    | Collect_Constraints_Error -> if_mismatch_error typ2 typ3 
-    | _ as e -> raise e in
+    with
+      | Collect_Constraints_Error -> if_mismatch_error typ2 typ3 
+      | _ as e -> raise e in
   let env', ew2' = constrain_ew env' ew2 const in
   let env', ew3' = constrain_ew env' ew3 const in 
   let ifdecl = {
