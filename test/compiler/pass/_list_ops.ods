@@ -15,3 +15,7 @@ do print(y)
 /* list length test */
 do print(length([]))
 do print(length(ints))
+
+/* list cons test */
+do z = cons(5, ints)
+do print(z)
