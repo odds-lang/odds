@@ -69,7 +69,7 @@ and mk_if_function stmts cond =
 
 and past_fdecl_anon stmts sast_f =
   let stmts', def = past_fdecl stmts sast_f in
-  let stmts' = ( Past.Def(def) :: stmts') in
+  let stmts' = (Past.Def(def) :: stmts') in
   stmts', Past.Id(def.p_name)
 
 and past_fdecl stmts sast_f =

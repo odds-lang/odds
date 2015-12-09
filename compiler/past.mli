@@ -36,7 +36,7 @@ and stmt =
   | Def of fdecl
   | If of expr * stmt * stmt
   | Assign of string * expr
-  | Stmt of expr     (* set foo = bar + 3 *)
+  | Stmt of expr
 
 (* Program entry point *)
 type program = stmt list
