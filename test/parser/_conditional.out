@@ -1,0 +1,20 @@
+[
+    Do(If(Bool_lit(true), Num_lit(42), Num_lit(43))) ;
+    Do(If(Bool_lit(false), Num_lit(42), Num_lit(43))) ;
+    Do(If(Num_lit(42), String_lit(pass), String_lit(fail))) ;
+    Do(If(Num_lit(0), String_lit(pass), String_lit(fail))) ;
+    Do(
+        If(
+            Binop(Num_lit(5), Sub, Num_lit(5)),
+            Bool_lit(true),
+            Bool_lit(false)
+        )
+    ) ;
+    Do(
+        If(
+            Bool_lit(true),
+            Binop(Num_lit(40), Add, Num_lit(2)),
+            Binop(Num_lit(5), Mult, Num_lit(5))
+        )
+    )
+]

@@ -103,6 +103,11 @@ let unop_error op t =
     (str_of_unop op) (str_of_type t) in
   raise (Semantic_Error message)
 
+let typ_mismatch t1 t2 = 
+  let message = sprintf "Expected type %s but got type %s instead"
+    (str_of_type t1) (str_of_type t2) in
+  raise (Semantic_Error message)
+
 let binop_error t1 op t2 = 
   let message =
     sprintf "Invalid use of binary operator '%s' with types %s and %s" 
@@ -171,6 +176,13 @@ let constrain_error old_type const =
     (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
 
+let if_mismatch_error typ1 typ2 =
+  let message = sprintf
+    "Invalid attempt to use conditional with mismatched types %s and %s"
+    (str_of_type typ1) (str_of_type typ2) in
+  raise (Semantic_Error message)
+
+
 (********************
  * Scoping
  ********************)
@@ -232,7 +244,7 @@ let rec constrain_ew env ew typ =
   if old_typ <> Unconst && old_typ <> typ then constrain_error old_typ typ else
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
-    | Sast.Fdecl(f) -> update_type env f.fname typ; env, Sast.Expr(e, typ)
+    | Sast.Fdecl(f) -> update_type env f.f_name typ; env, Sast.Expr(e, typ)
     | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(f)), _) ->
         let _, Sast.Expr(_, old_type) = check_id env (id_of_ssid ssid) in
         let old_ret_type = begin match old_type with
@@ -300,6 +312,7 @@ and check_expr env = function
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
+  | Ast.If(i, t, e) -> check_if env i t e
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
@@ -420,6 +433,8 @@ and check_func_call_args env id f args =
 (* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f false
+  | Ast.Assign(_, _) -> let message = "Invalid attempt to chain assigns" in
+      raise (Semantic_Error message)
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       if typ = Void then assign_error id Void else
@@ -529,7 +544,7 @@ and check_fdecl env id f anon =
 
   (* Construct function declaration *)
   let fdecl = {
-    fname = name;
+    f_name = name;
     params = param_ssids;
     body = body;
     return = return;
@@ -549,6 +564,32 @@ and check_fdecl_params env param_list =
     | param :: tl -> let env', name = add_to_params env param in
         aux env' (name :: acc) tl
   in aux env [] param_list
+
+(* Conditionals *)
+and check_if env i t e = 
+  let env', ew1 = check_expr env i in
+  let Sast.Expr(_, typ1) = ew1 in
+  let env', ew1' = match typ1 with  
+    | Unconst -> constrain_ew env' ew1 Bool 
+    | Bool -> env, ew1
+    | _ as typ -> typ_mismatch Bool typ in
+  let env', ew2 = check_expr env' t in
+  let Sast.Expr(_, typ2) = ew2 in
+  let env', ew3 = check_expr env' e in
+  let Sast.Expr(_, typ3) = ew3 in
+  let const = try collect_constraints typ2 typ3
+    with
+      | Collect_Constraints_Error -> if_mismatch_error typ2 typ3 
+      | _ as e -> raise e in
+  let env', ew2' = constrain_ew env' ew2 const in
+  let env', ew3' = constrain_ew env' ew3 const in 
+  let ifdecl = {
+      c_name = (get_ssid "cond");
+      cond = ew1';
+      stmt_1 = ew2';
+      stmt_2 = ew3';
+  } in
+  env', Sast.Expr(Sast.If(ifdecl), const)
 
 (* Statements *)
 and check_stmt env = function
