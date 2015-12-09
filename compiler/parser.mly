@@ -33,7 +33,6 @@
 
 /* Function Symbols & Keywords */
 %token FDELIM RETURN
-%token CALL
 
 /* End-of-File */
 %token EOF
