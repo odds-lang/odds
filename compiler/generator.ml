@@ -63,7 +63,7 @@ let rec txt_of_expr indent = function
       (txt_of_expr indent e2)
   | Call(id, args) -> sprintf "%s(%s)"
       (txt_of_expr indent id) (txt_of_list indent args)
-  | List(l) -> sprintf "[%s]" (txt_of_list indent l)
+  | Ldecl(l) -> sprintf "[%s]" (txt_of_list indent l)
   | Empty -> ""
 
 (* Lists *)

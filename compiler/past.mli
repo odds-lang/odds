@@ -20,7 +20,7 @@ type expr =
   | Binop of expr * Ast.binop * expr
   | Id of string
   | Call of expr * expr list
-  | List of expr list
+  | Ldecl of expr list
   | Empty
 
 (* Function Declarations *)

@@ -30,7 +30,7 @@ let rec past_expr stmts = function
       let stmts', id = past_expr_unwrap stmts wid in
       let stmts', args = past_list stmts wargs in
       stmts', Past.Call(id, args)
-  | Sast.List(wl) -> let stmts', l = past_list stmts wl in stmts', Past.List(l)
+  | Sast.Ldecl(wl) -> let stmts', l = past_list stmts wl in stmts', Past.Ldecl(l)
   | Sast.If(cond) -> mk_if_function stmts cond
   | Sast.Assign(id, we) -> let stmts', e = past_expr_unwrap stmts we in
       (Past.Assign(id, e) :: stmts'), Past.Empty
