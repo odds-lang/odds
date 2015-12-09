@@ -68,6 +68,10 @@ and txt_of_call indent id args = match id with
   | Id("tail") ->
       let list_txt = txt_of_expr 0 (List.hd args) in sprintf
       "%s(%s[1:] if %s else None)" (indent_of_num indent) list_txt list_txt
+  | Id("cons") ->
+      let prepend = txt_of_expr 0 (List.hd args) and
+        list_txt = txt_of_expr 0 (List.hd (List.tl args)) in
+      sprintf "%s([%s] + %s)" (indent_of_num indent) prepend list_txt
   | _ -> sprintf "%s(%s)" (txt_of_expr indent id) (txt_of_list indent args)
 
 (* Lists *)

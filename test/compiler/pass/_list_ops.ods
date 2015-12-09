@@ -11,3 +11,7 @@ do print(tail([]))
 do print(tail(["hi"]))
 do y = tail(ints)
 do print(y)
+
+/* list length test */
+do print(length([]))
+do print(length(ints))

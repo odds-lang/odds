@@ -46,6 +46,18 @@ let builtins = VarMap.add "tail" {
   builtin = true;
 } builtins
 
+let builtins = VarMap.add "cons" {
+  name = "cons";
+  s_type = Func({ param_types = [Any ; List(Any)]; return_type = List(Any); });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "length" {
+  name = "len";
+  s_type = Func({ param_types = [List(Any)]; return_type = Num; });
+  builtin = true;
+} builtins
+
 (* Program entry environment *)
 let root_env = {
   params = VarMap.empty;
@@ -491,6 +503,7 @@ and check_func_call_ret env id args ret_default =
   match id' with
     | "head" -> inner_typ
     | "tail" -> list_typ
+    | "cons" -> list_typ
     | _ -> ret_default
 
 (* Assignment *)
