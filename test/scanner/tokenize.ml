@@ -38,6 +38,7 @@ let stringify = function
   (* Function Symbols & Keywords *)
   | FDELIM -> "FDELIM"
   | RETURN -> "RETURN"
+  | CAKE -> "CAKE"
 
   (* End-of-File *)
   | EOF -> "EOF"
