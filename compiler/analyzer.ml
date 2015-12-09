@@ -585,14 +585,11 @@ and check_if env i t e =
   let env', ew3' = constrain_ew env' ew3 const in 
   let ifdecl = {
       c_name = (get_ssid "cond");
-      cond = ew1;
+      cond = ew1';
       stmt_1 = ew2';
       stmt_2 = ew3';
   } in
   env', Sast.Expr(Sast.If(ifdecl), typ2)
-  (*let if_ew = Sast.Expr(Sast.If(stmt), const) in
-  let stmt' = if ia then Sast.Assign(id, if_ew) else Sast.If(stmt) in 
-  env', Sast.Expr(stmt', const)*)
 
 (* Statements *)
 and check_stmt env = function
