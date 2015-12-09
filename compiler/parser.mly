@@ -33,7 +33,7 @@
 
 /* Function Symbols & Keywords */
 %token FDELIM RETURN CAKE
-%token CALL
+%token FDELIM RETURN
 
 /* End-of-File */
 %token EOF
