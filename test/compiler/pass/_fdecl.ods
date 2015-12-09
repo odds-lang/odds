@@ -4,5 +4,6 @@ do call = (x, y) ->
 
 do no_args = () -> return void
 
-do call(40, 2)
+do x = call(40, 2)
+do print(x)
 do no_args()

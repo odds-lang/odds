@@ -1,0 +1,6 @@
+do if true then 42 else 43
+do if false then 42 else 43
+do if 42 then "pass" else "fail"
+do if 0 then "pass" else "fail"
+do if 5 - 5 then true else false
+do if true then 40 + 2 else 5 * 5
