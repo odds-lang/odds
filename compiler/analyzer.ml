@@ -195,6 +195,12 @@ let fdecl_reassign_error id typ =
     id (str_of_type typ) in
   raise (Semantic_Error message)
 
+let list_cons_mismatch_error typ const =
+  let message = sprintf
+    "Invalid attempt to prepend a value of type %s to list of type %s"
+   (str_of_type typ) (str_of_type const) in
+  raise (Semantic_Error message)
+
 let constrain_error old_type const =
   let message = sprintf "Invalid attempt to change unconstrained type %s to %s"
     (str_of_type old_type) (str_of_type const) in
@@ -510,9 +516,10 @@ and check_func_call_ret env id args ret_default =
           | List(t) -> t
           | _ -> ret_default
         end in
-        if c_typ = l_elem_typ then l_typ else 
-        (* CONSTRAIN *)
-        raise (Semantic_Error "MISMATCH!")
+        if c_typ = l_elem_typ then l_typ else
+        (* CONSTRAIN L_ELEM_TYP HERE *)
+        if l_elem_typ = Unconst then l_typ else
+        list_cons_mismatch_error c_typ l_typ
     | _ -> ret_default
 
 (* Assignment *)
