@@ -14,6 +14,8 @@ let txt_of_binop = function
   | Div -> "Div"
   | Mod -> "Mod"
   | Pow -> "Pow"
+  | Or -> "Or"
+  | And -> "And"
   | Eq -> "Eq"
   | Neq -> "Neq"
   | Less -> "Less"
@@ -40,6 +42,8 @@ let rec txt_of_expr = function
   | Assign(x, e) -> sprintf "Assign(%s, %s)" x (txt_of_expr e)
   | List(l) -> sprintf "List([%s])" (txt_of_list l)
   | Fdecl(f)-> txt_of_fdecl f
+  | Cake(fdecl, args) -> sprintf "Cake(%s, [%s])"
+      (txt_of_expr fdecl) (txt_of_list args)
 
 (* Function declarations *)
 and txt_of_fdecl f =

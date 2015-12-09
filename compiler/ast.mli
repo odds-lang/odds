@@ -15,20 +15,22 @@ type unop =
 
 (* Binary operators *)
 type binop =
+  (* Arithmetic *)
   | Add      (* + *)
   | Sub      (* - *)
   | Mult     (* * *)
   | Div      (* / *)
   | Mod      (* % *)
   | Pow      (* ** *)
+  (* Boolean *)
+  | Or       (* || *)
+  | And      (* && *)
   | Eq       (* == *)
   | Neq      (* != *)
   | Less     (* < *)
   | Leq      (* <= *)
   | Greater  (* > *)
   | Geq      (* >= *)
-  (*| And      (* && *)
-  | Or       (* || *)*)
 
 (* Expressions *)
 type num =
@@ -47,6 +49,7 @@ type expr =
   | Call of expr * expr list      (* add(1, 2) *)
   | List of expr list             (* [1, 2, 3] *)
   | Fdecl of fdecl                (* (x) -> ... return x *)
+  | Cake of expr * expr list      (* (() -> return 42)() *)
 
 (* Function Declarations *)
 and fdecl = {

@@ -33,6 +33,8 @@ let rec past_expr stmts = function
   | Sast.List(wl) -> let stmts', l = past_list stmts wl in stmts', Past.List(l)
   | Sast.Fdecl(f) -> if f.is_anon then past_fdecl_anon stmts f
       else past_fdecl stmts f
+  | Sast.Cake(wfdecl, wcall) -> let stmts, _ = past_expr_unwrap stmts wfdecl in
+      past_expr_unwrap stmts wcall
 
 and past_expr_unwrap stmts = function
   | Sast.Expr(e, _) -> past_expr stmts e

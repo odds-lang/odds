@@ -1,0 +1,11 @@
+do !true
+do !false
+do true && false
+do true || false
+do !(true || false)
+
+do print(!true)
+do print(!false)
+do print(true && false)
+do print(true || false)
+do print(!(true || false))
