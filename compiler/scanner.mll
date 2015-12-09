@@ -26,6 +26,7 @@ rule token = parse
 
 (* Function Symbols & Keywords *)
 | ')' whitespace* "->"   { FDELIM }  | "return"   { RETURN }
+| ')' whitespace* '('    { CAKE }
 
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }

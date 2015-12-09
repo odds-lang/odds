@@ -32,7 +32,7 @@
 %token DO
 
 /* Function Symbols & Keywords */
-%token FDELIM RETURN
+%token FDELIM RETURN CAKE
 %token CALL
 
 /* End-of-File */
@@ -86,7 +86,7 @@ expr:
   | LBRACE list_opt RBRACE                      { List($2) }
   | LPAREN expr RPAREN                          { $2 }
   | fdecl                                       { Fdecl($1) }
-  | LPAREN fdecl RPAREN LPAREN list_opt RPAREN  { Cake(Fdecl($2), $5) }
+  | LPAREN fdecl CAKE list_opt RPAREN  { Cake(Fdecl($2), $4) }
 
 /* Function declaration */
 fdecl:
