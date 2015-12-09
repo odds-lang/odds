@@ -5,7 +5,11 @@ def anon_1():
 def cond_2():
     if True:
         return anon_0
-    else:
-        return anon_1
-
+    return anon_1
 x = cond_2()
+print(x())
+def cond_3():
+    if True:
+        return "Hello, world!"
+    return "hi there!"
+print(cond_3())

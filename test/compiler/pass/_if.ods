@@ -1,0 +1,5 @@
+do x = if true then () -> return "hello" else () -> return "bye"
+
+do print(x())
+
+do print(if true then "Hello, world!" else "hi there!")

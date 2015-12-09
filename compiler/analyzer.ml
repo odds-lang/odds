@@ -176,14 +176,9 @@ let constrain_error old_type const =
     (str_of_type old_type) (str_of_type const) in
   raise (Semantic_Error message)
 
-let constrain_if_error typ1 typ2 =
-  let message = sprintf 
-    "Attempt to create conditional with mismatch types %s and %s for the if and else"
-    (str_of_type typ1) (str_of_type typ2) in
-  raise (Semantic_Error message)
-
-let mismatch_if_error typ1 typ2 = 
-  let message = sprintf "Invalid attempt to return two types from if, else of  %s & %s"
+let if_mismatch_error typ1 typ2 =
+  let message = sprintf
+    "Invalid attempt to use conditional with mismatched types %s and %s"
     (str_of_type typ1) (str_of_type typ2) in
   raise (Semantic_Error message)
 
@@ -585,7 +580,7 @@ and check_if env e1 e2 e3 id ia =
   let Sast.Expr(_, typ3) = ew3 in
   let const = try collect_constraints typ2 typ3
   with
-    | Collect_Constraints_Error -> constrain_if_error typ2 typ3 
+    | Collect_Constraints_Error -> if_mismatch_error typ2 typ3 
     | _ as e -> raise e in
   let env', ew2' = constrain_ew env' ew2 const in
   let env', ew3' = constrain_ew env' ew3 const in 
