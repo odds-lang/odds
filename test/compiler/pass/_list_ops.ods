@@ -5,3 +5,9 @@ do print(head([]))
 do x = head(ints)
 do print(x)
 do print(x + 1)
+
+/* list tail tests */
+do print(tail([]))
+do print(tail(["hi"]))
+do y = tail(ints)
+do print(y)

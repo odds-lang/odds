@@ -483,9 +483,14 @@ and check_func_call_ret env id args ret_default =
       (VarMap.find id' env.scope).builtin
     else false in
   if not builtin then ret_default else
+  
   let Sast.Expr(_, list_typ) = List.hd args in
-  match list_typ with
+  let inner_typ = match list_typ with
     | List(typ) -> typ
+    | _ -> ret_default in
+  match id' with
+    | "head" -> inner_typ
+    | "tail" -> list_typ
     | _ -> ret_default
 
 (* Assignment *)

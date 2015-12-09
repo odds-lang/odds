@@ -63,8 +63,11 @@ let rec txt_of_expr indent = function
 (* Function calls *)
 and txt_of_call indent id args = match id with
   | Id("head") ->
-      let list_txt = txt_of_expr 0 (List.hd args) in
-      sprintf "(%s[0] if %s else None)" list_txt list_txt
+      let list_txt = txt_of_expr 0 (List.hd args) in sprintf
+      "%s(%s[0] if %s else None)" (indent_of_num indent) list_txt list_txt
+  | Id("tail") ->
+      let list_txt = txt_of_expr 0 (List.hd args) in sprintf
+      "%s(%s[1:] if %s else None)" (indent_of_num indent) list_txt list_txt
   | _ -> sprintf "%s(%s)" (txt_of_expr indent id) (txt_of_list indent args)
 
 (* Lists *)
