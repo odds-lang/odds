@@ -1,15 +1,20 @@
-def anon_0():
-    return "hello"
-def anon_1():
-    return "bye"
-def cond_2():
+def cond_0():
     if True:
-        return anon_0
-    return anon_1
-x_3 = cond_2()
-print(x_3())
-def cond_4():
+        return 42
+    return 41
+cond_0()
+def anon_1():
+    return "hello"
+def anon_2():
+    return "bye"
+def cond_3():
+    if True:
+        return anon_1
+    return anon_2
+x_4 = cond_3()
+print(x_4())
+def cond_5():
     if True:
         return "Hello, world!"
     return "hi there!"
-print(cond_4())
+print(cond_5())

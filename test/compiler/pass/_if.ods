@@ -1,3 +1,5 @@
+do if true then 42 else 41
+
 do x = if true then () -> return "hello" else () -> return "bye"
 
 do print(x())
