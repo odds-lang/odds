@@ -589,7 +589,7 @@ and check_if env i t e =
       stmt_1 = ew2';
       stmt_2 = ew3';
   } in
-  env', Sast.Expr(Sast.If(ifdecl), typ2)
+  env', Sast.Expr(Sast.If(ifdecl), const)
 
 (* Statements *)
 and check_stmt env = function
