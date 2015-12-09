@@ -40,6 +40,12 @@ let builtins = VarMap.add "head" {
   builtin = true;
 } builtins
 
+let builtins = VarMap.add "tail" {
+  name = "tail";
+  s_type = Func({ param_types = [List(Any)]; return_type = List(Any); });
+  builtin = true;
+} builtins
+
 (* Program entry environment *)
 let root_env = {
   params = VarMap.empty;
@@ -469,9 +475,13 @@ and check_func_call_args env id f args =
   else env', args'
 
 and check_func_call_ret env id args ret_default =
-  let builtin = match id with
-    | Id("head") -> true
-    | _ -> false in
+  let id' = match id with
+    | Ast.Id(id') -> id'
+    | _ -> raise (Semantic_Error "check_func_call_ret() called with non-ID") in
+  let builtin =
+    if VarMap.mem id' env.scope then
+      (VarMap.find id' env.scope).builtin
+    else false in
   if not builtin then ret_default else
   let Sast.Expr(_, list_typ) = List.hd args in
   match list_typ with
