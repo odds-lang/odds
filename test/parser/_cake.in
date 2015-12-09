@@ -1,0 +1,4 @@
+do (() -> return 42)()
+do print(
+    ((x) -> return x + 1)(41)
+)

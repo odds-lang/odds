@@ -1,0 +1,9 @@
+do (
+    () ->
+        do print("Hello, world!")
+        return 42
+)()
+
+do print(
+    ((x) -> return x + 1)(41)
+)

@@ -300,6 +300,7 @@ and check_expr env = function
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
+  | Ast.Cake(fdecl, args) -> check_cake env fdecl args
 
 (* Find string key 'id' in the environment if it exists *)
 and check_id env id =
@@ -549,6 +550,13 @@ and check_fdecl_params env param_list =
     | param :: tl -> let env', name = add_to_params env param in
         aux env' (name :: acc) tl
   in aux env [] param_list
+
+(* Caking *)
+and check_cake env fdecl args =
+  let env', fdecl_ew = check_expr env fdecl in
+  let env', call_ew = check_func_call env' (Id("anon")) args in
+  let Sast.Expr(_, typ) = call_ew in
+  env', Sast.Expr(Sast.Cake(fdecl_ew, call_ew), typ)
 
 (* Statements *)
 and check_stmt env = function
