@@ -496,14 +496,23 @@ and check_func_call_ret env id args ret_default =
     else false in
   if not builtin then ret_default else
   
-  let Sast.Expr(_, list_typ) = List.hd args in
-  let inner_typ = match list_typ with
-    | List(typ) -> typ
-    | _ -> ret_default in
   match id' with
-    | "head" -> inner_typ
-    | "tail" -> list_typ
-    | "cons" -> list_typ
+    | "head" -> let Sast.Expr(_, typ) = List.hd args in
+        begin match typ with
+          | List(t) -> t
+          | _ -> ret_default
+        end
+    | "tail" -> let Sast.Expr(_, typ) = List.hd args in typ
+    | "cons" ->
+        let Sast.Expr(_, c_typ) = List.hd args and
+          Sast.Expr(_, l_typ) = List.hd (List.tl args) in
+        let l_elem_typ = begin match l_typ with
+          | List(t) -> t
+          | _ -> ret_default
+        end in
+        if c_typ = l_elem_typ then l_typ else 
+        (* CONSTRAIN *)
+        raise (Semantic_Error "MISMATCH!")
     | _ -> ret_default
 
 (* Assignment *)
