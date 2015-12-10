@@ -1,0 +1,13 @@
+ints_0 = [1, 2, 3, 4]
+print(([][0] if [] else None))
+x_1 = (ints_0[0] if ints_0 else None)
+print(x_1)
+print((x_1 + 1))
+print(([][1:] if [] else None))
+print((["hi"][1:] if ["hi"] else None))
+y_2 = (ints_0[1:] if ints_0 else None)
+print(y_2)
+print(len([]))
+print(len(ints_0))
+z_3 = ([5] + ints_0)
+print(z_3)

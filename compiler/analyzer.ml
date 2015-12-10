@@ -23,14 +23,42 @@ type environment = {
   scope: Sast.var VarMap.t;
 }
 
+(* Builtin variables and functions *)
 let builtins = VarMap.empty
-let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; } builtins
-let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; } builtins
+let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; builtin = true; } builtins
+let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; builtin = true; } builtins
 let builtins = VarMap.add "print" {
   name = "print";
   s_type = Func({ param_types = [Any]; return_type = Void; });
+  builtin = true;
 } builtins
 
+(* List builtins *)
+let builtins = VarMap.add "head" {
+  name = "head";
+  s_type = Func({ param_types = [List(Any)]; return_type = Any; });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "tail" {
+  name = "tail";
+  s_type = Func({ param_types = [List(Any)]; return_type = List(Any); });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "cons" {
+  name = "cons";
+  s_type = Func({ param_types = [Any ; List(Any)]; return_type = List(Any); });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "length" {
+  name = "len";
+  s_type = Func({ param_types = [List(Any)]; return_type = Num; });
+  builtin = true;
+} builtins
+
+(* Program entry environment *)
 let root_env = {
   params = VarMap.empty;
   scope = builtins;
@@ -43,7 +71,8 @@ let root_env = {
 
 (* Given an ssid my_var_#, return the original key ID my_var *)
 let id_of_ssid ssid =
-  let id_len = String.rindex ssid '_' in
+  let id_len =
+    try String.rindex ssid '_' with Not_found -> String.length ssid in
   String.sub ssid 0 id_len
 
 let rec str_of_type = function
@@ -130,8 +159,8 @@ let fcall_length_error id num_params num_args =
   let name = match id with
     | Sast.Id(name) -> id_of_ssid name
     | _ -> fcall_nonid_error () in
-  let message =
-    sprintf "Function '%s' expects %d arguments but was called with %d instead"
+  let message = sprintf
+    "Function '%s' expects %d argument(s) but was called with %d instead"
     name num_params num_args in
   raise (Semantic_Error message)
 
@@ -171,6 +200,12 @@ let fdecl_reassign_error id typ =
     id (str_of_type typ) in
   raise (Semantic_Error message)
 
+let list_cons_mismatch_error typ const =
+  let message = sprintf
+    "Invalid attempt to prepend a value of type %s to list of type %s"
+   (str_of_type typ) (str_of_type const) in
+  raise (Semantic_Error message)
+
 let constrain_error old_type const =
   let message = sprintf "Invalid attempt to change unconstrained type %s to %s"
     (str_of_type old_type) (str_of_type const) in
@@ -198,7 +233,7 @@ let get_ssid name =
 (* Add 'id' with type 's_type' to the environment scope *)
 let add_to_scope env id s_type =
   let ss_id = get_ssid id in
-  let var = { name = ss_id; s_type = s_type } in
+  let var = { name = ss_id; s_type = s_type; builtin = false; } in
   let env' = {
     params = env.params;
     scope = VarMap.add id var env.scope;
@@ -211,7 +246,7 @@ let add_to_scope env id s_type =
  *)
 let add_to_params env id =
   let ss_id = get_ssid id in 
-  let var = { name = ss_id; s_type = Unconst } in
+  let var = { name = ss_id; s_type = Unconst; builtin = false; } in
   let env' = {
     params = VarMap.add id var env.params;
     scope = VarMap.remove id env.scope;
@@ -337,6 +372,18 @@ and unconst_to_any = function
       Func({ func with param_types = param_types' })
   | _ as typ -> typ
 
+
+(* Check list elements against constraint type, constrain if possible *)
+and constrain_list_elems env acc const = function
+  | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
+  | (Sast.Expr(_, typ) as ew) :: tl ->
+      let _, const_w_any = try collect_constraints typ const
+        with
+          | Collect_Constraints_Error -> list_error (List(const)) typ
+          | _ as e -> raise e in
+      let env', ew' = constrain_ew env ew const_w_any in
+      constrain_list_elems env' (ew' :: acc) const tl
+
 (************************************************
  * Semantic checking and tree SAST construction
  ************************************************)
@@ -439,8 +486,9 @@ and check_func_call env id args =
         let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
     | _ -> fcall_nonfunc_error id' typ in
   let env', args = check_func_call_args env' id' f args in
+  let env', ret_typ = check_func_call_ret env' id args f.return_type in
   let env', ew' = check_expr env' id in
-  env', Sast.Expr(Sast.Call(ew', args), f.return_type)
+  env', Sast.Expr(Sast.Call(ew', args), ret_typ)
 
 and check_func_call_args env id f args =
   if List.length f.param_types <> List.length args then
@@ -470,6 +518,41 @@ and check_func_call_args env id f args =
     env', args'
   else env', args'
 
+and check_func_call_ret env id args ret_default =
+  let id' = match id with
+    | Ast.Id(id') -> id'
+    | _ -> raise (Semantic_Error "check_func_call_ret() called with non-ID") in
+  let builtin =
+    if VarMap.mem id' env.scope then
+      (VarMap.find id' env.scope).builtin
+    else false in
+  if not builtin then env, ret_default else
+  
+  match id' with
+    | "head" -> let Sast.Expr(_, typ) = List.hd args in
+        begin match typ with
+          | List(t) -> env, t
+          | _ -> env, ret_default (* NEVER SHOULD BE REACHED TO DO: MAKE ERROR *)
+        end
+    | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
+    | "cons" ->
+        let Sast.Expr(cons, c_typ) = List.hd args and
+          Sast.Expr(l, l_typ) = List.hd (List.tl args) in
+        let l_elem_typ = begin match l_typ with
+          | List(t) -> t
+          | _ -> ret_default (* NEVER SHOULD BE REACHED TO DO: MAKE ERROR *)
+        end in
+        let const, _ = try collect_constraints c_typ l_elem_typ
+          with
+            | Collect_Constraints_Error -> list_cons_mismatch_error c_typ l_typ
+            | _ as e -> raise e in
+        (* constrain the element begin appended *)
+        let env' = constrain_e env cons const in
+        (* constrain the list's type *)
+        let env' = constrain_e env' l (List(const)) in
+        env', List(const)
+    | _ -> env, ret_default
+
 (* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f false
@@ -487,20 +570,15 @@ and check_list env l =
   let rec process_list env acc const = function
     | [] -> env, List.rev acc, const
     | e :: tl -> let env', ew = check_expr env e in
-      if const <> Unconst then process_list env' (ew :: acc) const tl else
-      let Sast.Expr(_, typ) = ew in process_list env' (ew :: acc) typ tl in
-  let env', l', const = process_list env [] Unconst l in
+      let Sast.Expr(_, typ) = ew in
+      let const', _ = try collect_constraints const typ
+        with
+          | Collect_Constraints_Error -> list_error (List(const)) typ
+          | _ as e -> raise e in
+      process_list env' (ew :: acc) const' tl in
   
-  (* Check list elements against constraint type, constrain if possible *)
-  let rec check_list_elems env acc = function
-    | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
-    | (Sast.Expr(_, typ) as ew) :: tl ->
-      if typ = const || const = Unconst then check_list_elems env (ew :: acc) tl
-      else if typ = Unconst then
-        let env', ew' = constrain_ew env ew const in
-        check_list_elems env' (ew' :: acc) tl
-      else list_error (List(const)) typ in
-  check_list_elems env' [] l'
+  let env', l', const = process_list env [] Unconst l in
+  constrain_list_elems env' [] const l'
 
 (* Function declaration *)
 and check_fdecl env id f anon =

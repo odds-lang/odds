@@ -1,0 +1,2 @@
+do t = tail([1, 2, 3])
+do head(t) || true
