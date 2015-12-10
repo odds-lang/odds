@@ -52,7 +52,7 @@ and past_dist stmts d =
   let stmts1, min' = past_expr_unwrap stmts d.min in
   let stmts2, max' = past_expr_unwrap stmts1 d.max in
   let stmts3, dist_func' = past_expr_unwrap stmts2 d.dist_func in
-  stmts3, Past.Call(Past.Id("dist_to_list"), [min' ; max' ; dist_func'])
+  stmts3, Past.Call(Past.Id("make_dist"), [min' ; max' ; dist_func'])
 
 (* Lists *)
 and past_list stmts expr_list =

@@ -34,7 +34,7 @@ let _ =
       | Compile -> 
           let stdlib = Utils.get_str_from_file "stdlib.py" in  
           let file = open_out output_file
-          in fprintf file "%s%s\n" stdlib prog; close_out file
+          in fprintf file "%s\n\n%s\n" stdlib prog; close_out file
       | Raw -> 
           let file = open_out output_file
           in fprintf file "%s\n" prog; close_out file
