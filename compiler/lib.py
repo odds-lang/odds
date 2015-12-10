@@ -7,7 +7,7 @@
     - Daniel Echikson
     - Lilly Wang
 """
-
+import math
 import random
 
 INDEX_STEP = 1000
@@ -34,3 +34,7 @@ def make_dist(start, end, f):
         else:
             cum_i = cum_i + 1
     return dist_list
+
+"""
+  COMPILED CODE
+"""
