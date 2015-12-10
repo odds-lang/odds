@@ -1,6 +1,6 @@
 def make_dist(min, max, f):
     step = (max - min) / 1000
-    cutoff = [f((min + x * float((max - min)) / 1000)) for x in range(1, 1001)]
+    cutoff = [f((min + x * float((max - min)) / 1000)) for x in range(0, 1000)]
     total = sum(cutoff)
     dist = []
     for i in cutoff:
