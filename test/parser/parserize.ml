@@ -42,7 +42,9 @@ let rec txt_of_expr = function
   | Assign(x, e) -> sprintf "Assign(%s, %s)" x (txt_of_expr e)
   | List(l) -> sprintf "List([%s])" (txt_of_list l)
   | Dist(d) -> txt_of_dist d
-  | Fdecl(f)-> txt_of_fdecl f  
+  | Fdecl(f)-> txt_of_fdecl f
+  | Cake(fdecl, args) -> sprintf "Cake(%s, [%s])"
+      (txt_of_expr fdecl) (txt_of_list args) 
   | If(e1, e2, e3) -> sprintf "If(%s, %s, %s)"
       (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3)
   
