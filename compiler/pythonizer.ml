@@ -49,10 +49,10 @@ and past_expr_unwrap stmts = function
 
 (* Distributions *)
 and past_dist stmts d =
-  let stmts', min' = past_expr_unwrap stmts d.min in
-  let stmts', max' = past_expr_unwrap stmts d.max in
-  let stmts', dist_func' = past_expr_unwrap stmts d.dist_func in
-  stmts, Past.Call(Past.String_lit("dist_to_list"), [min' ; max' ; dist_func'])
+  let stmts1, min' = past_expr_unwrap stmts d.min in
+  let stmts2, max' = past_expr_unwrap stmts1 d.max in
+  let stmts3, dist_func' = past_expr_unwrap stmts2 d.dist_func in
+  stmts3, Past.Call(Past.String_lit("dist_to_list"), [min' ; max' ; dist_func'])
 
 (* Lists *)
 and past_list stmts expr_list =
