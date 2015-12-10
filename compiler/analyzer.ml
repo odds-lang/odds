@@ -642,7 +642,8 @@ and check_if env i t e =
 
 (* Distrubutions *)
 (* TO DO: Actually check constraints and make sure dists are semantically
-correct *)
+correct. Min and Max need to be Num types. Dist_func must be either an 
+anonymous function or an id of a function *)
 and check_dist env d =
   let env1, e1 = check_expr env d.min in
   let env2, e2 = check_expr env d.min in
