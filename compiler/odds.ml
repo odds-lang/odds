@@ -28,8 +28,11 @@ let _ =
     let ast = Parser.program Scanner.token lexbuf in
     let sast = Analyzer.check_ast ast in
     let past = Pythonizer.generate_past sast in
+    let prog = Generator.gen_program past in
     match action with
-      | Compile -> Generator.gen_program output_file past
+      | Compile -> 
+          let file = open_out output_file
+          in fprintf file "%s\n" prog; close_out file
       | Help -> ()
   with 
     | Scanner.Illegal_Character(m) -> eprintf "Scanner Exception: %s\n" m

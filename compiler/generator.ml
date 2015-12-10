@@ -105,7 +105,4 @@ and txt_of_stmts indent stmt_list =
   in aux indent [] stmt_list
 
 (* Code generation entry point *)
-let gen_program output_file past =
-  let txt = txt_of_stmts 0 past in
-  let file = open_out output_file in
-    fprintf file "%s\n" txt; close_out file
+let gen_program past = txt_of_stmts 0 past
