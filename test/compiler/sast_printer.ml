@@ -53,10 +53,22 @@ let rec str_of_expr = function
       let f_str = sprintf "(%s) ->\n%s\n%sreturn %s\n" params_txt body_txt 
         (tab_str ()) return_txt in
       tabs := !tabs - 1; f_str
+  | Cake(fdecl, call) ->
+      tabs := !tabs + 1;
+      let fdecl_txt = str_of_wrapped_expr fdecl and
+        call_txt = str_of_wrapped_expr call in
+      sprintf "{{\n%s\n}}\n{{\n%s\n}}" fdecl_txt call_txt
+  | If(cond) -> sprintf "%s" (str_of_cond cond)
+
+and str_of_cond cond =
+    sprintf "if (%s)\n  %s\n else  %s" 
+      (str_of_wrapped_expr cond.cond)
+      (str_of_wrapped_expr cond.stmt_1)
+      (str_of_wrapped_expr cond.stmt_2)
 
 and str_of_wrapped_expr_list l = 
   String.concat ", " (List.map str_of_wrapped_expr l)
-
+  
 and str_of_wrapped_expr = function
   | Sast.Expr(expr, typ) -> 
       let type_str = Analyzer.str_of_type typ and expr_str = str_of_expr expr in

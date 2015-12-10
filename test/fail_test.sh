@@ -12,7 +12,7 @@ printf "${CYAN}Running compiler 'fail' tests...\n${NC}"
 for input_file in $INPUT_FILES; do
     output_file=${input_file/.ods/.out}
 
-    ../compiler/odds.sh -c $input_file $TMP_FILE 2>&1 | cmp -s $output_file -
+    ../compiler/odds.sh -r $input_file $TMP_FILE 2>&1 | cmp -s $output_file -
     if [ "$?" -eq 0 ]; then
         printf "%-65s ${GREEN}SUCCESS\n${NC}" "  - checking $input_file..."
     else

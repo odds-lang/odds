@@ -1,0 +1,16 @@
+/*
+ * COMS4115: ODDS Standard Library
+ *
+ * Authors:
+ *  - Alex Kalicki
+ *  - Alexandra Medway
+ *  - Daniel Echikson
+ *  - Lilly Wang
+ */
+
+do list_rev = (l) ->
+    do aux = (acc, l) ->
+        return
+            if length(l) == 0 then acc
+            else aux(cons(head(l), acc), tail(l))
+    return aux([], l)

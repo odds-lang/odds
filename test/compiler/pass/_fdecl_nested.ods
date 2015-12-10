@@ -4,3 +4,6 @@ do foo = (x, y) ->
     return a + b
   do z = bar(1, 2)
   return x + z
+
+do y = foo(39, 100)
+do print(y)

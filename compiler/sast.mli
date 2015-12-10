@@ -48,13 +48,22 @@ and expr =
   | Call of expr_wrapper * expr_wrapper list
   | Ldecl of expr_wrapper list
   | Fdecl of fdecl
+  | Cake of expr_wrapper * expr_wrapper
+  | If of ifdecl
 
 and fdecl = {
-  fname: string;          (* Function Name *)
+  f_name: string;         (* Function Name *)
   params: string list;    (* Parameters *)
   body: stmt list;        (* Function Body *)
   return: expr_wrapper;   (* Return *)
   is_anon: bool;          (* Anonymous? *)
+}
+
+and ifdecl = {
+  c_name: string;         (* Function Name *)
+  cond: expr_wrapper;     (* If *)
+  stmt_1: expr_wrapper;   (* Then *)
+  stmt_2: expr_wrapper;   (* Else *)
 }
 
 (* Statements *)
