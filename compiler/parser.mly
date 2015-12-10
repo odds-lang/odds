@@ -33,7 +33,6 @@
 
 /* Function Symbols & Keywords */
 %token FDELIM RETURN CAKE
-%token FDELIM RETURN
 
 /* End-of-File */
 %token EOF
@@ -121,20 +120,20 @@ list:
 
 /* Distributions */
 dist_func:
-  | LCAR expr COMMA expr DDELIM expr
+  | LCAR expr COMMA expr DDELIM expr VBAR
     { {
       min = $2;
       max = $4;
       dist_func = $6;
     } }
+
 dist:
-  | LCAR expr COMMA expr LCAR 
+  | LCAR expr COMMA expr RCAR
     { {
       min = $2;
       max = $4;
-      dist_func = Ast.Id("uniform")
+      dist_func = Ast.Id("uniform");
     } }
-
 
 /* Binary operators */
 arith:

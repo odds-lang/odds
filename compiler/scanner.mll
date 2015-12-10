@@ -30,10 +30,10 @@ rule token = parse
 
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
+| '<' whitespace* '|'       { DDELIM }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACE }  | ']'   { RBRACE }
-| ','   { COMMA }   | '>'   { VBAR }
-| '>' whitespace* '|'   { DDELIM }
+| ','   { COMMA }   | '|'   { VBAR } 
 
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
