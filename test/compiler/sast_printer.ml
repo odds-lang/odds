@@ -42,7 +42,7 @@ let rec str_of_expr = function
       let func_name = str_of_wrapped_expr we and 
         args_txt = str_of_wrapped_expr_list we_list in
       sprintf "%s(%s)" func_name args_txt
-  | List(we_list) -> 
+  | Ldecl(we_list) -> 
       let l_txt = str_of_wrapped_expr_list we_list in
       sprintf "[%s]" l_txt
   | Fdecl(fdecl) -> 
@@ -58,10 +58,17 @@ let rec str_of_expr = function
       let fdecl_txt = str_of_wrapped_expr fdecl and
         call_txt = str_of_wrapped_expr call in
       sprintf "{{\n%s\n}}\n{{\n%s\n}}" fdecl_txt call_txt
+  | If(cond) -> sprintf "%s" (str_of_cond cond)
+
+and str_of_cond cond =
+    sprintf "if (%s)\n  %s\n else  %s" 
+      (str_of_wrapped_expr cond.cond)
+      (str_of_wrapped_expr cond.stmt_1)
+      (str_of_wrapped_expr cond.stmt_2)
 
 and str_of_wrapped_expr_list l = 
   String.concat ", " (List.map str_of_wrapped_expr l)
-
+  
 and str_of_wrapped_expr = function
   | Sast.Expr(expr, typ) -> 
       let type_str = Analyzer.str_of_type typ and expr_str = str_of_expr expr in

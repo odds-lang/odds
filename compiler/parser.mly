@@ -48,6 +48,7 @@
 %token VOID_LITERAL
 
 /* Precedence and associativity of each operator */
+%nonassoc IF THEN ELSE
 %right ASN
 %nonassoc RETURN
 %left OR
@@ -87,6 +88,7 @@ expr:
   | LPAREN expr RPAREN                    { $2 }
   | fdecl                                 { Fdecl($1) }
   | LPAREN fdecl CAKE list_opt RPAREN     { Cake(Fdecl($2), $4) }
+  | IF expr THEN expr ELSE expr           { If($2, $4, $6) }
 
 /* Function declaration */
 fdecl:

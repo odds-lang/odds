@@ -43,7 +43,9 @@ let rec txt_of_expr = function
   | List(l) -> sprintf "List([%s])" (txt_of_list l)
   | Fdecl(f)-> txt_of_fdecl f
   | Cake(fdecl, args) -> sprintf "Cake(%s, [%s])"
-      (txt_of_expr fdecl) (txt_of_list args)
+      (txt_of_expr fdecl) (txt_of_list args) 
+  | If(e1, e2, e3) -> sprintf "If(%s, %s, %s)"
+      (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3)
 
 (* Function declarations *)
 and txt_of_fdecl f =
