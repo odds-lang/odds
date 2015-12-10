@@ -1,5 +1,5 @@
 (*
- * COMS4115: Odds parser
+ * COMS4115: Odds Python code generator
  *
  * Authors:
  *  - Alex Kalicki

@@ -643,10 +643,11 @@ and check_if env i t e =
 (* Distrubutions *)
 (* TO DO: Actually check constraints and make sure dists are semantically
 correct. Min and Max need to be Num types. Dist_func must be either an 
-anonymous function or an id of a function *)
+anonymous function or an id of a function (has to take one argument of Num
+type and returns a Num) *)
 and check_dist env d =
   let env1, e1 = check_expr env d.min in
-  let env2, e2 = check_expr env d.min in
+  let env2, e2 = check_expr env d.max in
   let env3, e3 = check_expr env d.dist_func in
   env1, Sast.Expr(Sast.Dist({
     min = e1;
