@@ -32,7 +32,7 @@ let _ =
     let prog = Generator.gen_program past in
     match action with
       | Compile -> 
-          let stdlib = Utils.get_str_from_file "stdlib.py" in  
+          let stdlib = Utils.get_str_from_file "lib.py" in  
           let file = open_out output_file
           in fprintf file "%s\n\n%s\n" stdlib prog; close_out file
       | Raw -> 
