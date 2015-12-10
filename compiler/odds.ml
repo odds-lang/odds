@@ -16,7 +16,7 @@ let get_help =
   "Odds Usage: odds.sh <flag> <input_file> <output_file>\n" ^
   "  -c\tCompile odds input_file to python code in output_file with stdlib\n" ^
   "  -r\tCompile odds input_file into raw python output_file\n" ^
-  "  -s\tCompile odds input_file into syntatically checked ast\n" ^
+  "  -s\tCompile odds input_file into semantically checked ast\n" ^
   "  -h\tDisplay this list of options\n"
 
 let _ =
