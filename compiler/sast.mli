@@ -46,18 +46,26 @@ and expr =
   | Id of string
   | Assign of string * expr_wrapper
   | Call of expr_wrapper * expr_wrapper list
-  | List of expr_wrapper list
   | Dist of dist
+  | Ldecl of expr_wrapper list
   | Fdecl of fdecl
+  | If of ifdecl
+
+and ifdecl = {
+  c_name: string;
+  cond: expr_wrapper;
+  stmt_1: expr_wrapper;
+  stmt_2: expr_wrapper;
+}
 
 and dist = {
-  min: expr;        (* Distribution Minimum *)
-  max: expr;        (* Distribution Maximum *)
-  dist_func: expr;  (* Distribution Function *)
+  min: expr_wrapper;        (* Distribution Minimum *)
+  max: expr_wrapper;        (* Distribution Maximum *)
+  dist_func: expr_wrapper;  (* Distribution Function *)
 }
 
 and fdecl = {
-  fname: string;          (* Function Name *)
+  f_name: string;         (* Function Name *)
   params: string list;    (* Parameters *)
   body: stmt list;        (* Function Body *)
   return: expr_wrapper;   (* Return *)

@@ -50,6 +50,7 @@ type expr =
   | List of expr list             (* [1, 2, 3] *)
   | Dist of dist                  (* < 1, 2 > | normal *)
   | Fdecl of fdecl                (* (x) -> ... return x *)
+  | If of expr * expr * expr      (* if true then 42 else 43 *)
 
 (* Distribution Declarations *)
 and dist = {

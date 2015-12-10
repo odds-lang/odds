@@ -41,7 +41,14 @@ let rec txt_of_expr = function
       (txt_of_expr f) (txt_of_list args)
   | Assign(x, e) -> sprintf "Assign(%s, %s)" x (txt_of_expr e)
   | List(l) -> sprintf "List([%s])" (txt_of_list l)
-  | Fdecl(f)-> txt_of_fdecl f
+  | Dist(d) -> txt_of_dist d
+  | Fdecl(f)-> txt_of_fdecl f  
+  | If(e1, e2, e3) -> sprintf "If(%s, %s, %s)"
+      (txt_of_expr e1) (txt_of_expr e2) (txt_of_expr e3)
+  
+and txt_of_dist d =
+  sprintf "Dist({ min=%s ; max=%s ; dist_func=%s })"
+    (txt_of_expr d.min) (txt_of_expr d.min) (txt_of_expr d.dist_func)
 
 (* Function declarations *)
 and txt_of_fdecl f =
