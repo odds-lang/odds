@@ -50,7 +50,7 @@ let rec txt_of_expr = function
   
 and txt_of_dist d =
   sprintf "Dist({ min=%s ; max=%s ; dist_func=%s })"
-    (txt_of_expr d.min) (txt_of_expr d.min) (txt_of_expr d.dist_func)
+    (txt_of_expr d.min) (txt_of_expr d.max) (txt_of_expr d.dist_func)
 
 (* Function declarations *)
 and txt_of_fdecl f =

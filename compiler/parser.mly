@@ -81,6 +81,7 @@ expr:
   | literal                               { $1 }
   | arith                                 { $1 }
   | boolean                               { $1 }
+  | dist                                  { Dist($1) }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
