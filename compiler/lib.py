@@ -27,8 +27,6 @@ def make_dist(start, end, f):
     cum_i = 0
     rand_i = 0
     dist_list = []
-    print rands[0]
-    print cum_weights[0]
     while rand_i < len(rands):
         if rands[rand_i] < cum_weights[cum_i]:
             dist_list.append(indices[cum_i])
