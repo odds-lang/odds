@@ -360,6 +360,18 @@ and unconst_to_any = function
       Func({ func with param_types = param_types' })
   | _ as typ -> typ
 
+
+(* Check list elements against constraint type, constrain if possible *)
+and constrain_list_elems env acc const = function
+  | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
+  | (Sast.Expr(_, typ) as ew) :: tl ->
+      let _, const_w_any = try collect_constraints typ const
+        with
+          | Collect_Constraints_Error -> list_error (List(const)) typ
+          | _ as e -> raise e in
+      let env', ew' = constrain_ew env ew const_w_any in
+      constrain_list_elems env' (ew' :: acc) const tl
+
 (************************************************
  * Semantic checking and tree SAST construction
  ************************************************)
@@ -460,7 +472,7 @@ and check_func_call env id args =
         let env', ew' = constrain_ew env' ew (Func(f)) in env', ew', f
     | _ -> fcall_nonfunc_error id' typ in
   let env', args = check_func_call_args env' id' f args in
-  let ret_typ = check_func_call_ret env' id args f.return_type in
+  let env', ret_typ = check_func_call_ret env' id args f.return_type in
   let env', ew' = check_expr env' id in
   env', Sast.Expr(Sast.Call(ew', args), ret_typ)
 
@@ -500,27 +512,32 @@ and check_func_call_ret env id args ret_default =
     if VarMap.mem id' env.scope then
       (VarMap.find id' env.scope).builtin
     else false in
-  if not builtin then ret_default else
+  if not builtin then env, ret_default else
   
   match id' with
     | "head" -> let Sast.Expr(_, typ) = List.hd args in
         begin match typ with
-          | List(t) -> t
-          | _ -> ret_default
+          | List(t) -> env, t
+          | _ -> env, ret_default (* NEVER SHOULD BE REACHED TO DO: MAKE ERROR *)
         end
-    | "tail" -> let Sast.Expr(_, typ) = List.hd args in typ
+    | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
     | "cons" ->
-        let Sast.Expr(_, c_typ) = List.hd args and
-          Sast.Expr(_, l_typ) = List.hd (List.tl args) in
+        let Sast.Expr(cons, c_typ) = List.hd args and
+          Sast.Expr(l, l_typ) = List.hd (List.tl args) in
         let l_elem_typ = begin match l_typ with
           | List(t) -> t
-          | _ -> ret_default
+          | _ -> ret_default (* NEVER SHOULD BE REACHED TO DO: MAKE ERROR *)
         end in
-        if c_typ = l_elem_typ then l_typ else
-        (* CONSTRAIN L_ELEM_TYP HERE *)
-        if l_elem_typ = Unconst then l_typ else
-        list_cons_mismatch_error c_typ l_typ
-    | _ -> ret_default
+        let const, _ = try collect_constraints c_typ l_elem_typ
+          with
+            | Collect_Constraints_Error -> list_cons_mismatch_error c_typ l_typ
+            | _ as e -> raise e in
+        (* constrain the element begin appended *)
+        let env' = constrain_e env cons const in
+        (* constrain the list's type *)
+        let env' = constrain_e env' l (List(const)) in
+        env', List(const)
+    | _ -> env, ret_default
 
 (* Assignment *)
 and check_assign env id = function
@@ -537,20 +554,15 @@ and check_list env l =
   let rec process_list env acc const = function
     | [] -> env, List.rev acc, const
     | e :: tl -> let env', ew = check_expr env e in
-      if const <> Unconst then process_list env' (ew :: acc) const tl else
-      let Sast.Expr(_, typ) = ew in process_list env' (ew :: acc) typ tl in
-  let env', l', const = process_list env [] Unconst l in
+      let Sast.Expr(_, typ) = ew in
+      let const', _ = try collect_constraints const typ
+        with
+          | Collect_Constraints_Error -> list_error (List(const)) typ
+          | _ as e -> raise e in
+      process_list env' (ew :: acc) const' tl in
   
-  (* Check list elements against constraint type, constrain if possible *)
-  let rec check_list_elems env acc = function
-    | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
-    | (Sast.Expr(_, typ) as ew) :: tl ->
-      if typ = const || const = Unconst then check_list_elems env (ew :: acc) tl
-      else if typ = Unconst then
-        let env', ew' = constrain_ew env ew const in
-        check_list_elems env' (ew' :: acc) tl
-      else list_error (List(const)) typ in
-  check_list_elems env' [] l'
+  let env', l', const = process_list env [] Unconst l in
+  constrain_list_elems env' [] const l'
 
 (* Function declaration *)
 and check_fdecl env id f anon =
