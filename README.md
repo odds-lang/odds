@@ -13,7 +13,7 @@ Contributors:
 
 
 Constrain System will not constrain:
-1. Function parameters if they are passed to a function that is itself a
+1) Function parameters if they are passed to a function that is itself a
 parameter prior to that function's args being constrained. For example:
 ```ocaml 
 do call = (f, x) ->
@@ -24,7 +24,7 @@ do call = (f, x) ->
 `x` will not be constrained to a `Num` even though it ought to be. The second 
 parameter of `call` will be `Any`.
 
-2. The elements of a list if they are all unconstrained when the list is 
+2) The elements of a list if they are all unconstrained when the list is 
 instantiated (i.e. they are all parameters), and a constrained type is cons'd
 to the list. For example:
 ```ocaml
