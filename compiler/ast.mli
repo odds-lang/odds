@@ -48,7 +48,7 @@ type expr =
   | Assign of string * expr       (* x = 4 *)
   | Call of expr * expr list      (* add(1, 2) *)
   | List of expr list             (* [1, 2, 3] *)
-  | Dist of dist                  (* < 1, 2 > | normal *)
+  | Dist of dist                  (* < 1, 2> *) 
   | Fdecl of fdecl                (* (x) -> ... return x *)
   | Cake of expr * expr list      (* (() -> return 42)() *)
   | If of expr * expr * expr      (* if true then 42 else 43 *)

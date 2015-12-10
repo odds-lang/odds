@@ -10,3 +10,6 @@ def make_dist(min, max, f):
     for i in range(0, 10000 - len(dist)):
         dist.append(cutoff[len(cutoff)-1])
     return dist
+
+def uniform(x):
+    return 1.0

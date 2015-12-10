@@ -11,7 +11,7 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
@@ -82,6 +82,7 @@ expr:
   | arith                                 { $1 }
   | boolean                               { $1 }
   | dist                                  { Dist($1) }
+  | dist_func                             { Dist($1) }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
@@ -119,13 +120,21 @@ list:
 
 
 /* Distributions */
-dist:
-  | LCAR expr COMMA expr RCAR VBAR expr
+dist_func:
+  | LCAR expr COMMA expr DDELIM expr
     { {
       min = $2;
       max = $4;
-      dist_func = $7;
+      dist_func = $6;
     } }
+dist:
+  | LCAR expr COMMA expr LCAR 
+    { {
+      min = $2;
+      max = $4;
+      dist_func = Ast.Id("uniform")
+    } }
+
 
 /* Binary operators */
 arith:

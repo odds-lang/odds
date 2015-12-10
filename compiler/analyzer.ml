@@ -30,6 +30,12 @@ let builtins = VarMap.add "print" {
   name = "print";
   s_type = Func({ param_types = [Any]; return_type = Void; });
 } builtins
+let builtins = VarMap.add "uniform" {
+  name = "uniform";
+  s_type = Func({ param_types = [Num]; return_type = Num; });
+} builtins
+
+
 
 let root_env = {
   params = VarMap.empty;

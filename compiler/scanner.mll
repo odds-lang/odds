@@ -32,7 +32,8 @@ rule token = parse
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACE }  | ']'   { RBRACE }
-| ','   { COMMA }   | '|'   { VBAR }
+| ','   { COMMA }   | '>'   { VBAR }
+| '>' whitespace* '|'   { DDELIM }
 
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
