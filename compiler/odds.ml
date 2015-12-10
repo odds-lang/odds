@@ -17,7 +17,7 @@ let get_help =
   "  -c\tCompile odds input_file to python code in output_file with stdlib\n" ^
   "  -h\tDisplay this list of options\n" ^
   "  -r\tCompile odds input_file into raw python output_file\n" ^
-  "  -s\tPrint odds input_file as semantically checked ast\n"
+  "  -s\tPrint odds input_file as semantically checked ast"
 
 let _ =
   let action = List.assoc Sys.argv.(1)
@@ -32,15 +32,15 @@ let _ =
     match action with
       | Compile -> 
           let output_file = Sys.argv.(2) and stdlib_file = Sys.argv.(3) in
-          let stdlib = Utils.get_str_from_file stdlib_file in  
+          let stdlib = Utils.str_of_file stdlib_file in
           let file = open_out output_file
-          in fprintf file "%s%s\n" stdlib prog; close_out file
+          in fprintf file "%s\n\n%s\n" stdlib prog; close_out file
       | Raw -> 
           let output_file = Sys.argv.(2) in
           let file = open_out output_file
           in fprintf file "%s\n" prog; close_out file
-      | Sast -> Printer.print_sast ast 
-      | Help -> ()
+      | Sast -> Printer.print_sast sast
+      | Help -> print_endline get_help
   with 
     | Scanner.Illegal_Character(m) -> eprintf "Scanner Exception: %s\n" m
     | Analyzer.Semantic_Error(m) -> eprintf "Analyzer Exception: %s\n" m
