@@ -13,16 +13,15 @@ open Printf
 type action = Compile | Help | Raw | Sast
 
 let get_help =
-  "Odds Usage: odds.sh <flag> <input_file> <output_file>\n" ^
+  "Odds Usage: odds.sh <flag> [input_file] [output_file]\n" ^
   "  -c\tCompile odds input_file to python code in output_file with stdlib\n" ^
+  "  -h\tDisplay this list of options\n" ^
   "  -r\tCompile odds input_file into raw python output_file\n" ^
-  "  -s\tCompile odds input_file into semantically checked ast\n" ^
-  "  -h\tDisplay this list of options\n"
+  "  -s\tPrint odds input_file as semantically checked ast\n"
 
 let _ =
-  let action =
-    List.assoc Sys.argv.(1) 
-      [("-c", Compile) ; ("-h", Help) ; ("-r", Raw); ("-s", Sast)] in
+  let action = List.assoc Sys.argv.(1)
+    [("-c", Compile) ; ("-h", Help) ; ("-r", Raw); ("-s", Sast)] in
   if action = Help then print_endline get_help else
   try
     let lexbuf = Lexing.from_channel stdin in 
@@ -32,8 +31,8 @@ let _ =
     let prog = Generator.gen_program past in
     match action with
       | Compile -> 
-          let output_file = Sys.argv.(2) in
-          let stdlib = Utils.get_str_from_file "stdlib.py" in  
+          let output_file = Sys.argv.(2) and stdlib_file = Sys.argv.(3) in
+          let stdlib = Utils.get_str_from_file stdlib_file in  
           let file = open_out output_file
           in fprintf file "%s%s\n" stdlib prog; close_out file
       | Raw -> 
