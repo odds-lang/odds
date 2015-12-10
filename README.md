@@ -13,6 +13,7 @@ Contributors:
 
 
 Constrain System will not constrain:
+
 1) Function parameters if they are passed to a function that is itself a
 parameter prior to that function's args being constrained. For example:
 ```ocaml 
