@@ -13,8 +13,9 @@ open Analyzer
 open Printf
 
 (* Utility Functions *)
+let tabsize = 2
 let tabs = ref 0
-let tab_str () = String.make (!tabs * 2) ' '
+let tab_str () = String.make (!tabs * tabsize) ' '
 
 (* Stringerizer *)
 let rec str_of_expr = function
@@ -25,7 +26,7 @@ let rec str_of_expr = function
       end
   | String_lit(s) -> s
   | Bool_lit(b) -> string_of_bool b
-  | Void_lit -> "()"
+  | Void_lit -> "void"
   | Unop(op, we) -> 
       let op_str = Analyzer.str_of_unop op and we_str = str_of_wrapped_expr we in
       sprintf "%s%s" op_str we_str
@@ -57,14 +58,16 @@ let rec str_of_expr = function
       tabs := !tabs + 1;
       let fdecl_txt = str_of_wrapped_expr fdecl and
         call_txt = str_of_wrapped_expr call in
-      sprintf "{{\n%s\n}}\n{{\n%s\n}}" fdecl_txt call_txt
+      let c_str = sprintf "{\n%s%s}(%s)" (tab_str ()) fdecl_txt call_txt in
+      tabs := !tabs - 1; c_str
   | If(cond) -> sprintf "%s" (str_of_cond cond)
 
 and str_of_cond cond =
-    sprintf "if (%s)\n  %s\n else  %s" 
-      (str_of_wrapped_expr cond.cond)
-      (str_of_wrapped_expr cond.stmt_1)
-      (str_of_wrapped_expr cond.stmt_2)
+  let tabins = (tab_str ()) ^ (String.make tabsize ' ') in
+  sprintf "\n%sif %s then\n%s%s\n%selse\n%s%s" 
+    (tab_str ()) (str_of_wrapped_expr cond.cond) tabins 
+    (str_of_wrapped_expr cond.stmt_1) (tab_str ()) tabins 
+    (str_of_wrapped_expr cond.stmt_2)
 
 and str_of_wrapped_expr_list l = 
   String.concat ", " (List.map str_of_wrapped_expr l)
