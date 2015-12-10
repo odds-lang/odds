@@ -1,8 +1,13 @@
 #!/bin/bash
 
 MYDIR="$(dirname "$(which "$0")")"
-ODDS_FILE="$MYDIR/odds"
-PYLIB_FILE="$MYDIR/lib/lib.py"
+ODDS_FILE="$MYDIR/compiler/odds"
+PYLIB_FILE="$MYDIR/compiler/lib/lib.py"
+
+if [ ! -f $ODDS_FILE ]; then
+    printf "ERROR: not yet compiled, run 'make' first.\n" 1>&2
+    exit 1
+fi
 
 # odds.sh (-c | -r) <odds_file> <output_file>
 if [ "$#" -eq 3 ]; then
@@ -16,14 +21,16 @@ if [ "$#" -eq 3 ]; then
         printf "ERROR: invalid arguments supplied for command $0 $1\n" 1>&2
         exit 1
     fi
+fi
 
 # odds.sh -s <odds_file>
-elif [ "$#" -eq 2 ] && [ "$1" == "-s" ]; then
+if [ "$#" -eq 2 ] && [ "$1" == "-s" ]; then
     $ODDS_FILE $1 < $2
     exit 0
+fi
 
 # odds.sh -h
-elif [ "$#" -eq 1 ] && [ "$1" == "-h" ]; then
+if [ "$#" -eq 1 ] && [ "$1" == "-h" ]; then
     $ODDS_FILE -h
     exit 0
 fi
