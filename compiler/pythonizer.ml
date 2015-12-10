@@ -31,12 +31,17 @@ let rec past_expr stmts = function
       let stmts', args = past_list stmts wargs in
       stmts', Past.Call(id, args)
   | Sast.Ldecl(wl) -> let stmts', l = past_list stmts wl in stmts', Past.Ldecl(l)
-  | Sast.If(cond) -> mk_if_function stmts cond
   | Sast.Assign(id, we) -> let stmts', e = past_expr_unwrap stmts we in
       (Past.Assign(id, e) :: stmts'), Past.Empty
-  | Sast.Fdecl(f) -> if f.is_anon then 
-      let stmts', id = past_fdecl_anon stmts f in stmts', id
-      else let stmts', def = past_fdecl stmts f in (Past.Def(def) :: stmts'), Past.Empty
+  | Sast.Fdecl(f) -> 
+      if f.is_anon then 
+        let stmts', id = past_fdecl_anon stmts f in stmts', id
+      else
+        let stmts', def = past_fdecl stmts f in
+        (Past.Def(def) :: stmts'), Past.Empty
+  | Sast.Cake(wfdecl, wcall) -> let stmts', _ = past_expr_unwrap stmts wfdecl in
+      past_expr_unwrap stmts' wcall
+  | Sast.If(cond) -> mk_if_function stmts cond
 
 and past_expr_unwrap stmts = function
   | Sast.Expr(e, _) -> past_expr stmts e

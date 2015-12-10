@@ -1,0 +1,21 @@
+[
+    Do(
+        Cake(
+            Fdecl({ params=[] ; body=[] ; return = Num_lit(42) }),
+            []
+        )
+    ) ;
+    Do(
+        Call(Id(print),
+        [
+            Cake(
+                Fdecl({
+                    params=[x] ;
+                    body=[] ;
+                    return = Binop(Id(x), Add, Num_lit(1))
+                }),
+                [Num_lit(41)]
+            )
+        ])
+    )
+]
