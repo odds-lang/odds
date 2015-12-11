@@ -2,6 +2,3 @@ do square = (x) -> return x * x
 do x = <0, 1> | square |
 
 do y = <5 + 6, 7 + 8> | (x) -> return x * x |
-
-do print(x)
-do print(y)
