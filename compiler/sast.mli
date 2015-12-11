@@ -19,12 +19,18 @@ type data_type =
   | List of data_type
   | Func of func
   | Any
-  | Dist of dist
+  | Dist_t of dist_t
   | Unconst
 
 and func = {
   param_types: data_type list;
   return_type: data_type;
+}
+
+and dist_t = {
+  min_type: data_type;
+  max_type: data_type;
+  dfunc_type: data_type;
 }
 
 type var = {

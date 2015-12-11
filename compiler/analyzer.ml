@@ -189,6 +189,13 @@ let if_mismatch_error typ1 typ2 =
     (str_of_type typ1) (str_of_type typ2) in
   raise (Semantic_Error message)
 
+let invalid_dist_min_max_error typ1 typ2 = 
+  let message = sprintf ("Invalid attempt to create distribution with " ^
+    "min of type '%s' and max of type '%s'") (str_of_type typ1) 
+    (str_of_type typ2) in
+  raise (Semantic_Error message)
+
+
 
 (********************
  * Scoping
@@ -344,6 +351,11 @@ and unconst_to_any = function
       Func({ func with param_types = param_types' })
   | _ as typ -> typ
 
+(* Returns true if Num or Unconst, otherwise false *)
+and is_num = function
+  | Num | Unconst -> true
+  | _ -> false 
+
 (************************************************
  * Semantic checking and tree SAST construction
  ************************************************)
@@ -403,9 +415,6 @@ and check_binop env e1 op e2 =
     
     (* Numeric operations *)
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
-      let is_num = function
-        | Num | Unconst -> true
-        | _ -> false in 
       if is_num typ1 && is_num typ2 then 
         let result_type = match op with
           | Add | Sub | Mult | Div | Mod | Pow -> Num
@@ -652,9 +661,34 @@ correct. Min and Max need to be Num types. Dist_func must be either an
 anonymous function or an id of a function (has to take one argument of Num
 type and returns a Num) *)
 and check_dist env d =
-  let env1, e1 = check_expr env d.min in
-  let env2, e2 = check_expr env d.max in
-  let env3, e3 = check_expr env d.dist_func in
+  (* Dists must have function of the following type: *)
+  let dfunc_type = Func({ param_types = [Num]; return_type = Num; }) in
+
+  (* Check and constrain min/max if neccessary *)
+  let env', ew1 = check_expr env d.min in
+  let Sast.Expr(_, typ1) = ew1 in
+  let env', ew2 = check_expr env d.max in
+  let Sast.Expr(_, typ2) = ew2 in
+  let env', ew1', ew2' = 
+    if is_num typ1 && is_num typ2 then
+      let env', ew1' = constrain_ew env' ew1 Num in
+      let env', ew2' = constrain_ew env' ew2 Num in
+      env', ew1', ew2'
+    else invalid_dist_min_max_error typ1 typ2 in
+
+  (* Check and constrain distribution function *)
+  let env', ew3 = check_expr env d.dist_func in
+  let env', ew3' = match ew3 with
+    | Sast.Expr((Sast.Id(ssid)), typ3) -> (* do stuff *)
+    | Sast.Expr((Sast.Fdecl(_)), typ3) -> (* do other stuff *)
+    | _ -> (* throw error *) in
+
+  (* Construct Dist type *)
+  dist_type = Sast.Dist_t({
+    (* TO DO: UPDATE COLLECT_CONSTRAINTS TO ACCOUNT FOR DIST *)
+  })
+
+
   env1, Sast.Expr(Sast.Dist({
     min = e1;
     max = e2;
