@@ -59,7 +59,7 @@ let rec str_of_type = function
   | Void -> "Void"
   | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
-  | Dist(d) -> "Dist" (* Need to edit *)
+  | Dist_t -> "<Dist>|Func(Num => Num)|"
   | Any -> "Any"
   | Unconst -> "Unconst"
 
@@ -190,9 +190,14 @@ let if_mismatch_error typ1 typ2 =
   raise (Semantic_Error message)
 
 let invalid_dist_min_max_error typ1 typ2 = 
-  let message = sprintf ("Invalid attempt to create distribution with " ^
-    "min of type '%s' and max of type '%s'") (str_of_type typ1) 
-    (str_of_type typ2) in
+  let message = sprintf "Invalid distribution with min type '%s' and max type '%s'" 
+    (str_of_type typ1) (str_of_type typ2) in
+  raise (Semantic_Error message)
+
+let invalid_dist_func_type_error invalid_typ f_typ =
+  let message = sprintf "Invalid distribution with function '%s'
+    (distribution's must have function of type '%s')" 
+    (str_of_type invalid_typ) (str_of_type f_typ) in
   raise (Semantic_Error message)
 
 
@@ -656,10 +661,7 @@ and check_if env i t e =
   env', Sast.Expr(Sast.If(ifdecl), const)
 
 (* Distrubutions *)
-(* TO DO: Actually check constraints and make sure dists are semantically
-correct. Min and Max need to be Num types. Dist_func must be either an 
-anonymous function or an id of a function (has to take one argument of Num
-type and returns a Num) *)
+(* TO DO: UPDATE COLLECT_CONSTRAINTS TO ACCOUNT FOR DIST *)
 and check_dist env d =
   (* Dists must have function of the following type: *)
   let dfunc_type = Func({ param_types = [Num]; return_type = Num; }) in
@@ -678,22 +680,21 @@ and check_dist env d =
 
   (* Check and constrain distribution function *)
   let env', ew3 = check_expr env d.dist_func in
-  let env', ew3' = match ew3 with
-    | Sast.Expr((Sast.Id(ssid)), typ3) -> (* do stuff *)
-    | Sast.Expr((Sast.Fdecl(_)), typ3) -> (* do other stuff *)
-    | _ -> (* throw error *) in
+  let Sast.Expr(_, typ3) = ew3 in
+  let const, _ = try collect_constraints typ3 dfunc_type
+    with
+      | Collect_Constraints_Error -> invalid_dist_func_type_error typ3 dfunc_type
+      | _ as e -> raise e in
+  let env', ew3' = 
+    if has_unconst typ3 then constrain_ew env' ew3 const else env', ew3 in
 
-  (* Construct Dist type *)
-  dist_type = Sast.Dist_t({
-    (* TO DO: UPDATE COLLECT_CONSTRAINTS TO ACCOUNT FOR DIST *)
-  })
-
-
-  env1, Sast.Expr(Sast.Dist({
-    min = e1;
-    max = e2;
-    dist_func = e3;
-  }), Unconst) (* Should it be Dist? Hardcoded here for now *)
+  (* Construct Dist expr_wrapper *)
+  let dist = Sast.Expr(Sast.Dist({ 
+    min = ew1'; max = ew2'; dist_func = ew3';
+  }), Dist_t) in
+  
+  (* Return Dist expr_wrapper *)
+  env', dist
 
 (* Statements *)
 and check_stmt env = function
