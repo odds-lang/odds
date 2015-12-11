@@ -18,3 +18,12 @@ def cond_5():
         return "Hello, world!"
     return "hi there!"
 print(cond_5())
+def outer_6():
+    def inner_7(x_8):
+        def cond_10():
+            if x_8:
+                return "true"
+            return "false"
+        return cond_10()
+    return inner_7(True)
+print(outer_6())
