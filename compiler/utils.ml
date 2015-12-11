@@ -1,10 +1,19 @@
-let get_str_from_file file = 
-    let lst = ref [] in
-    let in_channel = open_in file in 
-    try 
-        while true; do
-            lst := input_line in_channel :: !lst 
-        done; String.concat "" (List.rev !lst)
-    with End_of_file ->
-        close_in in_channel;
-          String.concat "\n" (List.rev !lst);;
+(*
+ * COMS4115: Odds Utility File
+ *
+ * Authors:
+ *  - Alex Kalicki
+ *  - Alexandra Medway
+ *  - Daniel Echikson
+ *  - Lilly Wang
+ *)
+
+(* Return a string representation of file 'file' *)
+let str_of_file file =
+  let ic = open_in file in
+  let try_read () =
+    try Some(input_line ic) with End_of_file -> None in
+  let rec aux acc = match try_read () with
+    | None -> close_in ic; String.concat "\n" (List.rev acc)
+    | Some(s) -> aux (s :: acc) in
+  aux []
