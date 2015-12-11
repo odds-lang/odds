@@ -84,13 +84,6 @@ and str_of_stmts sast =
     | hd :: tl -> aux (str_of_stmt hd :: acc) tl
   in aux [] sast
 
-let _ = 
-  try 
-    let lexbuf = Lexing.from_channel stdin in 
-    let ast = Parser.program Scanner.token lexbuf in
-    let sast = Analyzer.check_ast ast in
+let print_sast sast =
     let sast_str = str_of_stmts sast in
     print_endline sast_str
-  with 
-    | Scanner.Illegal_Character(m) -> eprintf "Scanner Exception: %s\n" m
-    | Analyzer.Semantic_Error(m) -> eprintf "Analyzer Exception: %s\n" m
