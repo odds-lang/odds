@@ -12,6 +12,7 @@ import random
 
 INDEX_STEP = 1000
 DIST_LENGTH = 10000
+SAMPLE_STEP
 
 def make_dist(start, end, f):
     step = (end - start) * 1.0 / INDEX_STEP
@@ -34,6 +35,26 @@ def make_dist(start, end, f):
         else:
             cum_i = cum_i + 1
     return dist_list
+
+def add(d1, d2):
+    # Do we want to get a random number between 0 and 99? If so, we have to import random.
+    s1 = d1[0::SAMPLE_STEP]
+    s2 = d2[0::SAMPLE_STEP]
+    add = []
+    for i in s1:
+        for j in s2:
+            add.append(i+j)
+    return sorted(add)
+
+def mult(d1, d2):
+    # Do we want to get a random number between 0 and 99? If so, we have to import random.
+    s1 = d1[0::SAMPLE_STEP]
+    s2 = d2[0::SAMPLE_STEP]
+    mult = []
+    for i in s1:
+        for j in s2:
+            mult.append(i*j)
+    return sorted(mult)
 
 """
   COMPILED CODE

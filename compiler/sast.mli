@@ -19,7 +19,7 @@ type data_type =
   | List of data_type
   | Func of func
   | Any
-  | Dist of dist
+  | Dist of dist 
   | Unconst
 
 and func = {
