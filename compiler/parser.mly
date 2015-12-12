@@ -14,7 +14,7 @@
 %token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER
+%token PLUS MINUS TIMES DIVIDE MOD POWER D_PLUS D_TIMES
 
 /* Relational Operators */
 %token EQ NEQ LEQ GEQ
@@ -54,8 +54,8 @@
 %left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
-%left PLUS MINUS
-%left TIMES DIVIDE MOD
+%left PLUS MINUS D_PLUS
+%left TIMES DIVIDE MOD D_TIMES
 %left POWER
 %right NOT
 
@@ -144,6 +144,8 @@ arith:
   | expr DIVIDE expr                      { Binop($1, Div, $3) }
   | expr MOD expr                         { Binop($1, Mod, $3) }
   | expr POWER expr                       { Binop($1, Pow, $3) }
+  | expr D_PLUS expr                      { Binop($1, Dplus, $3)}
+  | expr D_TIMES expr                     { Binop($1, Dtimes, $3)}
 
 boolean:
   | NOT expr                              { Unop(Not, $2) }

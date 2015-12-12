@@ -22,6 +22,8 @@ type binop =
   | Div      (* / *)
   | Mod      (* % *)
   | Pow      (* ** *)
+  | Dplus    (* <+> *)
+  | Dtimes   (* <*> *)
   (* Boolean *)
   | Or       (* || *)
   | And      (* && *)

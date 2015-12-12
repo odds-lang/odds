@@ -76,6 +76,7 @@ let str_of_binop = function
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
+  | Dplus -> "<+>"  | Dtimes -> "<*>"
   (* Boolean *)
   | Or -> "||"      | And -> "&&"
   | Eq -> "=="      | Neq -> "!="
@@ -416,6 +417,18 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Num in
         env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
+    | Dplus | Dtimes ->
+      let is_dist = function
+        | Dist_t | Unconst -> true
+        | _ -> false in 
+      if is_dist typ1 && is_dist typ2 then 
+        let result_type = Dist_t in  
+        (* Constrain variable types to Num if neccessary *)
+        let env', ew1' = constrain_ew env' ew1 Dist_t in
+        let env', ew2' = constrain_ew env' ew2 Dist_t in
+        env', Sast.Call(Sast.Id("add_dist"), result_type)
+      else binop_error typ1 op typ2
+
 
     (* Equality operations - overloaded, no constraining can be done, can take
      * any type *)
