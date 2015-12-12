@@ -11,6 +11,6 @@
 do list_rev = (l) ->
     do aux = (acc, l) ->
         return
-            if length(l) == 0 then acc
+            if len(l) == 0 then acc
             else aux(cons(head(l), acc), tail(l))
     return aux([], l)

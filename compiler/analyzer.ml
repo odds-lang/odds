@@ -610,7 +610,6 @@ and check_fdecl env id f anon =
     if VarMap.mem id env.scope then
       let old_type = (VarMap.find id env.scope).s_type in
       match old_type with
-        | Func(f) when f.return_type = Unconst -> fdecl_reassign_error id f_type
         | _ -> add_to_scope env id f_type
     else add_to_scope env id f_type in
 
@@ -664,11 +663,6 @@ and check_fdecl env id f anon =
 
   (* Unconstrained function return types are not allowed *)
   let Sast.Expr(_, ret_type) = return in
-  let ret_type = match ret_type with
-    | Any -> fdecl_unconst_error id
-    | Unconst -> fdecl_unconst_error id
-    | List(Any) -> fdecl_unconst_error id
-    | _ as typ -> typ in
 
   (* If return type constrained differently than in env, throw error *)
   if return_typ <> Any && return_typ <> Unconst && ret_type <> return_typ then
