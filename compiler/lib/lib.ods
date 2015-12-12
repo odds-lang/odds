@@ -14,3 +14,13 @@ do list_rev = (l) ->
             if len(l) == 0 then acc
             else aux(cons(head(l), acc), tail(l))
     return aux([], l)
+
+do list_map = (f, l) ->
+    do aux = (acc, l) ->
+        return
+            if len(l) == 0 then list_rev(acc)
+            else (() ->
+                do applied = f(head(l))
+                return aux(cons(applied, acc), tail(l))
+            )()
+    return aux([], l)
