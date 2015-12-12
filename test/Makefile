@@ -12,7 +12,7 @@ test: build
 	./parser_test.sh
 	./pass_test.sh
 	./fail_test.sh
-	#./lib_test.sh
+	./lib_test.sh
 
 build:
 	cd scanner; make

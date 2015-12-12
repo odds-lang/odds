@@ -1,5 +1,5 @@
 """
-  COMS4115: Semantic Analyzer
+  COMS4115: Python Standard Library
 
   Authors:
     - Alex Kalicki
@@ -15,9 +15,10 @@ DIST_LENGTH = 10000
 SAMPLE_STEP
 
 def make_dist(start, end, f):
+    """Return a list generated from dist<min, max> | f"""
     step = (end - start) * 1.0 / INDEX_STEP
     indices = [ start + step * x for x in range(INDEX_STEP) ]
-    
+
     cum_sum = 0.0
     cum_weights = []
     for x in indices:
@@ -57,5 +58,6 @@ def mult(d1, d2):
     return sorted(mult)
 
 """
-  COMPILED CODE
+END PYTHON STANDARD LIBRARY
+BEGIN USER CODE
 """
