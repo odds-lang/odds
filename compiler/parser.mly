@@ -146,8 +146,8 @@ arith:
   | expr POWER expr                       { Binop($1, Pow, $3) }
   | expr D_PLUS expr                      { Binop($1, Dplus, $3) }
   | expr D_TIMES expr                     { Binop($1, Dtimes, $3) }
-  | expr SHIFT expr                       { Binop($1, Shift, $3) }
-  | expr STRETCH expr                     { Binop($1, Stretch, $3) }
+  | expr LCAR LCAR expr                   { Binop($1, Shift, $4) }
+  | expr LCAR RCAR expr                   { Binop($1, Stretch, $4) }
   | expr EXP expr                         { Binop($1, Exp, $3) }
 
 boolean:

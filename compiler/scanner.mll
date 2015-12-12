@@ -40,7 +40,6 @@ rule token = parse
 | '*'   { TIMES }   | '/'   { DIVIDE }
 | '%'   { MOD }     | "**"  { POWER }
 | "<+>" { D_PLUS }  | "<*>" { D_TIMES }
-| ">>"  { SHIFT }   | "<>"  { STRETCH }
 | "^^"  { EXP }
 
 (* Relational Operators *)
