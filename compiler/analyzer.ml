@@ -381,11 +381,12 @@ and has_unconst = function
 (* Turns Unconst types to Any *)
 and unconst_to_any = function
   | Unconst -> Any
+  | List(typ) -> let typ' = unconst_to_any typ in List(typ')
   | Func(func) -> 
-      let param_types' = List.map unconst_to_any func.param_types in
-      Func({ func with param_types = param_types' })
+      let param_types' = List.map unconst_to_any func.param_types and
+        return_type' = unconst_to_any func.return_type in
+      Func({ param_types = param_types'; return_type = return_type' })
   | _ as typ -> typ
-
 
 (* Check list elements against constraint type, constrain if possible *)
 and constrain_list_elems env acc const = function
@@ -541,7 +542,10 @@ and check_func_call_ret env id args ret_default =
     if VarMap.mem id' env.scope then
       (VarMap.find id' env.scope).builtin
     else false in
-  if not builtin then env, ret_default else
+  if not builtin then 
+  (* If ret_default is Any, make it Unconst *)
+  let ret_default' = if ret_default = Any then Unconst else ret_default in
+  env, ret_default' else
   
   match id' with
     | "head" -> let Sast.Expr(_, typ) = List.hd args in
@@ -661,10 +665,9 @@ and check_fdecl env id f anon =
   (* Re-evaluate function return type to see if it has been constrained above *)
   let func_env, return = check_expr func_env f.return in
 
-  (* Unconstrained function return types are not allowed *)
-  let Sast.Expr(_, ret_type) = return in
-
   (* If return type constrained differently than in env, throw error *)
+  let Sast.Expr(_, ret_type) = return in
+  let ret_type = unconst_to_any ret_type in
   if return_typ <> Any && return_typ <> Unconst && ret_type <> return_typ then
     fdecl_reassign_error id ret_type
   else
