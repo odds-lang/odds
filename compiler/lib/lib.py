@@ -9,10 +9,11 @@
 """
 import math
 import random
+import matplotlib.pyplot as plt
 
 INDEX_STEP = 1000
 DIST_LENGTH = 10000
-SAMPLE_STEP
+SAMPLE_STEP = 100
 
 def make_dist(start, end, f):
     """Return a list generated from dist<min, max> | f"""
@@ -67,6 +68,7 @@ def stretch_dist(d, n):
 
 def exp_dist(d, n):
     return [x**n for x in d]
+
 """
 END PYTHON STANDARD LIBRARY
 BEGIN USER CODE
