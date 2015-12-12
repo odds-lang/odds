@@ -42,6 +42,21 @@ let builtins = VarMap.add "mult_dist" {
   name = "mult_dist";
   s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
 } builtins
+let builtins = VarMap.add "shift_dist" {
+  name = "shift_dist";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+} builtins
+let builtins = VarMap.add "stretch_dist" {
+  name = "stretch_dist";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+} builtins
+let builtins = VarMap.add "exp_dist" {
+  name = "exp_dist";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+} builtins
+
+
+
 
 
 
@@ -87,6 +102,8 @@ let str_of_binop = function
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
   | Dplus -> "<+>"  | Dtimes -> "<*>"
+  | Shift -> ">>"   | Stretch -> "<>"
+  | Exp -> "^^"
   (* Boolean *)
   | Or -> "||"      | And -> "&&"
   | Eq -> "=="      | Neq -> "!="
@@ -386,6 +403,10 @@ and is_num = function
   | Num | Unconst -> true
   | _ -> false 
 
+and is_dist = function 
+  | Dist_t | Unconst -> true
+  | _ -> false 
+
 (************************************************
  * Semantic checking and tree SAST construction
  ************************************************)
@@ -442,7 +463,6 @@ and check_binop env e1 op e2 =
   let env', ew2 = check_expr env' e2 in
   let Sast.Expr(_, typ2) = ew2 in
   match op with
-    
     (* Numeric operations *)
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
       if is_num typ1 && is_num typ2 then 
@@ -471,12 +491,9 @@ and check_binop env e1 op e2 =
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
     | Dplus | Dtimes as op ->
-      let is_dist = function
-        | Dist_t | Unconst -> true
-        | _ -> false in 
       if is_dist typ1 && is_dist typ2 then 
         let result_type = Dist_t in  
-        (* Constrain variable types to Num if neccessary *)
+        (* Constrain variable types to Dist if neccessary *)
         let env', ew1' = constrain_ew env' ew1 Dist_t in
         let env', ew2' = constrain_ew env' ew2 Dist_t in
         match op with 
@@ -490,7 +507,28 @@ and check_binop env e1 op e2 =
               env', Sast.Expr(call, result_type)
           | _ -> binop_error typ1 op typ2
       else binop_error typ1 op typ2 
+    | Shift | Stretch | Exp as op ->
+      if is_dist typ1 && is_num typ2 then 
+        let result_type = Dist_t in  
+        (* Constrain variable types to Dist and Num if neccessary *)
+        let env', ew1' = constrain_ew env' ew1 Dist_t in
+        let env', ew2' = constrain_ew env' ew2 Num in
+        match op with 
+          | Shift ->  
+              let _, f = check_id env "shift_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, result_type)
+          | Stretch ->  
+              let _, f = check_id env "stretch_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, result_type)
+          | Exp ->  
+              let _, f = check_id env "exp_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, result_type)
 
+          | _ -> binop_error typ1 op typ2
+      else binop_error typ1 op typ2   
 (* Function calling *)
 and check_func_call env id args =
   let env', ew = check_expr env id in

@@ -37,26 +37,36 @@ def make_dist(start, end, f):
             cum_i = cum_i + 1
     return dist_list
 
-def add(d1, d2):
-    # Do we want to get a random number between 0 and 99? If so, we have to import random.
-    s1 = d1[0::SAMPLE_STEP]
-    s2 = d2[0::SAMPLE_STEP]
+def add_dist(d1, d2):
+    start1 = random.randint(0, 99)
+    s1 = d1[start1::SAMPLE_STEP]
+    start2 = random.randint(0, 99)
+    s2 = d2[start2::SAMPLE_STEP]
     add = []
     for i in s1:
         for j in s2:
             add.append(i+j)
     return sorted(add)
 
-def mult(d1, d2):
-    # Do we want to get a random number between 0 and 99? If so, we have to import random.
-    s1 = d1[0::SAMPLE_STEP]
-    s2 = d2[0::SAMPLE_STEP]
+def mult_dist(d1, d2):
+    start1 = random.randint(0, 99)
+    s1 = d1[start1::SAMPLE_STEP]
+    start2 = random.randint(0, 99)
+    s2 = d2[start2::SAMPLE_STEP]
     mult = []
     for i in s1:
         for j in s2:
             mult.append(i*j)
     return sorted(mult)
 
+def shift_dist(d, n):
+    return [x+n for x in d]
+
+def stretch_dist(d, n):
+    return [x*n for x in d]
+
+def exp_dist(d, n):
+    return [x**n for x in d]
 """
 END PYTHON STANDARD LIBRARY
 BEGIN USER CODE

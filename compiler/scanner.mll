@@ -39,7 +39,9 @@ rule token = parse
 | '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
 | '%'   { MOD }     | "**"  { POWER }
-| "<+>" { D_PLUS }  | "<*>" {D_TIMES}
+| "<+>" { D_PLUS }  | "<*>" { D_TIMES }
+| ">>"  { SHIFT }   | "<>"  { STRETCH }
+| "^^"  { EXP }
 
 (* Relational Operators *)
 | "=="    { EQ }    | "!="    { NEQ }
