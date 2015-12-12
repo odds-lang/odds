@@ -11,10 +11,10 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER
+%token PLUS MINUS TIMES DIVIDE MOD POWER D_PLUS D_TIMES
 
 /* Relational Operators */
 %token EQ NEQ LEQ GEQ
@@ -33,7 +33,6 @@
 
 /* Function Symbols & Keywords */
 %token FDELIM RETURN CAKE
-%token FDELIM RETURN
 
 /* End-of-File */
 %token EOF
@@ -55,8 +54,8 @@
 %left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
-%left PLUS MINUS
-%left TIMES DIVIDE MOD
+%left PLUS MINUS D_PLUS
+%left TIMES DIVIDE MOD D_TIMES
 %left POWER
 %right NOT
 
@@ -81,6 +80,8 @@ expr:
   | literal                               { $1 }
   | arith                                 { $1 }
   | boolean                               { $1 }
+  | dist                                  { Dist($1) }
+  | dist_func                             { Dist($1) }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
@@ -116,6 +117,24 @@ list:
   | expr                                  { [$1] }
   | list COMMA expr                       { $3 :: $1 }
 
+
+/* Distributions */
+dist_func:
+  | LCAR expr COMMA expr DDELIM expr VBAR
+    { {
+      min = $2;
+      max = $4;
+      dist_func = $6;
+    } }
+
+dist:
+  | LCAR expr COMMA expr RCAR
+    { {
+      min = $2;
+      max = $4;
+      dist_func = Ast.Id("uniform");
+    } }
+
 /* Binary operators */
 arith:
   | MINUS expr                            { Unop(Sub, $2) }
@@ -125,6 +144,8 @@ arith:
   | expr DIVIDE expr                      { Binop($1, Div, $3) }
   | expr MOD expr                         { Binop($1, Mod, $3) }
   | expr POWER expr                       { Binop($1, Pow, $3) }
+  | expr D_PLUS expr                      { Binop($1, Dplus, $3)}
+  | expr D_TIMES expr                     { Binop($1, Dtimes, $3)}
 
 boolean:
   | NOT expr                              { Unop(Not, $2) }

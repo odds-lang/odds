@@ -30,6 +30,12 @@ let builtins = VarMap.add "print" {
   name = "print";
   s_type = Func({ param_types = [Any]; return_type = Void; });
 } builtins
+let builtins = VarMap.add "uniform" {
+  name = "uniform";
+  s_type = Func({ param_types = [Num]; return_type = Num; });
+} builtins
+
+
 
 let root_env = {
   params = VarMap.empty;
@@ -53,6 +59,7 @@ let rec str_of_type = function
   | Void -> "Void"
   | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
+  | Dist(d) -> "Dist" (* Need to edit *)
   | Any -> "Any"
   | Unconst -> "Unconst"
 
@@ -69,6 +76,7 @@ let str_of_binop = function
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
+  | Dplus -> "<+>"  | Dtimes -> "<*>"
   (* Boolean *)
   | Or -> "||"      | And -> "&&"
   | Eq -> "=="      | Neq -> "!="
@@ -367,6 +375,7 @@ and check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
+  | Ast.Dist(d) -> check_dist env d
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
@@ -422,6 +431,18 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Num in
         env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
+    | Dplus | Dtimes ->
+      let is_dist = function
+        | Dist_t | Unconst -> true
+        | _ -> false in 
+      if is_dist typ1 && is_dist typ2 then 
+        let result_type = Dist_t in  
+        (* Constrain variable types to Num if neccessary *)
+        let env', ew1' = constrain_ew env' ew1 Dist_t in
+        let env', ew2' = constrain_ew env' ew2 Dist_t in
+        env', Sast.Call(Sast.Id("add_dist"), result_type)
+      else binop_error typ1 op typ2
+
 
     (* Equality operations - overloaded, no constraining can be done, can take
      * any type *)
@@ -652,6 +673,21 @@ and check_if env i t e =
       stmt_2 = ew3';
   } in
   env', Sast.Expr(Sast.If(ifdecl), const)
+
+(* Distrubutions *)
+(* TO DO: Actually check constraints and make sure dists are semantically
+correct. Min and Max need to be Num types. Dist_func must be either an 
+anonymous function or an id of a function (has to take one argument of Num
+type and returns a Num) *)
+and check_dist env d =
+  let env1, e1 = check_expr env d.min in
+  let env2, e2 = check_expr env d.max in
+  let env3, e3 = check_expr env d.dist_func in
+  env1, Sast.Expr(Sast.Dist({
+    min = e1;
+    max = e2;
+    dist_func = e3;
+  }), Unconst) (* Should it be Dist? Hardcoded here for now *)
 
 (* Statements *)
 and check_stmt env = function

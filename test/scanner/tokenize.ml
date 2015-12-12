@@ -11,6 +11,7 @@ let stringify = function
   | LCAR -> "LCAR"      | RCAR -> "RCAR"
   | LBRACE -> "LBRACE"  | RBRACE -> "RBRACE"
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
+  | DDELIM -> "DDELIM"
 
   (* Arithmetic Operators *)
   | PLUS -> "PLUS"     | MINUS -> "MINUS"
