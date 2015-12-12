@@ -52,7 +52,7 @@ let builtins = VarMap.add "cons" {
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "length" {
+let builtins = VarMap.add "len" {
   name = "len";
   s_type = Func({ param_types = [List(Any)]; return_type = Num; });
   builtin = true;
