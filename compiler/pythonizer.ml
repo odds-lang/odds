@@ -75,7 +75,7 @@ and mk_if_function stmts cond =
       p_params = [];
       p_body = [if_stmt];
     } in
-    let stmts' = (Def(f) :: stmts') in 
+    let stmts' = (Def(f) :: stmts') in
     stmts', Past.Call(Past.Id(f.p_name), [])
 
 and past_fdecl_anon stmts sast_f =
@@ -84,15 +84,15 @@ and past_fdecl_anon stmts sast_f =
   stmts', Past.Id(def.p_name)
 
 and past_fdecl stmts sast_f =
-  let b = past_stmts sast_f.body in
-  let stmts', e = past_expr_unwrap stmts sast_f.return in
+  let body = past_stmts sast_f.body in
+  let body', e = past_expr_unwrap body sast_f.return in
   let r = Past.Return(e) in 
-  let body = b @ [r] in
+  let body' = body' @ [r] in
   let f = {
     p_name = sast_f.f_name;
     p_params = sast_f.params;
-    p_body = body;
-  } in stmts', f
+    p_body = body';
+  } in stmts, f
 
 (* Statements *)
 and past_stmt stmts = function

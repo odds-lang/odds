@@ -42,6 +42,7 @@ let txt_of_binop = function
   | Leq -> "<="
   | Greater -> ">"
   | Geq -> ">="
+  | Dplus | Dtimes -> raise (Python_Error "Unexpected binary operator")
 
 (* Conditionals *)
 let txt_of_cond indent i t e = sprintf "%sif %s:\n%s\n%s" 
