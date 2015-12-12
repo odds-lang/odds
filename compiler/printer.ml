@@ -87,7 +87,6 @@ and str_of_stmts sast =
     | hd :: tl -> aux (str_of_stmt hd :: acc) tl
   in aux [] sast
 
-let print_sast ast = 
-    let sast = Analyzer.check_ast ast in
+let print_sast sast =
     let sast_str = str_of_stmts sast in
     print_endline sast_str

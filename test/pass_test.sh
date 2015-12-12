@@ -14,7 +14,7 @@ for input_file in $INPUT_FILES; do
     output_file=${input_file/.ods/.out}
 
     # compile odds program to temp python file
-    ../compiler/odds.sh -r $input_file $TMP_FILE
+    ../odds.sh -r $input_file $TMP_FILE
 
     # if python test file exists, compare them
     if [ -e "$python_file" ]; then
