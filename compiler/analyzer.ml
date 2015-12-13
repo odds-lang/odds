@@ -665,11 +665,13 @@ and check_fdecl env id f anon =
   (* Re-evaluate function return type to see if it has been constrained above *)
   let func_env, return = check_expr func_env f.return in
 
-  (* If return type constrained differently than in env, throw error *)
+  (* If return type is Unconst, convert to Any *)
   let Sast.Expr(_, ret_type) = return in
-  let ret_type = unconst_to_any ret_type in
-  if return_typ <> Any && return_typ <> Unconst && ret_type <> return_typ then
-    fdecl_reassign_error id ret_type
+  let ret_type' = unconst_to_any ret_type in
+  
+  (* If return type constrained differently than in env, throw error *)
+  if return_typ <> Any && return_typ <> Unconst && ret_type' <> return_typ then
+    fdecl_reassign_error id ret_type'
   else
 
   (* Construct function declaration *)
@@ -682,7 +684,7 @@ and check_fdecl env id f anon =
   } in
 
   (* Construct function type *)
-  let f_type = Func({ param_types = param_types'; return_type = ret_type }) in
+  let f_type = Func({ param_types = param_types'; return_type = ret_type' }) in
   
   (* Update function type in environment and return expression wrapper *)
   let ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
