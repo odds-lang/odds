@@ -32,6 +32,8 @@ let builtins = VarMap.add "print" {
   s_type = Func({ param_types = [Any]; return_type = Void; });
   builtin = true;
 } builtins
+
+(* Dist builtins *)
 let builtins = VarMap.add "uniform" {
   name = "uniform";
   s_type = Func({ param_types = [Num]; return_type = Num; });
@@ -63,13 +65,6 @@ let builtins = VarMap.add "exp_dist" {
   builtin = true;
 } builtins
 
-
-
-
-
-
-
-
 (* List builtins *)
 let builtins = VarMap.add "head" {
   name = "head";
@@ -100,7 +95,6 @@ let root_env = {
   params = VarMap.empty;
   scope = builtins;
 }
-
 
 (********************
  * Utilities
@@ -274,6 +268,10 @@ let invalid_dist_func_type_error invalid_typ f_typ =
     (str_of_type invalid_typ) (str_of_type f_typ) in
   raise (Semantic_Error message)
 
+let dead_code_path_error ocaml_func_name =
+  let message = 
+    sprintf "ERROR: DEAD CODE PATH REACHED IN FUNCTION: %s" ocaml_func_name in
+  raise (Semantic_Error message) 
 
 (********************
  * Scoping
@@ -443,6 +441,16 @@ and unconst_to_any = function
       Func({ func with param_types = param_types' })
   | _ as typ -> typ
 
+(* Returns true if Num or Unconst, otherwise false *)
+and is_num = function
+  | Num | Unconst -> true
+  | _ -> false 
+
+(* Returns true if Dist_t or Unconst, otherwise false *)
+and is_dist = function 
+  | Dist_t | Unconst -> true
+  | _ -> false 
+
 (* Check list elements against constraint type, constrain if possible *)
 and constrain_list_elems env acc const = function
   | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
@@ -453,15 +461,6 @@ and constrain_list_elems env acc const = function
           | _ as e -> raise e in
       let env', ew' = constrain_ew env ew const_w_any in
       constrain_list_elems env' (ew' :: acc) const tl
-
-(* Returns true if Num or Unconst, otherwise false *)
-and is_num = function
-  | Num | Unconst -> true
-  | _ -> false 
-
-and is_dist = function 
-  | Dist_t | Unconst -> true
-  | _ -> false 
 
 (************************************************
  * Semantic checking and tree SAST construction
