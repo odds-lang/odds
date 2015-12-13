@@ -34,12 +34,14 @@ do list_iter = (f, l) ->
 
 /*
  * Return the nth element in the list, wiith the head at position 0. Throw
- * exception with message "list_nth: List index out of range" if list too short
+ * exception with message "list_get: List index out of range" if list too short,
+ * message "list_nth: n can not be negative" if n is negative
  */
-do list_nth = (n, l) ->
+do list_get = (n, l) ->
     do
-        if len(l) <= n then exception("list_nth: List index out of range")
+        if n < 0 then exception("list_get: n can not be negative") else
+        if len(l) <= n then exception("list_get: List index out of range")
         else void
     return
         if n == 0 then head(l)
-        else list_nth(n - 1, tail(l))
+        else list_get(n - 1, tail(l))
