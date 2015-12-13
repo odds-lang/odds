@@ -1,0 +1,6 @@
+do call = (f, x) ->
+  return !f(x)
+
+do being_called = () -> return true
+
+do call(being_called, true)

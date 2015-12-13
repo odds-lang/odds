@@ -312,7 +312,11 @@ and collect_constraints typ1 typ2 =
   let build_func collect_func func1 func2 = 
     let params1 = func1.param_types and params2 = func2.param_types and
       ret1 = func1.return_type and ret2 = func2.return_type in
-    let params' = List.map2 collect_func params1 params2 and 
+    (* If different number of params, raise error *)
+    let params' = 
+      if List.length params1 <> List.length params2 then 
+        raise Collect_Constraints_Error 
+      else List.map2 collect_func params1 params2 and 
       ret' = collect_func ret1 ret2 in
     Func({ param_types = params'; return_type = ret'; })
   and build_list collect_func l_typ1 l_typ2 = 
@@ -363,6 +367,16 @@ and collect_constraints typ1 typ2 =
         else raise Collect_Constraints_Error
   
   in overwrite_any typ1 typ2, keep_any typ1 typ2
+
+(* Returns true if has Unconst, otherwise false *)
+and has_unconst = function
+  | Unconst -> true
+  | List(l_typ) -> has_unconst l_typ
+  | Func(func) -> 
+    let is_param_unconst = List.map has_unconst func.param_types and
+      is_ret_unconst = has_unconst func.return_type in
+    List.mem true is_param_unconst || is_ret_unconst
+  | _ -> false 
 
 (* Turns Unconst types to Any *)
 and unconst_to_any = function
@@ -504,7 +518,8 @@ and check_func_call_args env id f args =
             | Collect_Constraints_Error -> fcall_argtype_error id typ param_type
             | _ as e -> raise e in
         let env', ew' = 
-          if typ <> constrained then
+          (* NOTE: IF THINGS ARE ACTING WEIRD ERROR IS PROBABLY ON LINE BELOW *)
+          if has_unconst typ && typ <> constrained then
             constrain_ew env ew constrained
           else env', ew in
         aux env' (ew' :: acc) (constrained_w_any :: acc_param_types) 
