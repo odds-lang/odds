@@ -30,6 +30,7 @@ and func = {
 type var = {
   name: string;
   mutable s_type: data_type;
+  builtin: bool;
 }
 
 (* Expressions *)

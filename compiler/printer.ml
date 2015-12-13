@@ -53,8 +53,8 @@ let rec str_of_expr = function
       let params_txt = String.concat ", " fdecl.params and
         body_txt = str_of_stmts fdecl.body and
         return_txt = str_of_wrapped_expr fdecl.return in
-      let f_str = sprintf "(%s) ->\n%s\n%sreturn %s\n" params_txt body_txt 
-        (tab_str ()) return_txt in
+      let f_str = sprintf "%s(%s) ->\n%s\n%sreturn %s\n" fdecl.f_name params_txt 
+        body_txt (tab_str ()) return_txt in
       tabs := !tabs - 1; f_str
   | Cake(fdecl, call) ->
       tabs := !tabs + 1;
