@@ -308,7 +308,6 @@ and constrain_e env e typ = match e with
   | Sast.Id(ssid) -> update_type env ssid typ; env
   | _ -> env
 
-
 (* This function takes 2 types. It returns 2 types. The first type returned 
  * will overwrite 'Any' to another type, including, possibly, 'Unconst.' The
  * second type returned will have 'Any' in it, overwriting any other type
@@ -727,8 +726,10 @@ and check_if env i t e =
     with
       | Collect_Constraints_Error -> if_mismatch_error typ2 typ3 
       | _ as e -> raise e in
-  let env', ew2' = constrain_ew env' ew2 const in
-  let env', ew3' = constrain_ew env' ew3 const in 
+  let env', ew2' = if has_unconst typ2 then constrain_ew env' ew2 const
+    else env', ew2 in 
+  let env', ew3' = if has_unconst typ3 then constrain_ew env' ew3 const 
+    else env', ew3 in 
   let ifdecl = {
       c_name = (get_ssid "cond");
       cond = ew1';
