@@ -1,0 +1,5 @@
+do nums = [0, 1, 2, 3]
+
+do print(list_remove(0, nums))
+do print(list_remove(2, nums))
+do print(list_remove(3, nums))

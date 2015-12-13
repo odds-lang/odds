@@ -89,3 +89,19 @@ do list_insert = (v, i, l) ->
             if i == 0 then list_concat(list_rev(cons(v, acc)), l)
             else aux(cons(head(l), acc), i - 1, tail(l))
     return aux([], i, l)
+
+/*
+ * Return modified with the specified index removed. Throw exception with
+ * message "list_remove: List index out of range" if list too short to remove at
+ * given index, "list_remove: i can not be negative" if negative index supplied.
+ */
+do list_remove = (i, l) ->
+    do
+        if i < 0 then exception("list_remove: i can not be negative") else
+        if len(l) <= i then exception("list_remove: List index out of range")
+        else void
+    do aux = (acc, i, l) ->
+        return
+            if i == 0 then list_concat(list_rev(acc), tail(l))
+            else aux(cons(head(l), acc), i - 1, tail(l))
+    return aux([], i, l)
