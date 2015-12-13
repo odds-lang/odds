@@ -55,3 +55,11 @@ do list_get = (n, l) ->
     return
         if n == 0 then head(l)
         else list_get(n - 1, tail(l))
+
+/* Concatenate lists a and b and return the result */
+do list_concat = (a, b) ->
+    do aux = (acc, l) ->
+        return
+            if len(l) == 0 then list_rev(acc)
+            else aux(cons(head(l), acc), tail(l))
+    return aux(list_rev(a), b)
