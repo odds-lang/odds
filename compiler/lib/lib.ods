@@ -18,6 +18,29 @@ do list_make = (n, v) ->
         return if n == 0 then acc else aux(cons(v, acc), n - 1)
     return aux([], n)
 
+/*
+ * Return the nth element in the list, wiith the head at position 0. Throw
+ * exception with message "list_get: List index out of range" if list too short,
+ * message "list_nth: n can not be negative" if n is negative
+ */
+do list_get = (n, l) ->
+    do
+        if n < 0 then exception("list_get: n can not be negative") else
+        if len(l) <= n then exception("list_get: List index out of range")
+        else void
+    return
+        if n == 0 then head(l)
+        else list_get(n - 1, tail(l))
+
+/*
+ * Apply a function to a partial result and an element of the list to produce
+ * the next partial result.
+ */
+do list_fold = (f, acc, l) ->
+    return
+        if len(l) == 0 then acc
+        else list_fold(f, f(acc, head(l)), tail(l))
+
 /* Return list l with elements in reverse order */
 do list_rev = (l) ->
     do aux = (acc, l) ->
@@ -25,6 +48,14 @@ do list_rev = (l) ->
             if len(l) == 0 then acc
             else aux(cons(head(l), acc), tail(l))
     return aux([], l)
+
+/* Concatenate lists a and b and return the result */
+do list_concat = (a, b) ->
+    do aux = (acc, l) ->
+        return
+            if len(l) == 0 then list_rev(acc)
+            else aux(cons(head(l), acc), tail(l))
+    return aux(list_rev(a), b)
 
 /* Returns a new list of l's elements with function f applied */
 do list_map = (f, l) ->
@@ -41,25 +72,3 @@ do list_map = (f, l) ->
 do list_iter = (f, l) ->
     do list_map(f, l)
     return void
-
-/*
- * Return the nth element in the list, wiith the head at position 0. Throw
- * exception with message "list_get: List index out of range" if list too short,
- * message "list_nth: n can not be negative" if n is negative
- */
-do list_get = (n, l) ->
-    do
-        if n < 0 then exception("list_get: n can not be negative") else
-        if len(l) <= n then exception("list_get: List index out of range")
-        else void
-    return
-        if n == 0 then head(l)
-        else list_get(n - 1, tail(l))
-
-/* Concatenate lists a and b and return the result */
-do list_concat = (a, b) ->
-    do aux = (acc, l) ->
-        return
-            if len(l) == 0 then list_rev(acc)
-            else aux(cons(head(l), acc), tail(l))
-    return aux(list_rev(a), b)

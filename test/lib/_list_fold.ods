@@ -1,0 +1,5 @@
+do nums = [1, 2, 3, 4, 5]
+do sum = list_fold((a, x) -> return a + x, 0, nums)
+
+do print(list_fold((a, x) -> return a + x, 0, []))
+do print(sum)
