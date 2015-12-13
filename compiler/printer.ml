@@ -7,6 +7,7 @@
  *  - Daniel Echikson
  *  - Lilly Wang
  *)
+
 open Ast
 open Sast
 open Analyzer
@@ -45,6 +46,8 @@ let rec str_of_expr = function
   | Ldecl(we_list) -> 
       let l_txt = str_of_wrapped_expr_list we_list in
       sprintf "[%s]" l_txt
+  | Dist(d) -> sprintf "<%s, %s> | %s"
+      (str_of_wrapped_expr d.min) (str_of_wrapped_expr d.max) (str_of_wrapped_expr d.dist_func)
   | Fdecl(fdecl) -> 
       tabs := !tabs + 1;
       let params_txt = String.concat ", " fdecl.params and

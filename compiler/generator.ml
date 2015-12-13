@@ -1,5 +1,5 @@
 (*
- * COMS4115: Odds parser
+ * COMS4115: Odds Python code generator
  *
  * Authors:
  *  - Alex Kalicki
@@ -42,6 +42,8 @@ let txt_of_binop = function
   | Leq -> "<="
   | Greater -> ">"
   | Geq -> ">="
+  | Dplus | Dtimes | Exp | Shift | Stretch -> 
+      raise (Python_Error "Unexpected binary operator")
 
 (* Conditionals *)
 let txt_of_cond indent i t e = sprintf "%sif %s:\n%s\n%s" 
@@ -89,13 +91,13 @@ and txt_of_list indent = function
 
 (* Functions *)
 and txt_of_fdecl indent f =
-    let params = String.concat ", " f.p_params in
-    let body = txt_of_stmts (indent + 1) f.p_body in
-    sprintf "%sdef %s(%s):%s"
-      (indent_of_num indent)
-      f.p_name
-      params
-      (if String.length body > 0 then "\n" ^ body else "")
+  let params = String.concat ", " f.p_params in
+  let body = txt_of_stmts (indent + 1) f.p_body in
+  sprintf "%sdef %s(%s):%s"
+    (indent_of_num indent)
+    f.p_name
+    params
+    (if String.length body > 0 then "\n" ^ body else "")
 
 (* Statements *)
 and txt_of_stmt indent = function 

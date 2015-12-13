@@ -30,14 +30,17 @@ rule token = parse
 
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
+| '>' whitespace* '|'       { DDELIM }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACE }  | ']'   { RBRACE }
-| ','   { COMMA }   | '|'   { VBAR }
+| ','   { COMMA }   | '|'   { VBAR } 
 
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
 | '%'   { MOD }     | "**"  { POWER }
+| "<+>" { D_PLUS }  | "<*>" { D_TIMES }
+| "^^"  { EXP }
 
 (* Relational Operators *)
 | "=="    { EQ }    | "!="    { NEQ }
