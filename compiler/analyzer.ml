@@ -402,6 +402,7 @@ and constrain_list_elems env acc const = function
         with
           | Collect_Constraints_Error -> list_error (List(const)) typ
           | _ as e -> raise e in
+      (* MIGHT NEED TO CHECK IF UNCONST *)
       let env', ew' = constrain_ew env ew const_w_any in
       constrain_list_elems env' (ew' :: acc) const tl
 
@@ -694,6 +695,7 @@ and check_fdecl env id f anon =
   
   (* Update function type in environment and return expression wrapper *)
   let ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
+  (* MIGHT NEED TO CHECK IF UNCONST *)
   constrain_ew env' ew f_type
 
 and check_fdecl_params env param_list =
