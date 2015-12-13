@@ -17,7 +17,7 @@ for input_file in $INPUT_FILES; do
 
     # if test output file exists, compare compiled output to it
     if [ -e "$output_file" ]; then
-        python $TMP_FILE | cmp -s $output_file -
+        python $TMP_FILE 2>&1 | cmp -s $output_file -
         if [ "$?" -ne 0 ]; then
             printf "%-65s ${RED}ERROR\n${NC}" "  - checking $output_file..." 1>&2
             rm -f $TMP_FILE

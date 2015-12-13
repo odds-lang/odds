@@ -8,6 +8,7 @@
  *  - Lilly Wang
  */
 
+/* Return list l with elements in reverse order */
 do list_rev = (l) ->
     do aux = (acc, l) ->
         return
@@ -15,6 +16,7 @@ do list_rev = (l) ->
             else aux(cons(head(l), acc), tail(l))
     return aux([], l)
 
+/* Returns a new list of l's elements with function f applied */
 do list_map = (f, l) ->
     do aux = (acc, l) ->
         return
@@ -24,3 +26,20 @@ do list_map = (f, l) ->
                 return aux(cons(applied, acc), tail(l))
             )()
     return aux([], l)
+
+/* Same as list_map, but applied f and discards the return function */
+do list_iter = (f, l) ->
+    do list_map(f, l)
+    return void
+
+/*
+ * Return the nth element in the list, wiith the head at position 0. Throw
+ * exception with message "list_nth: List index out of range" if list too short
+ */
+do list_nth = (n, l) ->
+    do
+        if len(l) <= n then exception("list_nth: List index out of range")
+        else void
+    return
+        if n == 0 then head(l)
+        else list_nth(n - 1, tail(l))

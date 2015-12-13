@@ -3,7 +3,7 @@
 MYDIR="$(dirname "$(which "$0")")"
 ODDS_FILE="$MYDIR/compiler/odds"
 ODDS_LIB="$MYDIR/compiler/lib/lib.ods"
-PY_LIB="$MYDIR/compiler/lib/lib.py"
+PY_LIB="$MYDIR/compiler/lib/core.py"
 
 if [ ! -f $ODDS_FILE ]; then
     printf "ERROR: not yet compiled, run 'make' first.\n" 1>&2

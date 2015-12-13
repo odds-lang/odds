@@ -27,9 +27,17 @@ type environment = {
 let builtins = VarMap.empty
 let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; builtin = true; } builtins
 let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; builtin = true; } builtins
+
+(* Core functions *)
+let builtins = VarMap.add "exception" {
+  name = "exception";
+  s_type = Func({ param_types=[String]; return_type = Void; });
+  builtin = true;
+} builtins
+
 let builtins = VarMap.add "print" {
   name = "print";
-  s_type = Func({ param_types = [Any]; return_type = Void; });
+  s_type = Func({ param_types = [Any]; return_type = String; });
   builtin = true;
 } builtins
 
@@ -171,11 +179,6 @@ let fcall_argtype_error id typ const =
   let message = sprintf
     "Function '%s' expected argument of type %s but was passed %s instead"
     name (str_of_type const) (str_of_type typ) in
-  raise (Semantic_Error message)
-
-let assign_error id typ =
-  let message = sprintf "Invalid assignment of id '%s' to type %s"
-    id (str_of_type typ) in
   raise (Semantic_Error message)
 
 let list_error list_type elem_type = 
@@ -543,6 +546,7 @@ and check_func_call_ret env id args ret_default =
       (VarMap.find id' env.scope).builtin
     else false in
   if not builtin then 
+  
   (* If ret_default is Any, make it Unconst *)
   let ret_default' = if ret_default = Any then Unconst else ret_default in
   env, ret_default' else
@@ -579,7 +583,6 @@ and check_assign env id = function
       raise (Semantic_Error message)
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
-      if typ = Void then assign_error id Void else
       let env', name = add_to_scope env' id typ in
       env', Sast.Expr(Sast.Assign(name, ew), typ)
 

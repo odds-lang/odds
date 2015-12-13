@@ -1,5 +1,5 @@
 """
-  COMS4115: Python Standard Library
+  COMS4115: A compiled Odds program.
 
   Authors:
     - Alex Kalicki
@@ -7,11 +7,22 @@
     - Daniel Echikson
     - Lilly Wang
 """
+from __future__ import print_function
 import math
 import random
+import sys
 
 INDEX_STEP = 1000
 DIST_LENGTH = 10000
+
+def exception(s):
+    sys.stderr.write("%s\n" % s)
+    exit(1)
+
+def print(*args, **kwargs):
+    """Call normal print() function, but return None"""
+    __builtins__.print(*args, **kwargs)
+    return str(args[0])
 
 def make_dist(min, max, f):
     """Return a list generated from dist<min, max> | f"""
@@ -37,6 +48,6 @@ def make_dist(min, max, f):
     return dist_list
 
 """
-END PYTHON STANDARD LIBRARY
+END ODDS CORE LIBRARY
 BEGIN USER CODE
 """

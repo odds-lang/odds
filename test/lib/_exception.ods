@@ -1,0 +1,2 @@
+do exception("My custom exception!")
+do print("dead codepath")
