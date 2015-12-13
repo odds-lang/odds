@@ -547,7 +547,6 @@ and check_binop env e1 op e2 =
       else binop_error typ1 op typ2
     | Dplus | Dtimes as op ->
       if is_dist typ1 && is_dist typ2 then 
-        let result_type = Dist_t in  
         (* Constrain variable types to Dist if neccessary *)
         let env', ew1' = constrain_ew env' ew1 Dist_t in
         let env', ew2' = constrain_ew env' ew2 Dist_t in
@@ -555,12 +554,12 @@ and check_binop env e1 op e2 =
           | Dplus ->  
               let _, f = check_id env "add_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
-              env', Sast.Expr(call, result_type)
+              env', Sast.Expr(call, Dist_t)
           | Dtimes ->  
               let _, f = check_id env "mult_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
-              env', Sast.Expr(call, result_type)
-          | _ -> binop_error typ1 op typ2
+              env', Sast.Expr(call, Dist_t)
+          | _ -> dead_code_path_error "check_binop"
       else binop_error typ1 op typ2 
     | Shift | Stretch | Exp as op ->
       if is_dist typ1 && is_num typ2 then 
@@ -582,8 +581,9 @@ and check_binop env e1 op e2 =
               let call = Sast.Call(f, [ew1'; ew2']) in 
               env', Sast.Expr(call, result_type)
 
-          | _ -> binop_error typ1 op typ2
+          | _ -> dead_code_path_error "check_binop"
       else binop_error typ1 op typ2   
+
 (* Function calling *)
 and check_func_call env id args =
   let env', ew = check_expr env id in

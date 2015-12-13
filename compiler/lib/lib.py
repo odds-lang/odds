@@ -46,7 +46,7 @@ def add_dist(d1, d2):
     add = []
     for i in s1:
         for j in s2:
-            add.append(i+j)
+            add.append(i + j)
     return sorted(add)
 
 def mult_dist(d1, d2):
@@ -57,17 +57,17 @@ def mult_dist(d1, d2):
     mult = []
     for i in s1:
         for j in s2:
-            mult.append(i*j)
+            mult.append(i * j)
     return sorted(mult)
 
 def shift_dist(d, n):
-    return [x+n for x in d]
+    return [x + n for x in d]
 
 def stretch_dist(d, n):
-    return [x*n for x in d]
+    return [x * n for x in d]
 
 def exp_dist(d, n):
-    return [x**n for x in d]
+    return [x ** n for x in d]
 
 """
 END PYTHON STANDARD LIBRARY

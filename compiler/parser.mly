@@ -82,7 +82,6 @@ expr:
   | arith                                 { $1 }
   | boolean                               { $1 }
   | dist                                  { Dist($1) }
-  | dist_func                             { Dist($1) }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
@@ -120,15 +119,13 @@ list:
 
 
 /* Distributions */
-dist_func:
+dist:
   | LCAR expr COMMA expr DDELIM expr VBAR
     { {
       min = $2;
       max = $4;
       dist_func = $6;
     } }
-
-dist:
   | LCAR expr COMMA expr RCAR
     { {
       min = $2;
