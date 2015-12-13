@@ -217,6 +217,10 @@ let if_mismatch_error typ1 typ2 =
     (str_of_type typ1) (str_of_type typ2) in
   raise (Semantic_Error message)
 
+let dead_code_path_error ocaml_func_name =
+  let message = 
+    sprintf "ERROR: DEAD CODE PATH REACHED IN FUNCTION: %s" ocaml_func_name in
+  raise (Semantic_Error message) 
 
 (********************
  * Scoping
@@ -463,7 +467,7 @@ and check_binop env e1 op e2 =
         let result_type = match op with
           | Add | Sub | Mult | Div | Mod | Pow -> Num
           | Less | Leq | Greater | Geq -> Bool
-          | _ -> binop_error typ1 op typ2 in
+          | _ -> dead_code_path_error "check_binop" in
         (* Constrain variable types to Num if neccessary *)
         let env', ew1' = constrain_ew env' ew1 Num in
         let env', ew2' = constrain_ew env' ew2 Num in
@@ -536,7 +540,7 @@ and check_func_call_args env id f args =
 and check_func_call_ret env id args ret_default =
   let id' = match id with
     | Ast.Id(id') -> id'
-    | _ -> raise (Semantic_Error "check_func_call_ret() called with non-ID") in
+    | _ -> dead_code_path_error "check_func_call_ret" in
   let builtin =
     if VarMap.mem id' env.scope then
       (VarMap.find id' env.scope).builtin
@@ -547,7 +551,7 @@ and check_func_call_ret env id args ret_default =
     | "head" -> let Sast.Expr(_, typ) = List.hd args in
         begin match typ with
           | List(t) -> env, t
-          | _ -> env, ret_default (* NEVER SHOULD BE REACHED TO DO: MAKE ERROR *)
+          | _ -> dead_code_path_error "check_func_call_ret"
         end
     | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
     | "cons" ->
@@ -555,7 +559,7 @@ and check_func_call_ret env id args ret_default =
           Sast.Expr(l, l_typ) = List.hd (List.tl args) in
         let l_elem_typ = begin match l_typ with
           | List(t) -> t
-          | _ -> ret_default (* NEVER SHOULD BE REACHED TO DO: MAKE ERROR *)
+          | _ -> dead_code_path_error "check_func_call_ret"
         end in
         let const, _ = try collect_constraints c_typ l_elem_typ
           with
