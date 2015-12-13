@@ -72,3 +72,20 @@ do list_map = (f, l) ->
 do list_iter = (f, l) ->
     do list_map(f, l)
     return void
+
+/*
+ * Return list with the specified value inserted before the specified index.
+ * Throw exception with message "list_insert: List index out of range" if list
+ * too short to insert at given index, "list_insert: i can not be negative" if
+ * negative index supplied.
+ */
+do list_insert = (v, i, l) ->
+    do
+        if i < 0 then exception("list_insert: i can not be negative") else
+        if len(l) < i then exception("list_insert: List index out of range")
+        else void
+    do aux = (acc, i, l) ->
+        return
+            if i == 0 then list_concat(list_rev(cons(v, acc)), l)
+            else aux(cons(head(l), acc), i - 1, tail(l))
+    return aux([], i, l)

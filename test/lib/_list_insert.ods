@@ -1,0 +1,6 @@
+do nums = [1, 2, 3, 4]
+
+do print(list_insert(5, 2, nums))
+do print(list_insert(0, 0, nums))
+do print(list_insert(5, 4, nums))
+do print(list_insert("hello", 0, []))
