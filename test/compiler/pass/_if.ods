@@ -10,3 +10,4 @@ do outer = () ->
     do inner = (x) -> return if x then "true" else "false"
     return inner(true)
 do print(outer())
+
