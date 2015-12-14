@@ -27,9 +27,17 @@ type environment = {
 let builtins = VarMap.empty
 let builtins = VarMap.add "EUL" { name = "EUL"; s_type = Num; builtin = true; } builtins
 let builtins = VarMap.add "PI" { name = "PI"; s_type = Num; builtin = true; } builtins
+
+(* Core functions *)
+let builtins = VarMap.add "exception" {
+  name = "exception";
+  s_type = Func({ param_types=[String]; return_type = Void; });
+  builtin = true;
+} builtins
+
 let builtins = VarMap.add "print" {
   name = "print";
-  s_type = Func({ param_types = [Any]; return_type = Void; });
+  s_type = Func({ param_types = [Any]; return_type = String; });
   builtin = true;
 } builtins
 
@@ -52,7 +60,7 @@ let builtins = VarMap.add "cons" {
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "length" {
+let builtins = VarMap.add "len" {
   name = "len";
   s_type = Func({ param_types = [List(Any)]; return_type = Num; });
   builtin = true;
@@ -171,11 +179,6 @@ let fcall_argtype_error id typ const =
   let message = sprintf
     "Function '%s' expected argument of type %s but was passed %s instead"
     name (str_of_type const) (str_of_type typ) in
-  raise (Semantic_Error message)
-
-let assign_error id typ =
-  let message = sprintf "Invalid assignment of id '%s' to type %s"
-    id (str_of_type typ) in
   raise (Semantic_Error message)
 
 let list_error list_type elem_type = 
@@ -305,7 +308,6 @@ and constrain_e env e typ = match e with
   | Sast.Id(ssid) -> update_type env ssid typ; env
   | _ -> env
 
-
 (* This function takes 2 types. It returns 2 types. The first type returned 
  * will overwrite 'Any' to another type, including, possibly, 'Unconst.' The
  * second type returned will have 'Any' in it, overwriting any other type
@@ -385,11 +387,12 @@ and has_unconst = function
 (* Turns Unconst types to Any *)
 and unconst_to_any = function
   | Unconst -> Any
+  | List(typ) -> let typ' = unconst_to_any typ in List(typ')
   | Func(func) -> 
-      let param_types' = List.map unconst_to_any func.param_types in
-      Func({ func with param_types = param_types' })
+      let param_types' = List.map unconst_to_any func.param_types and
+        return_type' = unconst_to_any func.return_type in
+      Func({ param_types = param_types'; return_type = return_type' })
   | _ as typ -> typ
-
 
 (* Check list elements against constraint type, constrain if possible *)
 and constrain_list_elems env acc const = function
@@ -399,6 +402,7 @@ and constrain_list_elems env acc const = function
         with
           | Collect_Constraints_Error -> list_error (List(const)) typ
           | _ as e -> raise e in
+      (* MIGHT NEED TO CHECK IF UNCONST *)
       let env', ew' = constrain_ew env ew const_w_any in
       constrain_list_elems env' (ew' :: acc) const tl
 
@@ -545,7 +549,11 @@ and check_func_call_ret env id args ret_default =
     if VarMap.mem id' env.scope then
       (VarMap.find id' env.scope).builtin
     else false in
-  if not builtin then env, ret_default else
+  if not builtin then 
+  
+  (* If ret_default is Any, make it Unconst *)
+  let ret_default' = if ret_default = Any then Unconst else ret_default in
+  env, ret_default' else
   
   match id' with
     | "head" -> let Sast.Expr(_, typ) = List.hd args in
@@ -579,7 +587,6 @@ and check_assign env id = function
       raise (Semantic_Error message)
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
-      if typ = Void then assign_error id Void else
       let env', name = add_to_scope env' id typ in
       env', Sast.Expr(Sast.Assign(name, ew), typ)
 
@@ -614,7 +621,6 @@ and check_fdecl env id f anon =
     if VarMap.mem id env.scope then
       let old_type = (VarMap.find id env.scope).s_type in
       match old_type with
-        | Func(f) when f.return_type = Unconst -> fdecl_reassign_error id f_type
         | _ -> add_to_scope env id f_type
     else add_to_scope env id f_type in
 
@@ -666,17 +672,13 @@ and check_fdecl env id f anon =
   (* Re-evaluate function return type to see if it has been constrained above *)
   let func_env, return = check_expr func_env f.return in
 
-  (* Unconstrained function return types are not allowed *)
+  (* If return type is Unconst, convert to Any *)
   let Sast.Expr(_, ret_type) = return in
-  let ret_type = match ret_type with
-    | Any -> fdecl_unconst_error id
-    | Unconst -> fdecl_unconst_error id
-    | List(Any) -> fdecl_unconst_error id
-    | _ as typ -> typ in
-
+  let ret_type' = unconst_to_any ret_type in
+  
   (* If return type constrained differently than in env, throw error *)
-  if return_typ <> Any && return_typ <> Unconst && ret_type <> return_typ then
-    fdecl_reassign_error id ret_type
+  if return_typ <> Any && return_typ <> Unconst && ret_type' <> return_typ then
+    fdecl_reassign_error id ret_type'
   else
 
   (* Construct function declaration *)
@@ -689,10 +691,11 @@ and check_fdecl env id f anon =
   } in
 
   (* Construct function type *)
-  let f_type = Func({ param_types = param_types'; return_type = ret_type }) in
+  let f_type = Func({ param_types = param_types'; return_type = ret_type' }) in
   
   (* Update function type in environment and return expression wrapper *)
   let ew = Sast.Expr(Sast.Fdecl(fdecl), Unconst) in
+  (* MIGHT NEED TO CHECK IF UNCONST *)
   constrain_ew env' ew f_type
 
 and check_fdecl_params env param_list =
@@ -725,8 +728,10 @@ and check_if env i t e =
     with
       | Collect_Constraints_Error -> if_mismatch_error typ2 typ3 
       | _ as e -> raise e in
-  let env', ew2' = constrain_ew env' ew2 const in
-  let env', ew3' = constrain_ew env' ew3 const in 
+  let env', ew2' = if has_unconst typ2 then constrain_ew env' ew2 const
+    else env', ew2 in 
+  let env', ew3' = if has_unconst typ3 then constrain_ew env' ew3 const 
+    else env', ew3 in 
   let ifdecl = {
       c_name = (get_ssid "cond");
       cond = ew1';

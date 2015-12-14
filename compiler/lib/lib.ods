@@ -1,0 +1,107 @@
+/*
+ * COMS4115: ODDS Standard Library
+ *
+ * Authors:
+ *  - Alex Kalicki
+ *  - Alexandra Medway
+ *  - Daniel Echikson
+ *  - Lilly Wang
+ */
+
+/*
+ * Create a list with of n values initialized to v. Throw exception with
+ * message "list_make: n can not be negative" if n is negative
+ */
+do list_make = (n, v) ->
+    do if n < 0 then exception("list_make: n can not be negtive") else void
+    do aux = (acc, n) ->
+        return if n == 0 then acc else aux(cons(v, acc), n - 1)
+    return aux([], n)
+
+/*
+ * Return the nth element in the list, wiith the head at position 0. Throw
+ * exception with message "list_get: List index out of range" if list too short,
+ * message "list_nth: n can not be negative" if n is negative
+ */
+do list_get = (n, l) ->
+    do
+        if n < 0 then exception("list_get: n can not be negative") else
+        if len(l) <= n then exception("list_get: List index out of range")
+        else void
+    return
+        if n == 0 then head(l)
+        else list_get(n - 1, tail(l))
+
+/*
+ * Apply a function to a partial result and an element of the list to produce
+ * the next partial result.
+ */
+do list_fold = (f, acc, l) ->
+    return
+        if len(l) == 0 then acc
+        else list_fold(f, f(acc, head(l)), tail(l))
+
+/* Return list l with elements in reverse order */
+do list_rev = (l) ->
+    do aux = (acc, l) ->
+        return
+            if len(l) == 0 then acc
+            else aux(cons(head(l), acc), tail(l))
+    return aux([], l)
+
+/* Concatenate lists a and b and return the result */
+do list_concat = (a, b) ->
+    do aux = (acc, l) ->
+        return
+            if len(l) == 0 then list_rev(acc)
+            else aux(cons(head(l), acc), tail(l))
+    return aux(list_rev(a), b)
+
+/* Returns a new list of l's elements with function f applied */
+do list_map = (f, l) ->
+    do aux = (acc, l) ->
+        return
+            if len(l) == 0 then list_rev(acc)
+            else (() ->
+                do applied = f(head(l))
+                return aux(cons(applied, acc), tail(l))
+            )()
+    return aux([], l)
+
+/* Same as list_map, but applied f and discards the return function */
+do list_iter = (f, l) ->
+    do list_map(f, l)
+    return void
+
+/*
+ * Return list with the specified value inserted before the specified index.
+ * Throw exception with message "list_insert: List index out of range" if list
+ * too short to insert at given index, "list_insert: i can not be negative" if
+ * negative index supplied.
+ */
+do list_insert = (v, i, l) ->
+    do
+        if i < 0 then exception("list_insert: i can not be negative") else
+        if len(l) < i then exception("list_insert: List index out of range")
+        else void
+    do aux = (acc, i, l) ->
+        return
+            if i == 0 then list_concat(list_rev(cons(v, acc)), l)
+            else aux(cons(head(l), acc), i - 1, tail(l))
+    return aux([], i, l)
+
+/*
+ * Return modified with the specified index removed. Throw exception with
+ * message "list_remove: List index out of range" if list too short to remove at
+ * given index, "list_remove: i can not be negative" if negative index supplied.
+ */
+do list_remove = (i, l) ->
+    do
+        if i < 0 then exception("list_remove: i can not be negative") else
+        if len(l) <= i then exception("list_remove: List index out of range")
+        else void
+    do aux = (acc, i, l) ->
+        return
+            if i == 0 then list_concat(list_rev(acc), tail(l))
+            else aux(cons(head(l), acc), i - 1, tail(l))
+    return aux([], i, l)

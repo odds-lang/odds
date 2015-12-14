@@ -1,0 +1,3 @@
+do print(list_make(0, 0))
+do print(list_make(3, 42))
+do print(list_make(2, "hi"))

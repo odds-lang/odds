@@ -1,0 +1,1 @@
+do list_insert(42, 1, [])
