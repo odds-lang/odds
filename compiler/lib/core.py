@@ -20,7 +20,7 @@ def exception(s):
     exit(1)
 
 def print(*args, **kwargs):
-    """Call normal print() function, but return None"""
+    """Call normal print() function, but return argument that was passed"""
     __builtins__.print(*args, **kwargs)
     return str(args[0])
 
