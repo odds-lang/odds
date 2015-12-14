@@ -363,7 +363,7 @@ and constrain_e env e typ = match e with
  * when neccessary. TO DO: MAKE PRETTIER & SHORTER.
  *)
 and collect_constraints typ1 typ2 = 
-  (* Helper functions for this function *)
+  (* Helper functions for collect_constraints *)
   let build_func collect_func func1 func2 = 
     let params1 = func1.param_types and params2 = func2.param_types and
       ret1 = func1.return_type and ret2 = func2.return_type in
@@ -530,6 +530,7 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Num in
         env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
+    
     (* Equality operations - overloaded, no constraining can be done, can take
      * any type *)
     | Eq | Neq -> env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
@@ -545,6 +546,8 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Bool in
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
+    
+    (* Distribtuion - Distribtuion operations *)
     | Dplus | Dtimes as op ->
       if is_dist typ1 && is_dist typ2 then 
         (* Constrain variable types to Dist if neccessary *)
@@ -561,6 +564,8 @@ and check_binop env e1 op e2 =
               env', Sast.Expr(call, Dist_t)
           | _ -> dead_code_path_error "check_binop"
       else binop_error typ1 op typ2 
+    
+    (* Distribtuion - Num operations *)
     | Shift | Stretch | Exp as op ->
       if is_dist typ1 && is_num typ2 then 
         let result_type = Dist_t in  
@@ -580,7 +585,6 @@ and check_binop env e1 op e2 =
               let _, f = check_id env "exp_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
               env', Sast.Expr(call, result_type)
-
           | _ -> dead_code_path_error "check_binop"
       else binop_error typ1 op typ2   
 
