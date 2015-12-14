@@ -830,7 +830,6 @@ and check_if env i t e =
   env', Sast.Expr(Sast.If(ifdecl), const)
 
 (* Distrubutions *)
-(* TO DO: UPDATE COLLECT_CONSTRAINTS TO ACCOUNT FOR DIST *)
 and check_dist env d =
   (* Dists must have function of the following type: *)
   let dfunc_type = Func({ param_types = [Num]; return_type = Num; }) in
