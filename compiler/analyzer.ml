@@ -360,7 +360,7 @@ and constrain_e env e typ = match e with
 (* This function takes 2 types. It returns 2 types. The first type returned 
  * will overwrite 'Any' to another type, including, possibly, 'Unconst.' The
  * second type returned will have 'Any' in it, overwriting any other type
- * when neccessary. TO DO: MAKE PRETTIER & SHORTER. TO DO: UPDATE FOR DIST TYPE.
+ * when neccessary. TO DO: MAKE PRETTIER & SHORTER.
  *)
 and collect_constraints typ1 typ2 = 
   (* Helper functions for this function *)
