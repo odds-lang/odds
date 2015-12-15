@@ -1,0 +1,3 @@
+do nums = [1, 2, 3, 4, 5]
+do print(list_get(2, nums))
+do print(list_get(4, nums))

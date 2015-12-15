@@ -1,0 +1,4 @@
+do nums = ["Hello,", "world!"]
+
+do list_iter(print, [])
+do list_iter(print, nums)

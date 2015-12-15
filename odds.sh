@@ -2,7 +2,9 @@
 
 MYDIR="$(dirname "$(which "$0")")"
 ODDS_FILE="$MYDIR/compiler/odds"
-PYLIB_FILE="$MYDIR/compiler/lib/lib.py"
+LIST_LIB="$MYDIR/compiler/lib/list.ods"
+DIST_LIB="$MYDIR/compiler/lib/dist.ods"
+PY_LIB="$MYDIR/compiler/lib/core.py"
 
 if [ ! -f $ODDS_FILE ]; then
     printf "ERROR: not yet compiled, run 'make' first.\n" 1>&2
@@ -12,7 +14,7 @@ fi
 # odds.sh (-c | -r) <odds_file> <output_file>
 if [ "$#" -eq 3 ]; then
     if [ "$1" == "-c" ]; then
-        $ODDS_FILE $1 $3 $PYLIB_FILE < $2
+        cat $LIST_LIB $DIST_LIB $2 | $ODDS_FILE $1 $3 $PY_LIB
         exit 0
     elif [ "$1" == "-r" ]; then
         $ODDS_FILE $1 $3 < $2

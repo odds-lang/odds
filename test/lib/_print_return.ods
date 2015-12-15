@@ -1,0 +1,7 @@
+do x = print("Hello, world!")
+do y = print(42)
+do z = print([1, 2, 3])
+
+do print(x)
+do print(y)
+do print(z)

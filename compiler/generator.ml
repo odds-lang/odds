@@ -50,44 +50,35 @@ let txt_of_cond indent i t e = sprintf "%sif %s:\n%s\n%s"
   (indent_of_num indent) i t e
 
 (* Expressions *)
-let rec txt_of_expr indent = function
+let rec txt_of_expr = function
   | Num_lit(n) -> txt_of_num n
   | String_lit(s) -> sprintf "\"%s\"" s
   | Bool_lit(b) -> String.capitalize (string_of_bool(b))
   | None_lit -> "None"
   | Id(id) -> id
-  | Unop(op, e) -> sprintf "(%s%s)"
-      (txt_of_unop op)
-      (txt_of_expr indent e)
+  | Unop(op, e) -> sprintf "(%s%s)" (txt_of_unop op) (txt_of_expr e)
   | Binop(e1, op, e2) -> sprintf "(%s %s %s)"
-      (txt_of_expr indent e1)
-      (txt_of_binop op)
-      (txt_of_expr indent e2)
-  | Call(id, args) -> txt_of_call indent id args
-  | Ldecl(l) -> sprintf "[%s]" (txt_of_list indent l)
+      (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
+  | Call(id, args) -> txt_of_call id args
+  | Ldecl(l) -> sprintf "[%s]" (txt_of_list l)
   | Empty -> ""
 
 (* Function calls *)
-and txt_of_call indent id args = match id with
-  | Id("head") ->
-      let list_txt = txt_of_expr 0 (List.hd args) in sprintf
-      "%s(%s[0] if %s else None)" (indent_of_num indent) list_txt list_txt
-  | Id("tail") ->
-      let list_txt = txt_of_expr 0 (List.hd args) in sprintf
-      "%s(%s[1:] if %s else None)" (indent_of_num indent) list_txt list_txt
+and txt_of_call id args = match id with
+  | Id("head") -> sprintf "%s[0]" (txt_of_expr (List.hd args))
+  | Id("tail") -> sprintf "%s[1:]" (txt_of_expr (List.hd args))
   | Id("cons") ->
-      let prepend = txt_of_expr 0 (List.hd args) and
-        list_txt = txt_of_expr 0 (List.hd (List.tl args)) in
-      sprintf "%s([%s] + %s)" (indent_of_num indent) prepend list_txt
-  | _ -> sprintf "%s(%s)" (txt_of_expr indent id) (txt_of_list indent args)
+      let prepend = txt_of_expr (List.hd args) and
+        list_txt = txt_of_expr (List.hd (List.tl args)) in
+      sprintf "([%s] + %s)" prepend list_txt
+  | _ -> sprintf "%s(%s)" (txt_of_expr id) (txt_of_list args)
 
 (* Lists *)
-and txt_of_list indent = function
+and txt_of_list = function
   | [] -> ""
-  | [x] -> txt_of_expr indent x
-  | _ as l ->
-    let strs = List.map (fun x -> txt_of_expr indent x) l
-    in String.concat ", " strs
+  | [x] -> txt_of_expr x
+  | _ as l -> let strs = List.map (fun x -> txt_of_expr x) l in
+    String.concat ", " strs
 
 (* Functions *)
 and txt_of_fdecl indent f =
@@ -102,16 +93,15 @@ and txt_of_fdecl indent f =
 (* Statements *)
 and txt_of_stmt indent = function 
   | Assign(id, e) -> sprintf "%s%s = %s" 
-      (indent_of_num indent) id (txt_of_expr indent e)
+      (indent_of_num indent) id (txt_of_expr e)
   | Def(f) -> txt_of_fdecl indent f 
-  | Return(e) -> sprintf "%sreturn %s" 
-      (indent_of_num indent) (txt_of_expr indent e)
-  | If(e1, e2, e3) -> 
-      let i = txt_of_expr indent e1
-      and t = txt_of_stmt (indent + 1) e2 
-      and e = txt_of_stmt indent e3 in
-      txt_of_cond indent i t e
-  | Stmt(e) -> sprintf "%s%s" (indent_of_num indent) (txt_of_expr indent e)
+  | Return(e) -> sprintf "%sreturn %s" (indent_of_num indent) (txt_of_expr e)
+  | If(i, t, e) -> 
+      let i' = txt_of_expr i
+        and t' = txt_of_stmt (indent + 1) t
+        and e' = txt_of_stmt indent e in
+      txt_of_cond indent i' t' e'
+  | Stmt(e) -> sprintf "%s%s" (indent_of_num indent) (txt_of_expr e)
 
 and txt_of_stmts indent stmt_list =
   let rec aux indent acc = function

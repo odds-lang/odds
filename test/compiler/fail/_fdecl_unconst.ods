@@ -1,3 +1,0 @@
-do f = (x) ->
-    do y = 1 + 2
-    return x

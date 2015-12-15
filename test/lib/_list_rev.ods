@@ -1,0 +1,6 @@
+do empty = []
+do nums = [1, 2, 3, 4, 5]
+
+do print(list_rev(empty))
+do print(list_rev(nums))
+do print(list_rev(["world!", "Hello,"]))
