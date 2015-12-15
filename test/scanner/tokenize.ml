@@ -13,6 +13,10 @@ let stringify = function
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
   | DDELIM -> "DDELIM"
 
+  (* Dist Operators *)
+  | DPLUS -> "DPLUS"    | DTIMES -> "DTIMES"
+  | DPOWER -> "DPOWER"
+
   (* Arithmetic Operators *)
   | PLUS -> "PLUS"     | MINUS -> "MINUS"
   | TIMES -> "TIMES"   | DIVIDE -> "DIVIDE"

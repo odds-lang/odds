@@ -14,7 +14,7 @@
 %token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER D_PLUS D_TIMES EXP SHIFT STRETCH
+%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER 
 
 /* Relational Operators */
 %token EQ NEQ LEQ GEQ
@@ -54,10 +54,9 @@
 %left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
-%left PLUS MINUS D_PLUS
-%left TIMES DIVIDE MOD D_TIMES
-%left EXP SHIFT STRETCH
-%left POWER
+%left PLUS MINUS DPLUS
+%left TIMES DIVIDE MOD DTIMES
+%left POWER DPOWER
 %right NOT
 
 %start program                /* Start symbol */
@@ -142,11 +141,11 @@ arith:
   | expr DIVIDE expr                      { Binop($1, Div, $3) }
   | expr MOD expr                         { Binop($1, Mod, $3) }
   | expr POWER expr                       { Binop($1, Pow, $3) }
-  | expr D_PLUS expr                      { Binop($1, Dplus, $3) }
-  | expr D_TIMES expr                     { Binop($1, Dtimes, $3) }
-  | expr RCAR RCAR expr                   { Binop($1, Shift, $4) }
-  | expr LCAR RCAR expr                   { Binop($1, Stretch, $4) }
-  | expr EXP expr                         { Binop($1, Exp, $3) }
+  | expr DPLUS expr                       { Binop($1, D_Plus, $3) }
+  | expr DTIMES expr                      { Binop($1, D_Times, $3) }
+  | expr DPOWER expr                      { Binop($1, D_Power, $3) }
+  | expr RCAR RCAR expr                   { Binop($1, D_Shift, $4) }
+  | expr LCAR RCAR expr                   { Binop($1, D_Stretch, $4) }
 
 boolean:
   | NOT expr                              { Unop(Not, $2) }

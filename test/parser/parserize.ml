@@ -8,12 +8,20 @@ let txt_of_unop = function
 
 (* Binary operators *)
 let txt_of_binop = function
+  (* Dist *)
+  | D_Plus -> "D_Plus"
+  | D_Times -> "D_Times"
+  | D_Shift -> "D_Shift"
+  | D_Stretch -> "D_Stretch"
+  | D_Power -> "D_Power"
+  (* Arithmetic *)
   | Add -> "Add"
   | Sub -> "Sub"
   | Mult -> "Mult"
   | Div -> "Div"
   | Mod -> "Mod"
   | Pow -> "Pow"
+  (* Boolean *)
   | Or -> "Or"
   | And -> "And"
   | Eq -> "Eq"

@@ -42,31 +42,30 @@ let builtins = VarMap.add "print" {
 } builtins
 
 (* Dist builtins *)
-let builtins = VarMap.add "uniform" {
-  name = "uniform";
-  s_type = Func({ param_types = [Num]; return_type = Num; });
-  builtin = true;
-} builtins
 let builtins = VarMap.add "add_dist" {
   name = "add_dist";
   s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
+
 let builtins = VarMap.add "mult_dist" {
   name = "mult_dist";
   s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
+
 let builtins = VarMap.add "shift_dist" {
   name = "shift_dist";
   s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
   builtin = true;
 } builtins
+
 let builtins = VarMap.add "stretch_dist" {
   name = "stretch_dist";
   s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
   builtin = true;
 } builtins
+
 let builtins = VarMap.add "exp_dist" {
   name = "exp_dist";
   s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
@@ -134,13 +133,14 @@ let str_of_unop = function
   | Not -> "!"      | Sub -> "-"
 
 let str_of_binop = function
+  (* Dist *)
+  | D_Plus -> "<+>" | D_Times -> "<*>"
+  | D_Shift -> ">>" | D_Stretch -> "<>"
+  | D_Power -> "^^"
   (* Arithmetic *)
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
   | Mod -> "%"      | Pow -> "**"
-  | Dplus -> "<+>"  | Dtimes -> "<*>"
-  | Shift -> ">>"   | Stretch -> "<>"
-  | Exp -> "^^"
   (* Boolean *)
   | Or -> "||"      | And -> "&&"
   | Eq -> "=="      | Neq -> "!="
@@ -553,17 +553,17 @@ and check_binop env e1 op e2 =
       else binop_error typ1 op typ2
     
     (* Distribtuion - Distribtuion operations *)
-    | Dplus | Dtimes as op ->
+    | D_Plus | D_Times as op ->
       if is_dist typ1 && is_dist typ2 then 
         (* Constrain variable types to Dist if neccessary *)
         let env', ew1' = constrain_ew env' ew1 Dist_t in
         let env', ew2' = constrain_ew env' ew2 Dist_t in
         match op with 
-          | Dplus ->  
+          | D_Plus ->  
               let _, f = check_id env "add_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
               env', Sast.Expr(call, Dist_t)
-          | Dtimes ->  
+          | D_Times ->  
               let _, f = check_id env "mult_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
               env', Sast.Expr(call, Dist_t)
@@ -571,22 +571,22 @@ and check_binop env e1 op e2 =
       else binop_error typ1 op typ2 
     
     (* Distribtuion - Num operations *)
-    | Shift | Stretch | Exp as op ->
+    | D_Shift | D_Stretch | D_Power as op ->
       if is_dist typ1 && is_num typ2 then 
         let result_type = Dist_t in  
         (* Constrain variable types to Dist and Num if neccessary *)
         let env', ew1' = constrain_ew env' ew1 Dist_t in
         let env', ew2' = constrain_ew env' ew2 Num in
         match op with 
-          | Shift ->  
+          | D_Shift ->  
               let _, f = check_id env "shift_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
               env', Sast.Expr(call, result_type)
-          | Stretch ->  
+          | D_Stretch ->  
               let _, f = check_id env "stretch_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
               env', Sast.Expr(call, result_type)
-          | Exp ->  
+          | D_Power ->  
               let _, f = check_id env "exp_dist" in
               let call = Sast.Call(f, [ew1'; ew2']) in 
               env', Sast.Expr(call, result_type)

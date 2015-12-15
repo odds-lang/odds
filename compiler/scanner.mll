@@ -35,12 +35,14 @@ rule token = parse
 | '['   { LBRACE }  | ']'   { RBRACE }
 | ','   { COMMA }   | '|'   { VBAR } 
 
+(* Dist Operators *)
+| "<+>" { DPLUS }   | "<*>" { DTIMES }
+| "^^"  { DPOWER }
+
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
 | '*'   { TIMES }   | '/'   { DIVIDE }
 | '%'   { MOD }     | "**"  { POWER }
-| "<+>" { D_PLUS }  | "<*>" { D_TIMES }
-| "^^"  { EXP }
 
 (* Relational Operators *)
 | "=="    { EQ }    | "!="    { NEQ }
