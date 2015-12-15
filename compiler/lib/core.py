@@ -12,6 +12,10 @@ import math
 import random
 import sys
 
+# Odds constants
+EUL = math.e
+PI = math.pi
+
 INDEX_STEP = 1000
 DIST_LENGTH = 10000
 
