@@ -29,7 +29,7 @@ let rec str_of_expr_wrapper = function
         | Ast.Num_int(i) -> string_of_int i
         | Ast.Num_float(f) -> string_of_float f
       end
-  | Sast.Expr((String_lit(s)), _) -> s
+  | Sast.Expr((String_lit(s)), _) -> sprintf "\"%s\"" s
   | Sast.Expr(Bool_lit(b), _) -> string_of_bool b
   | Sast.Expr(Void_lit, _) -> "void"
   | Sast.Expr(Unop(op, we), _) -> 
@@ -78,8 +78,11 @@ and str_of_fdecl fdecl typ =
     return_txt = str_of_expr_wrapper fdecl.return in
   
   let f_str = 
-    sprintf "%s(%s) ->\n%s\n%sreturn %s\n" fdecl.f_name decl_txt
-    body_txt (tab_str ()) return_txt in
+    let is_body = String.length body_txt > 0 in
+    sprintf "%s(%s) ->%s%sreturn %s" fdecl.f_name decl_txt
+      (if is_body then "\n" ^ body_txt ^ "\n" else "")
+      (if is_body then tab_str () else " ")
+      (if is_body then return_txt ^ "\n" else return_txt) in
   tabs := !tabs - 1; f_str
 
 (* Currently not using *)
@@ -118,4 +121,4 @@ and str_of_stmts sast =
 
 let print_sast sast =
     let sast_str = str_of_stmts sast in
-    print_endline ("\n" ^ sast_str)
+    print_endline sast_str
