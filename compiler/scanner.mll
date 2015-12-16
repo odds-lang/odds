@@ -30,9 +30,14 @@ rule token = parse
 
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
+| '>' whitespace* '|'       { DDELIM }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACE }  | ']'   { RBRACE }
-| ','   { COMMA }   | '|'   { VBAR }
+| ','   { COMMA }   | '|'   { VBAR } 
+
+(* Dist Operators *)
+| "<+>" { DPLUS }   | "<*>" { DTIMES }
+| "^^"  { DPOWER }
 
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
@@ -46,6 +51,9 @@ rule token = parse
 (* Logical Operators & Keywords*)
 | "&&"    { AND }   | "||"    { OR }
 | "!"     { NOT }
+
+(* List Operator *)
+| "::"    { CONS }
 
 (* Assignment Operator *)
 | '='   { ASN }

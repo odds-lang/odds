@@ -11,10 +11,13 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER
+%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER 
+
+/* List Operators */
+%token CONS
 
 /* Relational Operators */
 %token EQ NEQ LEQ GEQ
@@ -50,13 +53,14 @@
 %nonassoc IF THEN ELSE
 %right ASN
 %nonassoc RETURN
+%left CONS
 %left OR
 %left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
-%left PLUS MINUS
-%left TIMES DIVIDE MOD
-%left POWER
+%left PLUS MINUS DPLUS
+%left TIMES DIVIDE MOD DTIMES
+%left POWER DPOWER
 %right NOT
 
 %start program                /* Start symbol */
@@ -80,6 +84,8 @@ expr:
   | literal                               { $1 }
   | arith                                 { $1 }
   | boolean                               { $1 }
+  | list_operation                        { $1 }
+  | dist                                  { Dist($1) }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
@@ -115,6 +121,22 @@ list:
   | expr                                  { [$1] }
   | list COMMA expr                       { $3 :: $1 }
 
+
+/* Distributions */
+dist:
+  | LCAR expr COMMA expr DDELIM expr VBAR
+    { {
+      min = $2;
+      max = $4;
+      dist_func = $6;
+    } }
+  | LCAR expr COMMA expr RCAR
+    { {
+      min = $2;
+      max = $4;
+      dist_func = Ast.Id("uniform");
+    } }
+
 /* Binary operators */
 arith:
   | MINUS expr                            { Unop(Sub, $2) }
@@ -124,6 +146,11 @@ arith:
   | expr DIVIDE expr                      { Binop($1, Div, $3) }
   | expr MOD expr                         { Binop($1, Mod, $3) }
   | expr POWER expr                       { Binop($1, Pow, $3) }
+  | expr DPLUS expr                       { Binop($1, D_Plus, $3) }
+  | expr DTIMES expr                      { Binop($1, D_Times, $3) }
+  | expr DPOWER expr                      { Binop($1, D_Power, $3) }
+  | expr RCAR RCAR expr                   { Binop($1, D_Shift, $4) }
+  | expr LCAR RCAR expr                   { Binop($1, D_Stretch, $4) }
 
 boolean:
   | NOT expr                              { Unop(Not, $2) }
@@ -135,6 +162,9 @@ boolean:
   | expr LEQ expr                         { Binop($1, Leq, $3) }
   | expr RCAR expr                        { Binop($1, Greater, $3) }
   | expr GEQ expr                         { Binop($1, Geq, $3) }
+
+list_operation:
+  | expr CONS expr                        { Binop($1, Cons, $3) }
 
 /* Literals */
 literal:

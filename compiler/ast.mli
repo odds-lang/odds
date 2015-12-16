@@ -15,6 +15,12 @@ type unop =
 
 (* Binary operators *)
 type binop =
+  (* Dist *)
+  | D_Plus     (* <+> *)
+  | D_Times    (* <*> *)
+  | D_Power    (* ^^ *)
+  | D_Shift    (* >> *)
+  | D_Stretch  (* <> *)
   (* Arithmetic *)
   | Add      (* + *)
   | Sub      (* - *)
@@ -31,6 +37,8 @@ type binop =
   | Leq      (* <= *)
   | Greater  (* > *)
   | Geq      (* >= *)
+  (* List *)
+  | Cons     (* :: *)
 
 (* Expressions *)
 type num =
@@ -48,9 +56,17 @@ type expr =
   | Assign of string * expr       (* x = 4 *)
   | Call of expr * expr list      (* add(1, 2) *)
   | List of expr list             (* [1, 2, 3] *)
+  | Dist of dist                  (* < 1, 2> | normal *) 
   | Fdecl of fdecl                (* (x) -> ... return x *)
   | Cake of expr * expr list      (* (() -> return 42)() *)
   | If of expr * expr * expr      (* if true then 42 else 43 *)
+
+(* Distribution Declarations *)
+and dist = {
+  min: expr;        (* Distribution Minimum *)
+  max: expr;        (* Distribution Maximum *)
+  dist_func: expr;  (* Distribution Function *)
+}
 
 (* Function Declarations *)
 and fdecl = {
