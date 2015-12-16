@@ -98,7 +98,6 @@ and str_of_cake fdecl_ew call_ew =
   let c_str = sprintf "{%s}%s" fdecl_txt call_txt in
   tabs := !tabs - 1; c_str
 
-
 and str_of_cond cond =
   tabs := !tabs + 1;
   let tabins = (tab_str ()) ^ (String.make tabsize ' ') in

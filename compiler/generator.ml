@@ -82,11 +82,11 @@ and txt_of_list = function
 and txt_of_fdecl indent f =
     let params = String.concat ", " f.p_params in
     let body = txt_of_stmts (indent + 1) f.p_body in
-    sprintf "%sdef %s(%s):%s"
+    sprintf "%sdef %s(%s):\n%s"
       (indent_of_num indent)
       f.p_name
       params
-      (if String.length body > 0 then "\n" ^ body else "")
+      body
 
 (* Statements *)
 and txt_of_stmt indent = function 
