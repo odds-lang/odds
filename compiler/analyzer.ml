@@ -500,6 +500,9 @@ and check_binop env e1 op e2 =
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
 
+    (* List Operators *)
+    | Cons ->
+
 (* Function calling *)
 and check_func_call env id args =
   let env', ew = check_expr env id in

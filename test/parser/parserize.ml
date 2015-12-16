@@ -22,6 +22,7 @@ let txt_of_binop = function
   | Leq -> "Leq"
   | Greater -> "Greater"
   | Geq -> "Geq"
+  | Cons -> "::"
 
 (* Expressions *)
 let txt_of_num = function

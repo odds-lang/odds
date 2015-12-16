@@ -16,6 +16,9 @@
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER
 
+/* List Operators */
+%token CONS
+
 /* Relational Operators */
 %token EQ NEQ LEQ GEQ
 
@@ -50,6 +53,7 @@
 %nonassoc IF THEN ELSE
 %right ASN
 %nonassoc RETURN
+%left CONS
 %left OR
 %left AND
 %left EQ NEQ
@@ -80,9 +84,11 @@ expr:
   | literal                               { $1 }
   | arith                                 { $1 }
   | boolean                               { $1 }
+  | list_operation                        { $1 }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
+  | LBRACE list_opt RBRACE                { List($2) }
   | LBRACE list_opt RBRACE                { List($2) }
   | LPAREN expr RPAREN                    { $2 }
   | fdecl                                 { Fdecl($1) }
@@ -135,6 +141,9 @@ boolean:
   | expr LEQ expr                         { Binop($1, Leq, $3) }
   | expr RCAR expr                        { Binop($1, Greater, $3) }
   | expr GEQ expr                         { Binop($1, Geq, $3) }
+
+list_operation:
+  | expr CONS expr                        { Binop($1, Cons, $3) }
 
 /* Literals */
 literal:

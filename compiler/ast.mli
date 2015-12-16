@@ -31,6 +31,8 @@ type binop =
   | Leq      (* <= *)
   | Greater  (* > *)
   | Geq      (* >= *)
+  (* List *)
+  | Cons     (* :: *)
 
 (* Expressions *)
 type num =
