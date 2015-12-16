@@ -1,0 +1,10 @@
+do bools = [true, false, true, false]
+do nums = [1, 2, 3, 4, 5]
+do square = (x) -> return x ** 2
+
+do print(list_map(square, []))
+do print(list_map(square, nums))
+do print(list_map(
+    (b) -> return !b,
+    bools
+))
