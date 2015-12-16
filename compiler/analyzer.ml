@@ -186,10 +186,16 @@ let list_error list_type elem_type =
     (str_of_type elem_type) (str_of_type list_type) in
   raise (Semantic_Error message)
 
-let typ_mismatch_error id typ const = 
+let type_mismatch_error id typ const = 
   let message = sprintf 
     "Invalid usage of id '%s' with type %s when type %s was expected" 
     id (str_of_type typ) (str_of_type const) in
+  raise (Semantic_Error message)
+
+let return_type_mismatch_error func_id typ1 typ2 = 
+  let message = sprintf "Invalid return type in function '%s':
+    type '%s' expected to be returned, but type '%s' returned instead."
+    func_id (str_of_type typ1) (str_of_type typ2) in
   raise (Semantic_Error message)
 
 let fdecl_unconst_error id =
@@ -283,7 +289,7 @@ let update_type env ssid typ =
  *)
 let rec constrain_ew env ew typ =
   let Sast.Expr(e, old_typ) = ew in
-  if old_typ <> Unconst && old_typ <> typ then constrain_error old_typ typ else
+  if not (has_unconst old_typ) && old_typ <> typ then constrain_error old_typ typ else
   match e with
     | Sast.Id(ssid) -> update_type env ssid typ; env, Sast.Expr(e, typ)
     | Sast.Fdecl(f) -> update_type env f.f_name typ; env, Sast.Expr(e, typ)
@@ -293,7 +299,7 @@ let rec constrain_ew env ew typ =
           | Sast.Func(old_f) -> old_f.return_type
           | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ 
         end in
-        if f.return_type <> Unconst && f.return_type <> old_ret_type then 
+        if not (has_unconst f.return_type) && f.return_type <> old_ret_type then 
           constrain_error old_ret_type f.return_type
         else
           let f' = Func({ f with return_type = typ }) in
@@ -545,40 +551,48 @@ and check_func_call_ret env id args ret_default =
   let id' = match id with
     | Ast.Id(id') -> id'
     | _ -> dead_code_path_error "check_func_call_ret" in
-  let builtin =
+  let is_builtin =
     if VarMap.mem id' env.scope then
       (VarMap.find id' env.scope).builtin
     else false in
-  if not builtin then 
   
-  (* If ret_default is Any, make it Unconst *)
-  let ret_default' = if ret_default = Any then Unconst else ret_default in
-  env, ret_default' else
+  if not is_builtin then 
+    (* If ret_default is Any, make it Unconst. Else if ret_default is a List
+     * or contains lists of Any, make it List of Unconsts or List of Lists of 
+     * Unconsts. *)
+    let ret_default' = 
+      let rec any_to_unconst_return = function
+        | Any -> Unconst
+        | List(typ) -> let typ' = any_to_unconst_return typ in List(typ')
+        | _ as typ -> typ in
+      any_to_unconst_return ret_default in
+    env, ret_default'
   
-  match id' with
-    | "head" -> let Sast.Expr(_, typ) = List.hd args in
-        begin match typ with
-          | List(t) -> env, t
-          | _ -> dead_code_path_error "check_func_call_ret"
-        end
-    | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
-    | "cons" ->
-        let Sast.Expr(cons, c_typ) = List.hd args and
-          Sast.Expr(l, l_typ) = List.hd (List.tl args) in
-        let l_elem_typ = begin match l_typ with
-          | List(t) -> t
-          | _ -> dead_code_path_error "check_func_call_ret"
-        end in
-        let const, _ = try collect_constraints c_typ l_elem_typ
-          with
-            | Collect_Constraints_Error -> list_cons_mismatch_error c_typ l_typ
-            | _ as e -> raise e in
-        (* constrain the element begin appended *)
-        let env' = constrain_e env cons const in
-        (* constrain the list's type *)
-        let env' = constrain_e env' l (List(const)) in
-        env', List(const)
-    | _ -> env, ret_default
+  else (* is builtin *)
+    match id' with
+      | "head" -> let Sast.Expr(_, typ) = List.hd args in
+          begin match typ with
+            | List(t) -> env, t
+            | _ -> dead_code_path_error "check_func_call_ret"
+          end
+      | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
+      | "cons" ->
+          let Sast.Expr(cons, c_typ) = List.hd args and
+            Sast.Expr(l, l_typ) = List.hd (List.tl args) in
+          let l_elem_typ = begin match l_typ with
+            | List(t) -> t
+            | _ -> dead_code_path_error "check_func_call_ret"
+          end in
+          let const, _ = try collect_constraints c_typ l_elem_typ
+            with
+              | Collect_Constraints_Error -> list_cons_mismatch_error c_typ l_typ
+              | _ as e -> raise e in
+          (* constrain the element begin appended *)
+          let env' = constrain_e env cons const in
+          (* constrain the list's type *)
+          let env' = constrain_e env' l (List(const)) in
+          env', List(const)
+      | _ -> env, ret_default
 
 (* Assignment *)
 and check_assign env id = function
@@ -644,7 +658,7 @@ and check_fdecl env id f anon =
           try collect_constraints var.s_type func_param_type
           with 
             | Collect_Constraints_Error -> 
-                typ_mismatch_error id func_param_type var.s_type
+                type_mismatch_error id func_param_type var.s_type
             | _ as e -> raise e in
 
         (* Convert remaining Unconst to Any *)
@@ -677,8 +691,14 @@ and check_fdecl env id f anon =
   let ret_type' = unconst_to_any ret_type in
   
   (* If return type constrained differently than in env, throw error *)
-  if return_typ <> Any && return_typ <> Unconst && ret_type' <> return_typ then
-    fdecl_reassign_error id ret_type'
+  let rec not_any_and_not_unconst = function
+    (* Returns false if type is Any, Unconst, or List of these. Otherwise
+     * returns true *)
+    | Any | Unconst -> false
+    | List(typ) -> not_any_and_not_unconst typ
+    | _ -> true in
+  if not_any_and_not_unconst return_typ && ret_type' <> return_typ then
+    return_type_mismatch_error id return_typ ret_type'
   else
 
   (* Construct function declaration *)
