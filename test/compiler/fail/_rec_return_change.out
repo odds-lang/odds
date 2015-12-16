@@ -1,1 +1,2 @@
-Analyzer Exception: Invalid attempt to reassign function identifier 'f' to type Num
+Analyzer Exception: Invalid return type in function 'f':
+    type 'Bool' expected to be returned, but type 'Num' returned instead.
