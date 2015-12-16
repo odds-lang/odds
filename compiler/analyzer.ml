@@ -146,6 +146,8 @@ let str_of_binop = function
   | Eq -> "=="      | Neq -> "!="
   | Less -> "<"     | Leq -> "<="
   | Greater -> ">"  | Geq -> ">="
+  (* List *)
+  | Cons -> "::"
 
 let print_env env =
   let print_var id var =
@@ -557,6 +559,11 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Bool in
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
+
+    (* List Operators *)
+    | Cons ->
+      let unsugared = Ast.Call(Ast.Id("cons"), [e1; e2]) in
+      check_expr env' unsugared
     
     (* Distribtuion - Distribtuion operations *)
     | D_Plus | D_Times as op ->
@@ -575,7 +582,7 @@ and check_binop env e1 op e2 =
               env', Sast.Expr(call, Dist_t)
           | _ -> dead_code_path_error "check_binop"
       else binop_error typ1 op typ2 
-    
+
     (* Distribtuion - Num operations *)
     | D_Shift | D_Stretch | D_Power as op ->
       if is_dist typ1 && is_num typ2 then 
@@ -598,9 +605,6 @@ and check_binop env e1 op e2 =
               env', Sast.Expr(call, result_type)
           | _ -> dead_code_path_error "check_binop"
       else binop_error typ1 op typ2   
-
-    (* List Operators *)
-    (*| Cons ->*)
 
 (* Function calling *)
 and check_func_call env id args =
