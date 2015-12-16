@@ -149,6 +149,10 @@ let str_of_binop = function
   (* List *)
   | Cons -> "::"
 
+let is_sugar = function
+  | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power -> true
+  | _ -> false 
+
 let print_env env =
   let print_var id var =
     let line = sprintf "\t%s --> { name: %s; s_type: %s; }"
@@ -458,11 +462,6 @@ and is_num = function
   | Num | Unconst -> true
   | _ -> false 
 
-(* Returns true if Dist_t or Unconst, otherwise false *)
-and is_dist = function 
-  | Dist_t | Unconst -> true
-  | _ -> false 
-
 (* Check list elements against constraint type, constrain if possible *)
 and constrain_list_elems env acc const = function
   | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
@@ -526,85 +525,56 @@ and check_unop env op e =
 
 (* Binary operators *)
 and check_binop env e1 op e2 =
-  let env', ew1 = check_expr env e1 in
-  let Sast.Expr(_, typ1) = ew1 in
-  let env', ew2 = check_expr env' e2 in
-  let Sast.Expr(_, typ2) = ew2 in
-  match op with
-    (* Numeric operations *)
-    | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
-      if is_num typ1 && is_num typ2 then 
-        let result_type = match op with
-          | Add | Sub | Mult | Div | Mod | Pow -> Num
-          | Less | Leq | Greater | Geq -> Bool
-          | _ -> dead_code_path_error "check_binop" in
-        (* Constrain variable types to Num if neccessary *)
-        let env', ew1' = constrain_ew env' ew1 Num in
-        let env', ew2' = constrain_ew env' ew2 Num in
-        env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
-      else binop_error typ1 op typ2
-    
-    (* Equality operations - overloaded, no constraining can be done, can take
-     * any type *)
-    | Eq | Neq -> env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
+  if is_sugar op then (* Check if binop is sugar. If so unsugar. *)
+    let func_name = match op with
+        | Cons -> "cons"
+        | D_Plus -> "add_dist"
+        | D_Times -> "mult_dist"
+        | D_Shift -> "shift_dist"
+        | D_Stretch -> "stretch_dist"
+        | D_Power -> "exp_dist"
+        | _ -> dead_code_path_error "check_binop" in
+      
+    (* Unsugar expression and refeed it to Analyzer *)
+    let unsugared = Ast.Call(Ast.Id(func_name), [e1; e2]) in
+    check_expr env unsugared
+  
+  else (* binop is not sugar. Check, constrain, and proceed. *)
+    let env', ew1 = check_expr env e1 in
+    let Sast.Expr(_, typ1) = ew1 in
+    let env', ew2 = check_expr env' e2 in
+    let Sast.Expr(_, typ2) = ew2 in
+    match op with
+      (* Numeric operations *)
+      | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
+        if is_num typ1 && is_num typ2 then 
+          let result_type = match op with
+            | Add | Sub | Mult | Div | Mod | Pow -> Num
+            | Less | Leq | Greater | Geq -> Bool
+            | _ -> dead_code_path_error "check_binop" in
+          (* Constrain variable types to Num if neccessary *)
+          let env', ew1' = constrain_ew env' ew1 Num in
+          let env', ew2' = constrain_ew env' ew2 Num in
+          env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
+        else binop_error typ1 op typ2
+      
+      (* Equality operations - overloaded, no constraining can be done, can take
+       * any type *)
+      | Eq | Neq -> env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
 
-    (* Boolean operations *)
-    | Or | And ->
-      let is_bool = function
-        | Bool | Unconst -> true
-        | _ -> false in
-      if is_bool typ1 && is_bool typ2 then
-        (* Constrain variable types to Bool if necessary *)
-        let env', ew1' = constrain_ew env' ew1 Bool in
-        let env', ew2' = constrain_ew env' ew2 Bool in
-        env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
-      else binop_error typ1 op typ2
+      (* Boolean operations *)
+      | Or | And ->
+        let is_bool = function
+          | Bool | Unconst -> true
+          | _ -> false in
+        if is_bool typ1 && is_bool typ2 then
+          (* Constrain variable types to Bool if necessary *)
+          let env', ew1' = constrain_ew env' ew1 Bool in
+          let env', ew2' = constrain_ew env' ew2 Bool in
+          env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
+        else binop_error typ1 op typ2
 
-    (* List Operators *)
-    | Cons ->
-      let unsugared = Ast.Call(Ast.Id("cons"), [e1; e2]) in
-      check_expr env' unsugared
-    
-    (* Distribtuion - Distribtuion operations *)
-    | D_Plus | D_Times as op ->
-      if is_dist typ1 && is_dist typ2 then 
-        (* Constrain variable types to Dist if neccessary *)
-        let env', ew1' = constrain_ew env' ew1 Dist_t in
-        let env', ew2' = constrain_ew env' ew2 Dist_t in
-        match op with 
-          | D_Plus ->  
-              let _, f = check_id env "add_dist" in
-              let call = Sast.Call(f, [ew1'; ew2']) in 
-              env', Sast.Expr(call, Dist_t)
-          | D_Times ->  
-              let _, f = check_id env "mult_dist" in
-              let call = Sast.Call(f, [ew1'; ew2']) in 
-              env', Sast.Expr(call, Dist_t)
-          | _ -> dead_code_path_error "check_binop"
-      else binop_error typ1 op typ2 
-
-    (* Distribtuion - Num operations *)
-    | D_Shift | D_Stretch | D_Power as op ->
-      if is_dist typ1 && is_num typ2 then 
-        let result_type = Dist_t in  
-        (* Constrain variable types to Dist and Num if neccessary *)
-        let env', ew1' = constrain_ew env' ew1 Dist_t in
-        let env', ew2' = constrain_ew env' ew2 Num in
-        match op with 
-          | D_Shift ->  
-              let _, f = check_id env "shift_dist" in
-              let call = Sast.Call(f, [ew1'; ew2']) in 
-              env', Sast.Expr(call, result_type)
-          | D_Stretch ->  
-              let _, f = check_id env "stretch_dist" in
-              let call = Sast.Call(f, [ew1'; ew2']) in 
-              env', Sast.Expr(call, result_type)
-          | D_Power ->  
-              let _, f = check_id env "exp_dist" in
-              let call = Sast.Call(f, [ew1'; ew2']) in 
-              env', Sast.Expr(call, result_type)
-          | _ -> dead_code_path_error "check_binop"
-      else binop_error typ1 op typ2   
+      | _ -> dead_code_path_error "check_binop"
 
 (* Function calling *)
 and check_func_call env id args =
