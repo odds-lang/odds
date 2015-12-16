@@ -1,0 +1,29 @@
+[
+    Do(
+        Dist({
+            min=Num_lit(2);
+            max=Num_lit(3);
+            dist_func=Id(hello)
+        })
+    );
+    Do(
+        Assign(
+            x,
+            Dist({
+                min=Binop(Num_lit(5), Add, Num_lit(6));
+                max=Binop(Num_lit(7), Add, Num_lit(8));
+                dist_func=
+                    Fdecl({
+                        params=[x] ;
+                        body=[] ;
+                        return=Binop(Id(x), Mult, Id(x))
+                    })
+            })
+        )
+    );
+    Do(Binop(Id(x), D_Plus, Id(x)));
+    Do(Binop(Id(x), D_Times, Id(x)));
+    Do(Binop(Id(x), D_Shift, Num_lit(2)));
+    Do(Binop(Id(x), D_Stretch, Num_lit(2)));
+    Do(Binop(Id(x), D_Power, Num_lit(2)))
+]
