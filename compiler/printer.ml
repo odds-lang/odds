@@ -55,10 +55,14 @@ let rec str_of_expr_wrapper = function
   | Sast.Expr(Ldecl(we_list), _) -> 
       let l_txt = str_of_expr_wrapper_list we_list in
       sprintf "[%s]" l_txt
+  | Sast.Expr(Dist(dist), _) -> 
+      let min_txt = str_of_expr_wrapper dist.min and
+        max_txt = str_of_expr_wrapper dist.max and
+        func_txt = str_of_expr_wrapper dist.dist_func in
+      sprintf "<%s, %s>|%s|" min_txt max_txt func_txt
   | Sast.Expr(Fdecl(fdecl), typ) -> str_of_fdecl fdecl typ
   | Sast.Expr(Cake(fdecl_ew, call_ew), _) -> str_of_cake fdecl_ew call_ew
   | Sast.Expr(If(cond), _) -> str_of_cond cond
-(*| ADD FOR DISTS *)
 
 and str_of_expr_wrapper_list l = 
   String.concat ", " (List.map str_of_expr_wrapper l)
