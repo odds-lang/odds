@@ -89,7 +89,7 @@ expr:
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
-  | LBRACE list_opt RBRACE                { List($2) }
+  | LBRACE list_opt RBRACE                { LDecl($2) }
   | LPAREN expr RPAREN                    { $2 }
   | fdecl                                 { Fdecl($1) }
   | LPAREN fdecl CAKE list_opt RPAREN     { Cake(Fdecl($2), $4) }

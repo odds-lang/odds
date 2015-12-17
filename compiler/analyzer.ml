@@ -495,7 +495,7 @@ and check_expr env = function
   | Ast.Binop(e1, op, e2) -> check_binop env e1 op e2
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
-  | Ast.List(l) -> check_list env l
+  | Ast.LDecl(l) -> check_list env l
   | Ast.Dist(d) -> check_dist env d
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args

@@ -50,7 +50,7 @@ let rec txt_of_expr = function
   | Call(f, args) -> sprintf "Call(%s, [%s])"
       (txt_of_expr f) (txt_of_list args)
   | Assign(x, e) -> sprintf "Assign(%s, %s)" x (txt_of_expr e)
-  | List(l) -> sprintf "List([%s])" (txt_of_list l)
+  | LDecl(l) -> sprintf "LDecl([%s])" (txt_of_list l)
   | Dist(d) -> txt_of_dist d
   | Fdecl(f)-> txt_of_fdecl f
   | Cake(fdecl, args) -> sprintf "Cake(%s, [%s])"
