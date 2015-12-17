@@ -41,6 +41,37 @@ let builtins = VarMap.add "print" {
   builtin = true;
 } builtins
 
+(* Dist builtins *)
+let builtins = VarMap.add "add_dist" {
+  name = "add_dist";
+  s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "mult_dist" {
+  name = "mult_dist";
+  s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "shift_dist" {
+  name = "shift_dist";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "stretch_dist" {
+  name = "stretch_dist";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "exp_dist" {
+  name = "exp_dist";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  builtin = true;
+} builtins
+
 (* List builtins *)
 let builtins = VarMap.add "head" {
   name = "head";
@@ -72,7 +103,6 @@ let root_env = {
   scope = builtins;
 }
 
-
 (********************
  * Utilities
  ********************)
@@ -90,6 +120,7 @@ let rec str_of_type = function
   | Void -> "Void"
   | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
+  | Dist_t -> "<Dist>|Func(Num => Num)|"
   | Any -> "Any"
   | Unconst -> "Unconst"
 
@@ -102,6 +133,10 @@ let str_of_unop = function
   | Not -> "!"      | Sub -> "-"
 
 let str_of_binop = function
+  (* Dist *)
+  | D_Plus -> "<+>" | D_Times -> "<*>"
+  | D_Shift -> ">>" | D_Stretch -> "<>"
+  | D_Power -> "^^"
   (* Arithmetic *)
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
@@ -231,6 +266,22 @@ let dead_code_path_error ocaml_func_name =
     sprintf "ERROR: DEAD CODE PATH REACHED IN FUNCTION: %s" ocaml_func_name in
   raise (Semantic_Error message) 
 
+let invalid_dist_min_max_error typ1 typ2 = 
+  let message = sprintf "Invalid distribution with min type '%s' and max type '%s'" 
+    (str_of_type typ1) (str_of_type typ2) in
+  raise (Semantic_Error message)
+
+let invalid_dist_func_type_error invalid_typ f_typ =
+  let message = sprintf "Invalid distribution with function '%s'
+    (distribution's must have function of type '%s')" 
+    (str_of_type invalid_typ) (str_of_type f_typ) in
+  raise (Semantic_Error message)
+
+let dead_code_path_error ocaml_func_name =
+  let message = 
+    sprintf "ERROR: DEAD CODE PATH REACHED IN FUNCTION: %s" ocaml_func_name in
+  raise (Semantic_Error message) 
+
 (********************
  * Scoping
  ********************)
@@ -317,10 +368,10 @@ and constrain_e env e typ = match e with
 (* This function takes 2 types. It returns 2 types. The first type returned 
  * will overwrite 'Any' to another type, including, possibly, 'Unconst.' The
  * second type returned will have 'Any' in it, overwriting any other type
- * when neccessary. TO DO: MAKE PRETTIER & SHORTER. TO DO: UPDATE FOR DIST TYPE.
+ * when neccessary. TO DO: MAKE PRETTIER & SHORTER.
  *)
 and collect_constraints typ1 typ2 = 
-  (* Helper functions for this function *)
+  (* Helper functions for collect_constraints *)
   let build_func collect_func func1 func2 = 
     let params1 = func1.param_types and params2 = func2.param_types and
       ret1 = func1.return_type and ret2 = func2.return_type in
@@ -400,6 +451,16 @@ and unconst_to_any = function
       Func({ param_types = param_types'; return_type = return_type' })
   | _ as typ -> typ
 
+(* Returns true if Num or Unconst, otherwise false *)
+and is_num = function
+  | Num | Unconst -> true
+  | _ -> false 
+
+(* Returns true if Dist_t or Unconst, otherwise false *)
+and is_dist = function 
+  | Dist_t | Unconst -> true
+  | _ -> false 
+
 (* Check list elements against constraint type, constrain if possible *)
 and constrain_list_elems env acc const = function
   | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
@@ -428,6 +489,7 @@ and check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
+  | Ast.Dist(d) -> check_dist env d
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
@@ -467,12 +529,8 @@ and check_binop env e1 op e2 =
   let env', ew2 = check_expr env' e2 in
   let Sast.Expr(_, typ2) = ew2 in
   match op with
-    
     (* Numeric operations *)
     | Add | Sub | Mult | Div | Mod | Pow | Less | Leq | Greater | Geq -> 
-      let is_num = function
-        | Num | Unconst -> true
-        | _ -> false in 
       if is_num typ1 && is_num typ2 then 
         let result_type = match op with
           | Add | Sub | Mult | Div | Mod | Pow -> Num
@@ -483,7 +541,7 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Num in
         env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
       else binop_error typ1 op typ2
-
+    
     (* Equality operations - overloaded, no constraining can be done, can take
      * any type *)
     | Eq | Neq -> env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
@@ -499,6 +557,47 @@ and check_binop env e1 op e2 =
         let env', ew2' = constrain_ew env' ew2 Bool in
         env', Sast.Expr(Sast.Binop(ew1, op, ew2), Bool)
       else binop_error typ1 op typ2
+    
+    (* Distribtuion - Distribtuion operations *)
+    | D_Plus | D_Times as op ->
+      if is_dist typ1 && is_dist typ2 then 
+        (* Constrain variable types to Dist if neccessary *)
+        let env', ew1' = constrain_ew env' ew1 Dist_t in
+        let env', ew2' = constrain_ew env' ew2 Dist_t in
+        match op with 
+          | D_Plus ->  
+              let _, f = check_id env "add_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, Dist_t)
+          | D_Times ->  
+              let _, f = check_id env "mult_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, Dist_t)
+          | _ -> dead_code_path_error "check_binop"
+      else binop_error typ1 op typ2 
+    
+    (* Distribtuion - Num operations *)
+    | D_Shift | D_Stretch | D_Power as op ->
+      if is_dist typ1 && is_num typ2 then 
+        let result_type = Dist_t in  
+        (* Constrain variable types to Dist and Num if neccessary *)
+        let env', ew1' = constrain_ew env' ew1 Dist_t in
+        let env', ew2' = constrain_ew env' ew2 Num in
+        match op with 
+          | D_Shift ->  
+              let _, f = check_id env "shift_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, result_type)
+          | D_Stretch ->  
+              let _, f = check_id env "stretch_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, result_type)
+          | D_Power ->  
+              let _, f = check_id env "exp_dist" in
+              let call = Sast.Call(f, [ew1'; ew2']) in 
+              env', Sast.Expr(call, result_type)
+          | _ -> dead_code_path_error "check_binop"
+      else binop_error typ1 op typ2   
 
 (* Function calling *)
 and check_func_call env id args =
@@ -759,6 +858,41 @@ and check_if env i t e =
       stmt_2 = ew3';
   } in
   env', Sast.Expr(Sast.If(ifdecl), const)
+
+(* Distrubutions *)
+and check_dist env d =
+  (* Dists must have function of the following type: *)
+  let dfunc_type = Func({ param_types = [Num]; return_type = Num; }) in
+
+  (* Check and constrain min/max if neccessary *)
+  let env', ew1 = check_expr env d.min in
+  let Sast.Expr(_, typ1) = ew1 in
+  let env', ew2 = check_expr env d.max in
+  let Sast.Expr(_, typ2) = ew2 in
+  let env', ew1', ew2' = 
+    if is_num typ1 && is_num typ2 then
+      let env', ew1' = constrain_ew env' ew1 Num in
+      let env', ew2' = constrain_ew env' ew2 Num in
+      env', ew1', ew2'
+    else invalid_dist_min_max_error typ1 typ2 in
+
+  (* Check and constrain distribution function *)
+  let env', ew3 = check_expr env d.dist_func in
+  let Sast.Expr(_, typ3) = ew3 in
+  let const, _ = try collect_constraints typ3 dfunc_type
+    with
+      | Collect_Constraints_Error -> invalid_dist_func_type_error typ3 dfunc_type
+      | _ as e -> raise e in
+  let env', ew3' = 
+    if has_unconst typ3 then constrain_ew env' ew3 const else env', ew3 in
+
+  (* Construct Dist expr_wrapper *)
+  let dist = Sast.Expr(Sast.Dist({ 
+    min = ew1'; max = ew2'; dist_func = ew3';
+  }), Dist_t) in
+  
+  (* Return Dist expr_wrapper *)
+  env', dist
 
 (* Statements *)
 and check_stmt env = function
