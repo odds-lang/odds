@@ -86,9 +86,7 @@ and past_stmts stmt_list =
   let rec aux acc = function
     | [] -> List.rev acc
     | stmt :: tl -> let stmts', s = past_stmt acc stmt in
-        match s with
-        | Past.Empty -> aux stmts' tl
-        | _ -> aux (Past.Stmt(s) :: stmts') tl
+        aux (Past.Stmt(s) :: stmts') tl
   in aux [] stmt_list
 
 (* Program entry point *)
