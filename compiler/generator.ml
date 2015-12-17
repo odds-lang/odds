@@ -1,5 +1,5 @@
 (*
- * COMS4115: Odds parser
+ * COMS4115: Odds Python code generator
  *
  * Authors:
  *  - Alex Kalicki
@@ -28,12 +28,14 @@ let txt_of_num = function
   | Num_float(f) -> string_of_float f
 
 let txt_of_binop = function
+  (* Arithmetic *)
   | Add -> "+"
   | Sub -> "-"
   | Mult -> "*"
   | Div -> "/"
   | Mod -> "%"
   | Pow -> "**"
+  (* Boolean *)
   | Or -> "or"
   | And -> "and"
   | Eq -> "=="
@@ -42,6 +44,9 @@ let txt_of_binop = function
   | Leq -> "<="
   | Greater -> ">"
   | Geq -> ">="
+  (* Dist *)
+  | D_Plus | D_Times | D_Power | D_Shift | D_Stretch -> 
+      raise (Python_Error "Unexpected binary operator")
 
 (* Conditionals *)
 let txt_of_cond indent i t e = sprintf "%sif %s:\n%s\n%s" 
