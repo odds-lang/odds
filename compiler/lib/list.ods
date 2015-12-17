@@ -8,6 +8,9 @@
  *  - Lilly Wang
  */
 
+/* Return true if list is empty, false otherwise */
+do list_empty = (l) -> return len(l) == 0
+
 /*
  * Create a list with of n values initialized to v. Throw exception with
  * message "list_make: n can not be negative" if n is negative
@@ -38,14 +41,14 @@ do list_get = (n, l) ->
  */
 do list_fold = (f, acc, l) ->
     return
-        if len(l) == 0 then acc
+        if list_empty(l) then acc
         else list_fold(f, f(acc, head(l)), tail(l))
 
 /* Return list l with elements in reverse order */
 do list_rev = (l) ->
     do aux = (acc, l) ->
         return
-            if len(l) == 0 then acc
+            if list_empty(l) then acc
             else aux(cons(head(l), acc), tail(l))
     return aux([], l)
 
@@ -53,7 +56,7 @@ do list_rev = (l) ->
 do list_concat = (a, b) ->
     do aux = (acc, l) ->
         return
-            if len(l) == 0 then list_rev(acc)
+            if list_empty(l) then list_rev(acc)
             else aux(cons(head(l), acc), tail(l))
     return aux(list_rev(a), b)
 
@@ -61,7 +64,7 @@ do list_concat = (a, b) ->
 do list_map = (f, l) ->
     do aux = (acc, l) ->
         return
-            if len(l) == 0 then list_rev(acc)
+            if list_empty(l) then list_rev(acc)
             else (() ->
                 do applied = f(head(l))
                 return aux(cons(applied, acc), tail(l))
