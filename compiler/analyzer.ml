@@ -136,7 +136,7 @@ let str_of_binop = function
   (* Dist *)
   | D_Plus -> "<+>" | D_Times -> "<*>"
   | D_Shift -> ">>" | D_Stretch -> "<>"
-  | D_Power -> "^^"
+  | D_Power -> "^^" | Sample -> "<x>"
   (* Arithmetic *)
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
@@ -150,7 +150,7 @@ let str_of_binop = function
   | Cons -> "::"
 
 let is_sugar = function
-  | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power -> true
+  | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power | Sample -> true
   | _ -> false 
 
 let print_env env =
@@ -533,6 +533,7 @@ and check_binop env e1 op e2 =
         | D_Shift -> "shift_dist"
         | D_Stretch -> "stretch_dist"
         | D_Power -> "exp_dist"
+        | Sample -> "sample_dist"
         | _ -> dead_code_path_error "check_binop" in
       
     (* Unsugar expression and refeed it to Analyzer *)

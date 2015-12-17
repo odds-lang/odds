@@ -21,6 +21,7 @@ type binop =
   | D_Power    (* ^^ *)
   | D_Shift    (* >> *)
   | D_Stretch  (* <> *)
+  | Sample     (* <4> *)
   (* Arithmetic *)
   | Add      (* + *)
   | Sub      (* - *)

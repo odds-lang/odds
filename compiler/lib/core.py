@@ -83,6 +83,11 @@ def stretch_dist(d, n):
 def exp_dist(d, n):
     return [ x ** n for x in d ]
 
+def sample_dist(d, n):
+    start1 = random.randint(0, 99)
+    return d1[start1::SAMPLE_STEP]
+
+
 """
 END ODDS CORE LIBRARY
 BEGIN USER CODE
