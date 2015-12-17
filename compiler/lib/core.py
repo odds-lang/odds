@@ -21,6 +21,7 @@ DIST_LENGTH = 10000
 SAMPLE_STEP = 100
 
 def exception(s):
+    """Write exception s to stderr and exit program"""
     sys.stderr.write("%s\n" % s)
     exit(1)
 
@@ -53,35 +54,32 @@ def make_dist(start, end, f):
     return dist_list
 
 def add_dist(d1, d2):
-    start1 = random.randint(0, 99)
-    s1 = d1[start1::SAMPLE_STEP]
-    start2 = random.randint(0, 99)
-    s2 = d2[start2::SAMPLE_STEP]
-    add = []
-    for i in s1:
-        for j in s2:
-            add.append(i + j)
-    return sorted(add)
+    """Return the sum of two distributions, adding each combination"""
+    s1 = d1[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
+    s2 = d2[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
+    return sorted([ x + y for x in s1 for y in s2 ])
 
 def mult_dist(d1, d2):
-    start1 = random.randint(0, 99)
-    s1 = d1[start1::SAMPLE_STEP]
-    start2 = random.randint(0, 99)
-    s2 = d2[start2::SAMPLE_STEP]
-    mult = []
-    for i in s1:
-        for j in s2:
-            mult.append(i * j)
-    return sorted(mult)
+    """Return the product of two distributions, multiplying each combination"""
+    s1 = d1[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
+    s2 = d2[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
+    return sorted([ x * y for x in s1 for y in s2 ])
 
-def shift_dist(d, n):
+def shift_dist(n, d):
+    """Shift each element in distribution d by n"""
     return [ x + n for x in d ]
 
-def stretch_dist(d, n):
+def stretch_dist(n, d):
+    """Stretch distribution d, multiplying each element by n"""
     return [ x * n for x in d ]
 
-def exp_dist(d, n):
+def exp_dist(n, d):
+    """Exponentiate distribution d, raising each element to power n"""
     return [ x ** n for x in d ]
+
+def sample_dist(n, d):
+    """Return a random sample of n elements in distribution d"""
+    return sorted([ random.randint(0, DIST_LENGTH - 1) for x in range(n) ])
 
 """
 END ODDS CORE LIBRARY

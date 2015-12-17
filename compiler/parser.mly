@@ -14,7 +14,10 @@
 %token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER 
+%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER
+
+/* List Operators */
+%token CONS
 
 /* Relational Operators */
 %token EQ NEQ LEQ GEQ
@@ -50,6 +53,7 @@
 %nonassoc IF THEN ELSE
 %right ASN
 %nonassoc RETURN
+%left CONS
 %left OR
 %left AND
 %left EQ NEQ
@@ -80,11 +84,12 @@ expr:
   | literal                               { $1 }
   | arith                                 { $1 }
   | boolean                               { $1 }
+  | list_operation                        { $1 }
   | dist                                  { Dist($1) }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
-  | LBRACE list_opt RBRACE                { List($2) }
+  | LBRACE list_opt RBRACE                { LDecl($2) }
   | LPAREN expr RPAREN                    { $2 }
   | fdecl                                 { Fdecl($1) }
   | LPAREN fdecl CAKE list_opt RPAREN     { Cake(Fdecl($2), $4) }
@@ -146,6 +151,7 @@ arith:
   | expr DPOWER expr                      { Binop($1, D_Power, $3) }
   | expr RCAR RCAR expr                   { Binop($1, D_Shift, $4) }
   | expr LCAR RCAR expr                   { Binop($1, D_Stretch, $4) }
+  | expr LCAR expr RCAR                   { Binop($1, D_Sample, $3) }
 
 boolean:
   | NOT expr                              { Unop(Not, $2) }
@@ -157,6 +163,9 @@ boolean:
   | expr LEQ expr                         { Binop($1, Leq, $3) }
   | expr RCAR expr                        { Binop($1, Greater, $3) }
   | expr GEQ expr                         { Binop($1, Geq, $3) }
+
+list_operation:
+  | expr CONS expr                        { Binop($1, Cons, $3) }
 
 /* Literals */
 literal:

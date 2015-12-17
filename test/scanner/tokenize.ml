@@ -26,6 +26,9 @@ let stringify = function
   | EQ -> "EQ"    | NEQ -> "NEQ"
   | LEQ -> "LEQ"  | GEQ -> "GEQ"
 
+  (* List Operators *)
+  | CONS -> "CONS"
+
   (* Logical Operators & Keywords *)
   | AND -> "AND"   | OR -> "OR"
   | NOT -> "NOT"

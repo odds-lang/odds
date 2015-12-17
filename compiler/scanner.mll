@@ -52,6 +52,9 @@ rule token = parse
 | "&&"    { AND }   | "||"    { OR }
 | "!"     { NOT }
 
+(* List Operator *)
+| "::"    { CONS }
+
 (* Assignment Operator *)
 | '='   { ASN }
 
