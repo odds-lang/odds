@@ -89,6 +89,9 @@ def sample_dist(d, n):
 def probability_dist(d, n):
     return len([i for i in d if i < n]) / DIST_LENGTH
 
+def expected_value(d):
+    return sum(d) / DIST_LENGTH
+
 def concat_str(s1, s2):
     return s1 + s2
 
