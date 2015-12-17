@@ -105,7 +105,7 @@ let builtins = VarMap.add "len" {
 
 let builtins = VarMap.add "concat" {
   name = "concat";
-  s_type = Func({ param_types = [String, String]; return_type = String; });
+  s_type = Func({ param_types = [String; String]; return_type = String; });
   builtin = true;
 } builtins
 
