@@ -72,6 +72,12 @@ let builtins = VarMap.add "exp_dist" {
   builtin = true;
 } builtins
 
+let builtins = VarMap.add "sample_dist" {
+  name = "sample_dist";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  builtin = true;
+} builtins
+
 (* List builtins *)
 let builtins = VarMap.add "head" {
   name = "head";
