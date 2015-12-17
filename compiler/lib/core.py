@@ -86,6 +86,8 @@ def exp_dist(d, n):
 def sample_dist(d, n):
     return sorted([ random.randint(0, DIST_LENGTH - 1) for x in range(n) ])
 
+def concat_str(s1, s2):
+    return s1 + s2
 
 """
 END ODDS CORE LIBRARY

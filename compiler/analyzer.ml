@@ -103,6 +103,13 @@ let builtins = VarMap.add "len" {
   builtin = true;
 } builtins
 
+let builtins = VarMap.add "concat" {
+  name = "concat";
+  s_type = Func({ param_types = [String, String]; return_type = String; });
+  builtin = true;
+} builtins
+
+
 (* Program entry environment *)
 let root_env = {
   params = VarMap.empty;
@@ -156,7 +163,7 @@ let str_of_binop = function
   | Cons -> "::"
 
 let is_sugar = function
-  | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power | Sample -> true
+  | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power | Sample | Concat -> true
   | _ -> false 
 
 let print_env env =
@@ -540,6 +547,7 @@ and check_binop env e1 op e2 =
         | D_Stretch -> "stretch_dist"
         | D_Power -> "exp_dist"
         | Sample -> "sample_dist"
+        | Concat -> "concat_str"
         | _ -> dead_code_path_error "check_binop" in
       
     (* Unsugar expression and refeed it to Analyzer *)
