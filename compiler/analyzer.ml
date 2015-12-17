@@ -597,8 +597,6 @@ and check_func_call_ret env id args ret_default =
 (* Assignment *)
 and check_assign env id = function
   | Ast.Fdecl(f) -> check_fdecl env id f false
-  | Ast.Assign(_, _) -> let message = "Invalid attempt to chain assigns" in
-      raise (Semantic_Error message)
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       let env', name = add_to_scope env' id typ in
