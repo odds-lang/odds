@@ -1,0 +1,3 @@
+do nums = [1, 2, 3]
+do print(list_empty([]))
+do print(list_empty(nums))
