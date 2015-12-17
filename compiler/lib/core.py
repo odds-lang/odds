@@ -86,6 +86,9 @@ def exp_dist(d, n):
 def sample_dist(d, n):
     return sorted([ random.randint(0, DIST_LENGTH - 1) for x in range(n) ])
 
+def probability_dist(d, n):
+    return len([i for i in d if i < n]) / DIST_LENGTH
+
 def concat_str(s1, s2):
     return s1 + s2
 

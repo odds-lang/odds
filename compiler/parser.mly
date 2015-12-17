@@ -14,7 +14,7 @@
 %token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER 
+%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER PROB 
 
 /* List Operators */
 %token CONS
@@ -57,7 +57,7 @@
 %left OR
 %left AND
 %left EQ NEQ
-%left LCAR LEQ RCAR GEQ
+%left LCAR LEQ RCAR GEQ PROB
 %left PLUS MINUS DPLUS
 %left TIMES DIVIDE MOD DTIMES
 %left POWER DPOWER
@@ -152,6 +152,7 @@ arith:
   | expr RCAR RCAR expr                   { Binop($1, D_Shift, $4) }
   | expr LCAR RCAR expr                   { Binop($1, D_Stretch, $4) }
   | expr LCAR expr RCAR                   { Binop($1, Sample, $3) }
+  | expr PROB expr                        { Binop($1, Prob, $3) }
 
 boolean:
   | NOT expr                              { Unop(Not, $2) }

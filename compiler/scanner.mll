@@ -37,7 +37,7 @@ rule token = parse
 
 (* Dist Operators *)
 | "<+>" { DPLUS }   | "<*>" { DTIMES }
-| "^^"  { DPOWER }
+| "^^"  { DPOWER }  | "|<|" { PROB }
 
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }

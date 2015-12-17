@@ -22,6 +22,7 @@ type binop =
   | D_Shift    (* >> *)
   | D_Stretch  (* <> *)
   | Sample     (* <4> *)
+  | Prob       (* |<| *)
   (* Arithmetic *)
   | Add      (* + *)
   | Sub      (* - *)
