@@ -84,8 +84,7 @@ def exp_dist(d, n):
     return [ x ** n for x in d ]
 
 def sample_dist(d, n):
-    start1 = random.randint(0, 99)
-    return d1[start1::SAMPLE_STEP]
+    return sorted([ random.randint(0, DIST_LENGTH - 1) for x in range(n) ])
 
 
 """
