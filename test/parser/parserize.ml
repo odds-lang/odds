@@ -14,6 +14,7 @@ let txt_of_binop = function
   | D_Shift -> "D_Shift"
   | D_Stretch -> "D_Stretch"
   | D_Power -> "D_Power"
+  | D_Sample -> "D_Sample"
   (* Arithmetic *)
   | Add -> "Add"
   | Sub -> "Sub"

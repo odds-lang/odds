@@ -56,25 +56,25 @@ let builtins = VarMap.add "mult_dist" {
 
 let builtins = VarMap.add "shift_dist" {
   name = "shift_dist";
-  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
 let builtins = VarMap.add "stretch_dist" {
   name = "stretch_dist";
-  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
 let builtins = VarMap.add "exp_dist" {
   name = "exp_dist";
-  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
 let builtins = VarMap.add "sample_dist" {
   name = "sample_dist";
-  s_type = Func({ param_types = [Dist_t; Num]; return_type = Dist_t; });
+  s_type = Func({ param_types = [Num; Dist_t]; return_type = List(Num); });
   builtin = true;
 } builtins
 
@@ -142,7 +142,7 @@ let str_of_binop = function
   (* Dist *)
   | D_Plus -> "<+>" | D_Times -> "<*>"
   | D_Shift -> ">>" | D_Stretch -> "<>"
-  | D_Power -> "^^" | Sample -> "<x>"
+  | D_Power -> "^^" | D_Sample -> "<x>"
   (* Arithmetic *)
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
@@ -156,7 +156,7 @@ let str_of_binop = function
   | Cons -> "::"
 
 let is_sugar = function
-  | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power | Sample -> true
+  | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power | D_Sample -> true
   | _ -> false 
 
 let print_env env =
@@ -539,7 +539,7 @@ and check_binop env e1 op e2 =
         | D_Shift -> "shift_dist"
         | D_Stretch -> "stretch_dist"
         | D_Power -> "exp_dist"
-        | Sample -> "sample_dist"
+        | D_Sample -> "sample_dist"
         | _ -> dead_code_path_error "check_binop" in
       
     (* Unsugar expression and refeed it to Analyzer *)
