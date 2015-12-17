@@ -88,7 +88,7 @@ def sample_dist(d, n):
     for i in n:
         val = random.randint(0, DIST_LENGTH)
         sample.append(val)
-    return sample
+    return sorted(sample)
 
 
 """
