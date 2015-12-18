@@ -71,7 +71,7 @@ rule token = parse
 | "void" { VOID_LITERAL }
 
 (* Identifiers *)
-| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | numeric)* as lxm { ID(lxm) }
+| ['a'-'z' 'A'-'Z'] (['a'-'z' 'A'-'Z' '_' ] | numeric)* as lxm { ID(lxm) }
 
 (* End-of-File *)
 | eof { EOF }

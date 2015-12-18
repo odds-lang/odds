@@ -1,0 +1,3 @@
+do anon = 42
+do () -> return "Hello, world!"
+do print(anon)
