@@ -31,6 +31,7 @@ rule token = parse
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '>' whitespace* '|'       { DDELIM }
+| '|' whitespace* '<'       { DISC }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACE }  | ']'   { RBRACE }
 | ','   { COMMA }   | '|'   { VBAR } 

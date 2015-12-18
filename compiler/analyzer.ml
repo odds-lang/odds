@@ -490,6 +490,7 @@ and check_expr env = function
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
   | Ast.Dist(d) -> check_dist env d
+  | Ast.Disc_dist(d) -> check_disc_dist env d
   | Ast.Fdecl(f) -> check_fdecl env "anon" f true
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
@@ -889,6 +890,27 @@ and check_dist env d =
   (* Construct Dist expr_wrapper *)
   let dist = Sast.Expr(Sast.Dist({ 
     min = ew1'; max = ew2'; dist_func = ew3';
+  }), Dist_t) in
+  
+  (* Return Dist expr_wrapper *)
+  env', dist
+
+and check_disc_dist env d =
+  (* Check and constrain min/max if neccessary *)
+  let env', ew1 = check_expr env d.vals in
+  let Sast.Expr(_, typ1) = ew1 in
+  let env', ew2 = check_expr env d.weights in
+  let Sast.Expr(_, typ2) = ew2 in
+  let env', ew1', ew2' = 
+    if is_list_of_num typ1 && is_list_of_num typ2 then
+      let env', ew1' = constrain_ew env' ew1 List(Num) in
+      let env', ew2' = constrain_ew env' ew2 List(Num) in
+      env', ew1', ew2'
+    else invalid_disc_dist_error typ1 typ2 in
+
+  (* Construct Dist expr_wrapper *)
+  let dist = Sast.Expr(Sast.Disc_Dist({ 
+    vals = ew1'; weights = ew2';
   }), Dist_t) in
   
   (* Return Dist expr_wrapper *)
