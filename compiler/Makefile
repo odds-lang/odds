@@ -35,15 +35,21 @@ analyzer.cmo: sast.cmi ast.cmi
 analyzer.cmx: sast.cmi ast.cmi
 generator.cmo: past.cmi ast.cmi
 generator.cmx: past.cmi ast.cmi
-odds.cmo: scanner.cmo parser.cmi generator.cmo analyzer.cmo pythonizer.cmo
-odds.cmx: scanner.cmx parser.cmx generator.cmx analyzer.cmx pythonizer.cmx
+odds.cmo: utils.cmo scanner.cmo pythonizer.cmo printer.cmo parser.cmi \
+    generator.cmo analyzer.cmo
+odds.cmx: utils.cmx scanner.cmx pythonizer.cmx printer.cmx parser.cmx \
+    generator.cmx analyzer.cmx
 parser.cmo: ast.cmi parser.cmi
 parser.cmx: ast.cmi parser.cmi
-pythonizer.cmo: past.cmi sast.cmi ast.cmi
-pythonizer.cmx: past.cmi sast.cmi ast.cmi
+printer.cmo: sast.cmi ast.cmi analyzer.cmo
+printer.cmx: sast.cmi ast.cmi analyzer.cmx
+pythonizer.cmo: sast.cmi past.cmi
+pythonizer.cmx: sast.cmi past.cmi
 scanner.cmo: parser.cmi ast.cmi
 scanner.cmx: parser.cmx ast.cmi
+utils.cmo:
+utils.cmx:
 ast.cmi:
 parser.cmi: ast.cmi
-sast.cmi: ast.cmi
 past.cmi: ast.cmi
+sast.cmi: ast.cmi

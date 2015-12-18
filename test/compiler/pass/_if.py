@@ -12,6 +12,7 @@ def cond_3():
         return anon_1
     return anon_2
 x_4 = cond_3()
+x_4
 print(x_4())
 def cond_5():
     if True:
@@ -25,5 +26,7 @@ def outer_6():
                 return "true"
             return "false"
         return cond_10()
+    inner_7
     return inner_7(True)
+outer_6
 print(outer_6())

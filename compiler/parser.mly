@@ -48,8 +48,8 @@
 
 /* Precedence and associativity of each operator */
 %nonassoc IF THEN ELSE
-%right ASN
 %nonassoc RETURN
+%right ASN
 %left OR
 %left AND
 %left EQ NEQ

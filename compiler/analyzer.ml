@@ -489,8 +489,8 @@ and check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
+  | Ast.Fdecl(f) -> check_fdecl env "anon" f
   | Ast.Dist(d) -> check_dist env d
-  | Ast.Fdecl(f) -> check_fdecl env "anon" f true
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
 
@@ -695,9 +695,7 @@ and check_func_call_ret env id args ret_default =
 
 (* Assignment *)
 and check_assign env id = function
-  | Ast.Fdecl(f) -> check_fdecl env id f false
-  | Ast.Assign(_, _) -> let message = "Invalid attempt to chain assigns" in
-      raise (Semantic_Error message)
+  | Ast.Fdecl(f) -> check_fdecl env id f
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       let env', name = add_to_scope env' id typ in
@@ -720,7 +718,7 @@ and check_list env l =
   constrain_list_elems env' [] const l'
 
 (* Function declaration *)
-and check_fdecl env id f anon =
+and check_fdecl env id f =
   (* Add function name to scope with unconstrained param types and return type
    * to allow recursion *)
   let f_type = Func({
@@ -806,7 +804,6 @@ and check_fdecl env id f anon =
     params = param_ssids;
     body = body;
     return = return;
-    is_anon = anon;
   } in
 
   (* Construct function type *)
