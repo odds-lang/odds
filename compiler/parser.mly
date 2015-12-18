@@ -126,12 +126,6 @@ dist:
       max = $4;
       dist_func = $6;
     } }
-  | LCAR expr COMMA expr RCAR
-    { {
-      min = $2;
-      max = $4;
-      dist_func = Ast.Id("uniform");
-    } }
 
 discr_dist:
   | DISC expr COMMA expr DDELIM 
