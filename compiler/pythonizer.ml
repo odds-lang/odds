@@ -32,6 +32,7 @@ let rec past_expr stmts = function
       stmts', Past.Call(id, args)
   | Sast.Ldecl(wl) ->
       let stmts', l = past_list stmts wl in stmts', Past.Ldecl(l)
+  | Sast.Dist(d) -> past_dist stmts d
   | Sast.Assign(id, we) -> let stmts', e = past_expr_unwrap stmts we in
       (Past.Assign(id, e) :: stmts'), Past.Id(id)
   | Sast.Fdecl(f) -> let stmts', def = past_fdecl stmts f in
@@ -42,6 +43,13 @@ let rec past_expr stmts = function
 
 and past_expr_unwrap stmts = function
   | Sast.Expr(e, _) -> past_expr stmts e
+
+(* Distributions *)
+and past_dist stmts d =
+  let stmts1, min' = past_expr_unwrap stmts d.min in
+  let stmts2, max' = past_expr_unwrap stmts1 d.max in
+  let stmts3, dist_func' = past_expr_unwrap stmts2 d.dist_func in
+  stmts3, Past.Call(Past.Id("make_dist"), [min' ; max' ; dist_func'])
 
 (* Lists *)
 and past_list stmts expr_list =
