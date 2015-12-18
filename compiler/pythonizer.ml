@@ -57,8 +57,6 @@ and past_discr_dist stmts d =
   let stmts2, weights' = past_expr_unwrap stmts1 d.weights in
   stmts2, Past.Call(Past.Id("make_discr_dist"), [vals' ; weights'])
 
-
-
 (* Lists *)
 and past_list stmts expr_list =
   let rec aux stmts acc = function
