@@ -48,6 +48,7 @@ and expr =
   | Assign of string * expr_wrapper
   | Call of expr_wrapper * expr_wrapper list
   | Dist of dist
+  | Discr_dist of discr_dist
   | Ldecl of expr_wrapper list
   | Fdecl of fdecl
   | Cake of expr_wrapper * expr_wrapper
@@ -57,6 +58,11 @@ and dist = {
   min: expr_wrapper;        (* Distribution Minimum *)
   max: expr_wrapper;        (* Distribution Maximum *)
   dist_func: expr_wrapper;  (* Distribution Function *)
+}
+
+and discr_dist = {
+  vals: expr_wrapper;        (* Distribution Values *)
+  weights: expr_wrapper;     (* Distribution Weights *)
 }
 
 and fdecl = {

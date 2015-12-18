@@ -60,6 +60,11 @@ let rec str_of_expr_wrapper = function
         max_txt = str_of_expr_wrapper dist.max and
         func_txt = str_of_expr_wrapper dist.dist_func in
       sprintf "<%s, %s>|%s|" min_txt max_txt func_txt
+  | Sast.Expr(Discr_dist(dist), _) -> 
+      let values = str_of_expr_wrapper dist.vals and
+        weights = str_of_expr_wrapper dist.weights in 
+      sprintf "<%s, %s>" values weights
+ 
   | Sast.Expr(Fdecl(fdecl), typ) -> str_of_fdecl fdecl typ
   | Sast.Expr(Cake(fdecl_ew, call_ew), _) -> str_of_cake fdecl_ew call_ew
   | Sast.Expr(If(cond), _) -> str_of_cond cond
