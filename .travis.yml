@@ -5,7 +5,7 @@ python: "2.7_with_system_site_packages"
 env: "OCAML_VERSION=4.01.0 OPAM_VERSION=1.2.0"
 before_install:
     - bash -ex config/travis_install.sh
-    - sudo apt-get install -qq python-numpy python-scipy
+    - sudo apt-get install -qq python-numpy
 install:
     - sudo pip install -r config/requirements.txt
 script: make test
