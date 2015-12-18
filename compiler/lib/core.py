@@ -21,6 +21,8 @@ INDEX_STEP = 1000
 DIST_LENGTH = 10000
 SAMPLE_STEP = 100
 
+PLOT = False
+
 def exception(s):
     sys.stderr.write("%s\n" % s)
     exit(1)
@@ -35,6 +37,8 @@ def print(*args, **kwargs):
     return str(args[0])
 
 def print_dist(dist):
+    global PLOT
+    PLOT = True
     plt.figure()
     plt.hist(dist, bins=20, normed=True)
     ax = plt.gca()
