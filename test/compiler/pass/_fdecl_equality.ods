@@ -1,0 +1,4 @@
+do foo = () -> return 42
+do print((bar = () -> return "hi") == foo)
+do print(foo == foo)
+do print((baz = () -> return true) == baz)
