@@ -36,7 +36,7 @@ def print(*args, **kwargs):
 
 def print_dist(dist):
     plt.figure()
-    plt.hist(dist)
+    plt.hist(dist, bins=20, normed=True)
 
 def make_dist(start, end, f):
     """Return a list generated from dist<min, max> | f"""
