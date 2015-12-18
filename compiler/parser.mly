@@ -51,8 +51,8 @@
 
 /* Precedence and associativity of each operator */ 
 %nonassoc IF THEN ELSE
-%right ASN
 %nonassoc RETURN
+%right ASN
 %left CONS
 %left OR
 %left AND

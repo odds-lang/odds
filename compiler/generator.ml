@@ -62,7 +62,6 @@ let rec txt_of_expr = function
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
   | Call(id, args) -> txt_of_call id args
   | Ldecl(l) -> sprintf "[%s]" (txt_of_list l)
-  | Empty -> ""
 
 (* Function calls *)
 and txt_of_call id args = match id with
