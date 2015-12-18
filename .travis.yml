@@ -7,5 +7,5 @@ before_install:
     - bash -ex config/travis_install.sh
     - sudo apt-get install -qq python-numpy python-scipy
 install:
-    - pip install -r config/requirements.txt
+    - sudo pip install -r config/requirements.txt
 script: make test
