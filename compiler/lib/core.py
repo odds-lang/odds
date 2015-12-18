@@ -53,35 +53,35 @@ def make_dist(start, end, f):
             cum_i = cum_i + 1
     return dist_list
 
-def add_dist(d1, d2):
+def dist_add(d1, d2):
     """Return the sum of two distributions, adding each combination"""
     s1 = d1[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
     s2 = d2[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
     return sorted([ x + y for x in s1 for y in s2 ])
 
-def mult_dist(d1, d2):
+def dist_mult(d1, d2):
     """Return the product of two distributions, multiplying each combination"""
     s1 = d1[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
     s2 = d2[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
     return sorted([ x * y for x in s1 for y in s2 ])
 
-def shift_dist(n, d):
+def dist_shift(n, d):
     """Shift each element in distribution d by n"""
     return [ x + n for x in d ]
 
-def stretch_dist(n, d):
+def dist_stretch(n, d):
     """Stretch distribution d, multiplying each element by n"""
     return [ x * n for x in d ]
 
-def exp_dist(n, d):
+def dist_exp(n, d):
     """Exponentiate distribution d, raising each element to power n"""
     return [ x ** n for x in d ]
 
-def sample_dist(n, d):
+def dist_sample(n, d):
     """Return a random sample of n elements in distribution d"""
     return sorted([ random.randint(0, DIST_LENGTH - 1) for x in range(n) ])
 
-def prob(d, n):
+def prob(n, d):
     return len([i for i in d if i < n]) / DIST_LENGTH
 
 def expected(d):
