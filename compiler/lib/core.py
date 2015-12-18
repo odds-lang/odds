@@ -11,6 +11,7 @@ from __future__ import print_function
 import math
 import random
 import sys
+import matplotlib.pyplot as plt
 
 # Odds constants
 EUL = math.e
@@ -20,15 +21,31 @@ INDEX_STEP = 1000
 DIST_LENGTH = 10000
 SAMPLE_STEP = 100
 
+PLOT = False
+
 def exception(s):
     """Write exception s to stderr and exit program"""
     sys.stderr.write("%s\n" % s)
     exit(1)
 
 def print(*args, **kwargs):
-    """Call normal print() function, but return argument that was passed"""
+    """Plot distributions for long lists and call normal print() function,
+    but return argument that was passed"""
+    if type(args[0]) is list and len(args[0]) >= DIST_LENGTH:
+        print_dist(args[0])
+        return str(args[0])
     __builtins__.print(*args, **kwargs)
     return str(args[0])
+
+def print_dist(dist):
+    """Opens a new figure (window) for each distribution it prints, removes
+    the y-axis labels, and does not show them all until the end"""
+    global PLOT
+    PLOT = True
+    plt.figure()
+    plt.hist(dist, bins=20, normed=True)
+    ax = plt.gca()
+    ax.axes.get_yaxis().set_visible(False)
 
 def make_dist(start, end, f):
     """Return a list generated from dist<min, max> | f"""
