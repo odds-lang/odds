@@ -500,7 +500,7 @@ and check_expr env = function
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "anon" f
   | Ast.Dist(d) -> check_dist env d
-  | Ast.Discr_dist(d) -> check_disc_dist env d
+  | Ast.Discr_dist(d) -> check_discr_dist env d
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
 
@@ -901,7 +901,7 @@ and check_dist env d =
   (* Return Dist expr_wrapper *)
   env', dist
 
-and check_disc_dist env d =
+and check_discr_dist env d =
   (* Check and constrain min/max if neccessary *)
   let env', ew1 = check_expr env d.vals in
   let Sast.Expr(_, typ1) = ew1 in
