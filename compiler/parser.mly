@@ -14,7 +14,7 @@
 %token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER DSHIFT DSTRETCH 
+%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER DSHIFT DSTRETCH
 
 /* List Operators */
 %token CONS
@@ -49,7 +49,7 @@
 %token <bool> BOOL_LITERAL
 %token VOID_LITERAL
 
-/* Precedence and associativity of each operator */
+/* Precedence and associativity of each operator */ 
 %nonassoc IF THEN ELSE
 %right ASN
 %nonassoc RETURN
@@ -166,7 +166,7 @@ dist_operation:
   | expr DPOWER expr                      { Binop($1, D_Power, $3) }
   | expr DSHIFT expr                      { Binop($1, D_Shift, $3) }
   | expr DSTRETCH expr                    { Binop($1, D_Stretch, $3) }
-  | expr LCAR expr RCAR                   { Binop($1, Sample, $3) }
+  | expr LCAR RCAR expr                   { Binop($1, Sample, $4)}
 
 list_operation:
   | expr CONS expr                        { Binop($1, Cons, $3) }
