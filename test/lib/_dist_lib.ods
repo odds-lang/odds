@@ -1,5 +1,6 @@
-do d1 = <0, 1>
-do d2 = <0, 2>
+do uniform = (x) -> return 1
+do d1 = <0, 1> | uniform |
+do d2 = <0, 2> | uniform |
 
 do d1 <+> d2
 do dist_mult(d1, d2)

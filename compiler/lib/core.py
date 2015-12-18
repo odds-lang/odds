@@ -49,6 +49,8 @@ def print_dist(dist):
 
 def make_dist(start, end, f):
     """Return a list generated from dist<min, max> | f"""
+    if end <= start: 
+        exception("dist_make: start cannot be greater than end")
     step = (end - start) * 1.0 / INDEX_STEP
     indices = [ start + step * x for x in range(INDEX_STEP) ]
 
@@ -85,6 +87,9 @@ def dist_mult(d1, d2):
 
 def make_discr_dist(vals, weights):
     """Return a list generated from dist<vals, weights>"""
+    if len(vals) != len(weights): 
+        exception("dist_make: discrete dist with different sized lists")
+    
     cum_weights = [sum(weights[:i+1]) for i in xrange(len(weights))]
     rands = sorted([ random.uniform(0, max(cum_weights)) for x in range(DIST_LENGTH) ])
 
