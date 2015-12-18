@@ -54,8 +54,8 @@ def make_dist(start, end, f):
 
 def make_discr_dist(vals, weights):
     """Return a list generated from dist<min, max> | f"""
-    cum_weights = [sum(lst[:i+1]) for i in xrange(len(weights))]
-    rands = sorted([ random.uniform(0, cum_sum) for x in range(DIST_LENGTH) ])
+    cum_weights = [sum(weights[:i+1]) for i in xrange(len(weights))]
+    rands = sorted([ random.uniform(0, max(cum_weights)) for x in range(DIST_LENGTH) ])
 
     cum_i = 0
     rand_i = 0
