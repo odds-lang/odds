@@ -120,13 +120,18 @@ def dist_sample(n, d):
     """Return a random sample of n elements in distribution d"""
     return sorted([ random.randint(0, DIST_LENGTH - 1) for x in range(n) ])
 
-def prob(n, d):
+def P(n, d):
+    """Return the probability that the distribution is less than 
+    the inputted value
+    """
     return len([i for i in d if i < n]) / DIST_LENGTH
 
-def expected(d):
+def E(d):
+    """ Expected value of the distribution """
     return sum(d) / DIST_LENGTH
 
 def concat_str(s1, s2):
+    """ Return s1 + s2 """
     return s1 + s2
 
 """

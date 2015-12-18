@@ -78,14 +78,14 @@ let builtins = VarMap.add "dist_sample" {
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "prob" {
-  name = "prob";
+let builtins = VarMap.add "P" {
+  name = "P";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = Num; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "expected" {
-  name = "expected";
+let builtins = VarMap.add "E" {
+  name = "E";
   s_type = Func({ param_types = [Dist_t]; return_type = Num; });
   builtin = true;
 } builtins
@@ -161,7 +161,7 @@ let str_of_binop = function
   (* Dist *)
   | D_Plus -> "<+>" | D_Times -> "<*>"
   | D_Shift -> "|+" | D_Stretch -> "|*"
-  | D_Sample -> "<>" | D_Power -> "|**" 
+  | D_Sample -> "<>"| D_Power -> "|**" 
   (* Arithmetic *)
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
