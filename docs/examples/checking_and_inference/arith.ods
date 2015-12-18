@@ -1,0 +1,3 @@
+do n = 2
+
+do success = n + 2

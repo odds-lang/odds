@@ -1,0 +1,4 @@
+do append_hello = (l) -> return "hello" :: l
+
+/* fail because append_hello expects List of String, not List of Num */
+do fail = append_hello([42])

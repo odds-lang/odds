@@ -1,0 +1,8 @@
+do call = (f, x, y, dummy) ->
+    
+    do f(2, true)
+
+    /* fails because second argument constrain in statement above to be Bool */
+    do fail = f(x, 2)
+
+    return "whatever"

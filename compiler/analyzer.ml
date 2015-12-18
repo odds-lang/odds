@@ -685,7 +685,7 @@ and check_func_call_ret env id args ret_default =
       | "head" -> let Sast.Expr(_, typ) = List.hd args in
           begin match typ with
             | List(t) -> env, t
-            | _ -> dead_code_path_error "check_func_call_ret"
+            | _ -> dead_code_path_error "check_func_call_ret_head"
           end
       | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
       | "cons" ->
@@ -693,7 +693,7 @@ and check_func_call_ret env id args ret_default =
             Sast.Expr(l, l_typ) = List.hd (List.tl args) in
           let l_elem_typ = begin match l_typ with
             | List(t) -> t
-            | _ -> dead_code_path_error "check_func_call_ret"
+            | _ -> dead_code_path_error "check_func_call_ret_cons"
           end in
           let const, _ = try collect_constraints c_typ l_elem_typ
             with

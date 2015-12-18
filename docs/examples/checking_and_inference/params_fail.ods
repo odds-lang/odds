@@ -1,0 +1,5 @@
+do and = (x, y) ->
+    do result = x && y
+    /*invalid because x and y have type Bool, but addition expects Num */
+    do fail = x + y
+    return result
