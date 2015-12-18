@@ -21,6 +21,8 @@ INDEX_STEP = 1000
 DIST_LENGTH = 10000
 SAMPLE_STEP = 100
 
+plot_num = 211
+
 def exception(s):
     sys.stderr.write("%s\n" % s)
     exit(1)
@@ -36,8 +38,9 @@ def print(*args, **kwargs):
 
 def print_dist(dist):
     plt.hist(dist)
-    plt.draw()
-    plt.pause(5)
+    #plt.subplot(plot_num)
+    print(plot_num)
+    plot_num += 1
 
 def make_dist(start, end, f):
     """Return a list generated from dist<min, max> | f"""

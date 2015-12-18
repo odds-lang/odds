@@ -34,7 +34,7 @@ let _ =
           let output_file = Sys.argv.(2) and stdlib_file = Sys.argv.(3) in
           let stdlib = Utils.str_of_file stdlib_file in
           let file = open_out output_file
-          in fprintf file "%s\n\n%s\n" stdlib prog; close_out file
+          in fprintf file "%s\n\n%s\n%s\n" stdlib prog "plt.show()"; close_out file
       | Raw -> 
           let output_file = Sys.argv.(2) in
           let file = open_out output_file
