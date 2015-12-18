@@ -1,12 +1,11 @@
+# https://travis-ci.org/odds-lang/odds
 sudo: required
 language: python
-python: "2.7"
-virtualenv:
-    system_site_packages: true
+python: "2.7_with_system_site_packages"
 env: "OCAML_VERSION=4.01.0 OPAM_VERSION=1.2.0"
 before_install:
+    - bash -ex config/travis_install.sh
     - sudo apt-get install -qq python-numpy python-scipy
 install:
     - pip install -r config/requirements.txt
-    - bash -ex config/travis_install.sh
 script: make test
