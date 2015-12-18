@@ -11,12 +11,13 @@ let stringify = function
   | LCAR -> "LCAR"      | RCAR -> "RCAR"
   | LBRACE -> "LBRACE"  | RBRACE -> "RBRACE"
   | COMMA -> "COMMA"    | VBAR -> "VBAR"
-  | DDELIM -> "DDELIM"
+  | DDELIM -> "DDELIM"  | DISC -> "DISC"
 
   (* Dist Operators *)
   | DPLUS -> "DPLUS"    | DTIMES -> "DTIMES"
   | DPOWER -> "DPOWER"  | DSHIFT -> "DSHIFT"
   | DSTRETCH -> "DSTRETCH"
+
 
   (* Arithmetic Operators *)
   | PLUS -> "PLUS"     | MINUS -> "MINUS"

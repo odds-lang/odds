@@ -53,6 +53,7 @@ def make_dist(start, end, f):
             cum_i = cum_i + 1
     return dist_list
 
+
 def dist_add(d1, d2):
     """Return the sum of two distributions, adding each combination"""
     s1 = d1[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
@@ -65,7 +66,23 @@ def dist_mult(d1, d2):
     s2 = d2[random.randint(0, SAMPLE_STEP - 1)::SAMPLE_STEP]
     return sorted([ x * y for x in s1 for y in s2 ])
 
-def dist_shift(n, d):
+def make_discr_dist(vals, weights):
+    """Return a list generated from dist<vals, weights>"""
+    cum_weights = [sum(weights[:i+1]) for i in xrange(len(weights))]
+    rands = sorted([ random.uniform(0, max(cum_weights)) for x in range(DIST_LENGTH) ])
+
+    cum_i = 0
+    rand_i = 0
+    dist_list = []
+    while rand_i < len(rands):
+        if rands[rand_i] < cum_weights[cum_i]:
+            dist_list.append(vals[cum_i])
+            rand_i = rand_i + 1
+        else:
+            cum_i = cum_i + 1
+    return dist_list
+
+def shift_dist(d, n):
     """Shift each element in distribution d by n"""
     return [ x + n for x in d ]
 

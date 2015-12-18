@@ -11,11 +11,10 @@
 %{ open Ast %}
 
 /* Punctuation */
-%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
+%token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM DISC
 
 /* Arithmetic Operators */
 %token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER DSHIFT DSTRETCH
-
 
 /* List Operators */
 %token CONS
@@ -88,11 +87,12 @@ expr:
   | bool_ops                              { $1 }
   | list_ops                              { $1 }
   | dist_ops                              { $1 }
+  | dist                                  { Dist($1) }
+  | discr_dist                            { Discr_dist($1) }
   | ID                                    { Id($1) }
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
   | LBRACE list_opt RBRACE                { LDecl($2) }
-  | dist                                  { Dist($1) }
   | LPAREN expr RPAREN                    { $2 }
   | fdecl                                 { Fdecl($1) }
   | LPAREN fdecl CAKE list_opt RPAREN     { Cake(Fdecl($2), $4) }
@@ -132,11 +132,12 @@ dist:
       max = $4;
       dist_func = $6;
     } }
-  | LCAR expr COMMA expr RCAR
+
+discr_dist:
+  | DISC expr COMMA expr DDELIM 
     { {
-      min = $2;
-      max = $4;
-      dist_func = Ast.Id("uniform");
+      vals = $2;
+      weights = $4;
     } }
 
 /* Binary operators */

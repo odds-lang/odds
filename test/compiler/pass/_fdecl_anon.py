@@ -1,9 +1,9 @@
-def anon_0():
+def _anon_0():
     return "hello"
-anon_0
+_anon_0
 def y_1(x_2):
     return (x_2() + 1)
 y_1
-def anon_3():
+def _anon_3():
     return 41
-print(y_1(anon_3))
+print(y_1(_anon_3))

@@ -302,6 +302,11 @@ let invalid_dist_min_max_error typ1 typ2 =
     (str_of_type typ1) (str_of_type typ2) in
   raise (Semantic_Error message)
 
+let invalid_discr_dist_error typ1 typ2 = 
+  let message = sprintf "Invalid distribution with vals type '%s' and weights type '%s'" 
+    (str_of_type typ1) (str_of_type typ2) in
+  raise (Semantic_Error message)
+
 let invalid_dist_func_type_error invalid_typ f_typ =
   let message = sprintf "Invalid distribution with function '%s'
     (distribution's must have function of type '%s')" 
@@ -487,6 +492,10 @@ and is_num = function
   | Num | Unconst -> true
   | _ -> false 
 
+and is_list_of_num = function
+  | List(Num) | List(Unconst) -> true
+  | _ -> false
+
 (* Check list elements against constraint type, constrain if possible *)
 and constrain_list_elems env acc const = function
   | [] -> env, Sast.Expr(Sast.Ldecl(List.rev acc), List(const))
@@ -515,8 +524,9 @@ and check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.LDecl(l) -> check_list env l
-  | Ast.Fdecl(f) -> check_fdecl env "anon" f
+  | Ast.Fdecl(f) -> check_fdecl env "_anon" f
   | Ast.Dist(d) -> check_dist env d
+  | Ast.Discr_dist(d) -> check_discr_dist env d
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
 
@@ -827,7 +837,7 @@ and check_fdecl_params env param_list =
 (* Caking *)
 and check_cake env fdecl args =
   let env', fdecl_ew = check_expr env fdecl in
-  let env', call_ew = check_func_call env' (Id("anon")) args in
+  let env', call_ew = check_func_call env' (Id("_anon")) args in
   let Sast.Expr(_, typ) = call_ew in
   env', Sast.Expr(Sast.Cake(fdecl_ew, call_ew), typ)
 
@@ -852,7 +862,7 @@ and check_if env i t e =
   let env', ew3' = if has_unconst typ3 then constrain_ew env' ew3 const 
     else env', ew3 in 
   let ifdecl = {
-      c_name = (get_ssid "cond");
+      c_name = (get_ssid "_cond");
       cond = ew1';
       stmt_1 = ew2';
       stmt_2 = ew3';
@@ -889,6 +899,27 @@ and check_dist env d =
   (* Construct Dist expr_wrapper *)
   let dist = Sast.Expr(Sast.Dist({ 
     min = ew1'; max = ew2'; dist_func = ew3';
+  }), Dist_t) in
+  
+  (* Return Dist expr_wrapper *)
+  env', dist
+
+and check_discr_dist env d =
+  (* Check and constrain min/max if neccessary *)
+  let env', ew1 = check_expr env d.vals in
+  let Sast.Expr(_, typ1) = ew1 in
+  let env', ew2 = check_expr env d.weights in
+  let Sast.Expr(_, typ2) = ew2 in
+  let env', ew1', ew2' = 
+    if is_list_of_num typ1 && is_list_of_num typ2 then
+      let env', ew1' = constrain_ew env' ew1 (List(Num)) in
+      let env', ew2' = constrain_ew env' ew2 (List(Num)) in
+      env', ew1', ew2'
+    else invalid_discr_dist_error typ1 typ2 in
+
+  (* Construct Dist expr_wrapper *)
+  let dist = Sast.Expr(Sast.Discr_dist({ 
+    vals = ew1'; weights = ew2';
   }), Dist_t) in
   
   (* Return Dist expr_wrapper *)

@@ -31,6 +31,7 @@ rule token = parse
 (* Punctuation *)
 | '('   { LPAREN }  | ')'   { RPAREN }
 | '>' whitespace* '|'       { DDELIM }
+| '|' whitespace* '<'       { DISC }
 | '<'   { LCAR }    | '>'   { RCAR } (* Also relational operators *)
 | '['   { LBRACE }  | ']'   { RBRACE }
 | ','   { COMMA }   | '|'   { VBAR } 
@@ -75,7 +76,7 @@ rule token = parse
 | "void" { VOID_LITERAL }
 
 (* Identifiers *)
-| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '_' ] | numeric)* as lxm { ID(lxm) }
+| ['a'-'z' 'A'-'Z'] (['a'-'z' 'A'-'Z' '_' ] | numeric)* as lxm { ID(lxm) }
 
 (* End-of-File *)
 | eof { EOF }
