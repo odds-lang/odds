@@ -52,6 +52,22 @@ def make_dist(start, end, f):
             cum_i = cum_i + 1
     return dist_list
 
+def make_discr_dist(vals, weights):
+    """Return a list generated from dist<vals, weights>"""
+    cum_weights = [sum(weights[:i+1]) for i in xrange(len(weights))]
+    rands = sorted([ random.uniform(0, max(cum_weights)) for x in range(DIST_LENGTH) ])
+
+    cum_i = 0
+    rand_i = 0
+    dist_list = []
+    while rand_i < len(rands):
+        if rands[rand_i] < cum_weights[cum_i]:
+            dist_list.append(vals[cum_i])
+            rand_i = rand_i + 1
+        else:
+            cum_i = cum_i + 1
+    return dist_list
+
 def add_dist(d1, d2):
     start1 = random.randint(0, 99)
     s1 = d1[start1::SAMPLE_STEP]

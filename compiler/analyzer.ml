@@ -271,6 +271,11 @@ let invalid_dist_min_max_error typ1 typ2 =
     (str_of_type typ1) (str_of_type typ2) in
   raise (Semantic_Error message)
 
+let invalid_discr_dist_error typ1 typ2 = 
+  let message = sprintf "Invalid distribution with vals type '%s' and weights type '%s'" 
+    (str_of_type typ1) (str_of_type typ2) in
+  raise (Semantic_Error message)
+
 let invalid_dist_func_type_error invalid_typ f_typ =
   let message = sprintf "Invalid distribution with function '%s'
     (distribution's must have function of type '%s')" 
@@ -456,6 +461,10 @@ and is_num = function
   | Num | Unconst -> true
   | _ -> false 
 
+and is_list_of_num = function
+  | List(Num) | List(Unconst) -> true
+  | _ -> false
+
 (* Returns true if Dist_t or Unconst, otherwise false *)
 and is_dist = function 
   | Dist_t | Unconst -> true
@@ -491,6 +500,7 @@ and check_expr env = function
   | Ast.List(l) -> check_list env l
   | Ast.Fdecl(f) -> check_fdecl env "_anon" f
   | Ast.Dist(d) -> check_dist env d
+  | Ast.Discr_dist(d) -> check_discr_dist env d
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
 
@@ -886,6 +896,27 @@ and check_dist env d =
   (* Construct Dist expr_wrapper *)
   let dist = Sast.Expr(Sast.Dist({ 
     min = ew1'; max = ew2'; dist_func = ew3';
+  }), Dist_t) in
+  
+  (* Return Dist expr_wrapper *)
+  env', dist
+
+and check_discr_dist env d =
+  (* Check and constrain min/max if neccessary *)
+  let env', ew1 = check_expr env d.vals in
+  let Sast.Expr(_, typ1) = ew1 in
+  let env', ew2 = check_expr env d.weights in
+  let Sast.Expr(_, typ2) = ew2 in
+  let env', ew1', ew2' = 
+    if is_list_of_num typ1 && is_list_of_num typ2 then
+      let env', ew1' = constrain_ew env' ew1 (List(Num)) in
+      let env', ew2' = constrain_ew env' ew2 (List(Num)) in
+      env', ew1', ew2'
+    else invalid_discr_dist_error typ1 typ2 in
+
+  (* Construct Dist expr_wrapper *)
+  let dist = Sast.Expr(Sast.Discr_dist({ 
+    vals = ew1'; weights = ew2';
   }), Dist_t) in
   
   (* Return Dist expr_wrapper *)
