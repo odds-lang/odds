@@ -120,7 +120,7 @@ let rec str_of_type = function
   | Void -> "Void"
   | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
-  | Dist_t -> "<Dist>|Func(Num => Num)|"
+  | Dist_t -> "Dist"
   | Any -> "Any"
   | Unconst -> "Unconst"
 
