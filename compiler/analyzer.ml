@@ -489,7 +489,7 @@ and check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.List(l) -> check_list env l
-  | Ast.Fdecl(f) -> check_fdecl env "anon" f
+  | Ast.Fdecl(f) -> check_fdecl env "_anon" f
   | Ast.Dist(d) -> check_dist env d
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
@@ -824,7 +824,7 @@ and check_fdecl_params env param_list =
 (* Caking *)
 and check_cake env fdecl args =
   let env', fdecl_ew = check_expr env fdecl in
-  let env', call_ew = check_func_call env' (Id("anon")) args in
+  let env', call_ew = check_func_call env' (Id("_anon")) args in
   let Sast.Expr(_, typ) = call_ew in
   env', Sast.Expr(Sast.Cake(fdecl_ew, call_ew), typ)
 
@@ -849,7 +849,7 @@ and check_if env i t e =
   let env', ew3' = if has_unconst typ3 then constrain_ew env' ew3 const 
     else env', ew3 in 
   let ifdecl = {
-      c_name = (get_ssid "cond");
+      c_name = (get_ssid "_cond");
       cond = ew1';
       stmt_1 = ew2';
       stmt_2 = ew3';

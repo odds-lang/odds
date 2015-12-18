@@ -8,9 +8,9 @@
  *  - Lilly Wang
  */
 
- do uniform = (x) -> return 1
+do uniform = (x) -> return 1
 
- do normal = (x) ->
+do normal = (x) ->
     do coef = 1 / (2 * PI) ** 0.5
     do exp = -1 * x ** 2 / 2
     return coef * EUL ** exp
