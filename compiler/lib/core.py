@@ -37,6 +37,8 @@ def print(*args, **kwargs):
 def print_dist(dist):
     plt.figure()
     plt.hist(dist, bins=20, normed=True)
+    ax = plt.gca()
+    ax.axes.get_yaxis().set_visible(False)
 
 def make_dist(start, end, f):
     """Return a list generated from dist<min, max> | f"""
