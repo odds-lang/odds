@@ -14,7 +14,8 @@
 %token LPAREN RPAREN LCAR RCAR LBRACE RBRACE COMMA VBAR DDELIM
 
 /* Arithmetic Operators */
-%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER
+%token PLUS MINUS TIMES DIVIDE MOD POWER DPLUS DTIMES DPOWER DSHIFT DSTRETCH
+
 
 /* List Operators */
 %token CONS
@@ -51,14 +52,15 @@
 
 /* Precedence and associativity of each operator */
 %nonassoc ELSE
-%right ASN
 %nonassoc RETURN
+%right ASN
 %left CONS
 %left OR
 %left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
-%left PLUS MINUS DPLUS VBAR
+%left DSHIFT DSTRETCH
+%left PLUS MINUS DPLUS
 %left TIMES DIVIDE MOD DTIMES
 %left POWER DPOWER
 %right NOT
@@ -90,9 +92,9 @@ expr:
   | ID ASN expr                           { Assign($1, $3) }
   | ID LPAREN list_opt RPAREN             { Call(Id($1), $3) }
   | LBRACE list_opt RBRACE                { LDecl($2) }
+  | dist                                  { Dist($1) }
   | LPAREN expr RPAREN                    { $2 }
   | fdecl                                 { Fdecl($1) }
-  | dist                                  { Dist($1) }
   | LPAREN fdecl CAKE list_opt RPAREN     { Cake(Fdecl($2), $4) }
   | IF expr THEN expr ELSE expr           { If($2, $4, $6) }
 
@@ -158,16 +160,16 @@ bool_ops:
   | expr RCAR expr                        { Binop($1, Greater, $3) }
   | expr GEQ expr                         { Binop($1, Geq, $3) }
 
-list_ops:
-  | expr CONS expr                        { Binop($1, Cons, $3) }
-
 dist_ops:
   | expr DPLUS expr                       { Binop($1, D_Plus, $3) }
   | expr DTIMES expr                      { Binop($1, D_Times, $3) }
   | expr DPOWER expr                      { Binop($1, D_Power, $3) }
-  | expr RCAR RCAR expr                   { Binop($1, D_Shift, $4) }
-  | expr LCAR RCAR expr                   { Binop($1, D_Stretch, $4) }
-  | expr VBAR expr VBAR                   { Binop($1, D_Sample, $3) }
+  | expr DSHIFT expr                      { Binop($1, D_Shift, $3) }
+  | expr DSTRETCH expr                    { Binop($1, D_Stretch, $3) }
+  | expr LCAR RCAR expr                   { Binop($1, D_Sample, $4)}
+
+list_ops:
+  | expr CONS expr                        { Binop($1, Cons, $3) }
 
 /* Literals */
 literal:

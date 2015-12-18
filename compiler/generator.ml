@@ -62,7 +62,6 @@ let rec txt_of_expr = function
       (txt_of_expr e1) (txt_of_binop op) (txt_of_expr e2)
   | Call(id, args) -> txt_of_call id args
   | Ldecl(l) -> sprintf "[%s]" (txt_of_list l)
-  | Empty -> ""
 
 (* Function calls *)
 and txt_of_call id args = match id with
@@ -83,13 +82,13 @@ and txt_of_list = function
 
 (* Functions *)
 and txt_of_fdecl indent f =
-  let params = String.concat ", " f.p_params in
-  let body = txt_of_stmts (indent + 1) f.p_body in
-  sprintf "%sdef %s(%s):%s"
-    (indent_of_num indent)
-    f.p_name
-    params
-    (if String.length body > 0 then "\n" ^ body else "")
+    let params = String.concat ", " f.p_params in
+    let body = txt_of_stmts (indent + 1) f.p_body in
+    sprintf "%sdef %s(%s):\n%s"
+      (indent_of_num indent)
+      f.p_name
+      params
+      body
 
 (* Statements *)
 and txt_of_stmt indent = function 

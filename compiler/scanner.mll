@@ -37,7 +37,11 @@ rule token = parse
 
 (* Dist Operators *)
 | "<+>" { DPLUS }   | "<*>" { DTIMES }
-| "^^"  { DPOWER }
+| "|**" { DPOWER }  | "|*"  { DSTRETCH }
+| "|+"  { DSHIFT }
+
+(* List Operator *)
+| "::"    { CONS }
 
 (* Arithmetic Operators *)
 | '+'   { PLUS }    | '-'   { MINUS }
@@ -51,9 +55,6 @@ rule token = parse
 (* Logical Operators & Keywords*)
 | "&&"    { AND }   | "||"    { OR }
 | "!"     { NOT }
-
-(* List Operator *)
-| "::"    { CONS }
 
 (* Assignment Operator *)
 | '='   { ASN }

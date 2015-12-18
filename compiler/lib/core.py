@@ -81,6 +81,15 @@ def sample_dist(n, d):
     """Return a random sample of n elements in distribution d"""
     return sorted([ random.randint(0, DIST_LENGTH - 1) for x in range(n) ])
 
+def prob(d, n):
+    return len([i for i in d if i < n]) / DIST_LENGTH
+
+def expected(d):
+    return sum(d) / DIST_LENGTH
+
+def concat_str(s1, s2):
+    return s1 + s2
+
 """
 END ODDS CORE LIBRARY
 BEGIN USER CODE

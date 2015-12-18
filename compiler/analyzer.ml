@@ -78,6 +78,18 @@ let builtins = VarMap.add "sample_dist" {
   builtin = true;
 } builtins
 
+let builtins = VarMap.add "prob" {
+  name = "prob";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Num; });
+  builtin = true;
+} builtins
+
+let builtins = VarMap.add "expected" {
+  name = "expected";
+  s_type = Func({ param_types = [Dist_t; Num]; return_type = Num; });
+  builtin = true;
+} builtins
+
 (* List builtins *)
 let builtins = VarMap.add "head" {
   name = "head";
@@ -103,6 +115,13 @@ let builtins = VarMap.add "len" {
   builtin = true;
 } builtins
 
+let builtins = VarMap.add "concat" {
+  name = "concat";
+  s_type = Func({ param_types = [String; String]; return_type = String; });
+  builtin = true;
+} builtins
+
+
 (* Program entry environment *)
 let root_env = {
   params = VarMap.empty;
@@ -126,7 +145,7 @@ let rec str_of_type = function
   | Void -> "Void"
   | List(l) -> sprintf "List[%s]" (str_of_type l)
   | Func(f) -> str_of_func f
-  | Dist_t -> "<Dist>|Func(Num => Num)|"
+  | Dist_t -> "Dist"
   | Any -> "Any"
   | Unconst -> "Unconst"
 
@@ -141,8 +160,8 @@ let str_of_unop = function
 let str_of_binop = function
   (* Dist *)
   | D_Plus -> "<+>" | D_Times -> "<*>"
-  | D_Shift -> ">>" | D_Stretch -> "<>"
-  | D_Power -> "^^" | D_Sample -> "<x>"
+  | D_Shift -> "|+" | D_Stretch -> "|*"
+  | D_Sample -> "<>" | D_Power -> "|**" 
   (* Arithmetic *)
   | Add -> "+"      | Sub -> "-"
   | Mult -> "*"     | Div -> "/"
@@ -496,8 +515,8 @@ and check_expr env = function
   | Ast.Call(id, args) -> check_func_call env id args
   | Ast.Assign(id, e) -> check_assign env id e
   | Ast.LDecl(l) -> check_list env l
+  | Ast.Fdecl(f) -> check_fdecl env "anon" f
   | Ast.Dist(d) -> check_dist env d
-  | Ast.Fdecl(f) -> check_fdecl env "anon" f true
   | Ast.Cake(fdecl, args) -> check_cake env fdecl args
   | Ast.If(i, t, e) -> check_if env i t e
 
@@ -679,9 +698,7 @@ and check_func_call_ret env id args ret_default =
 
 (* Assignment *)
 and check_assign env id = function
-  | Ast.Fdecl(f) -> check_fdecl env id f false
-  | Ast.Assign(_, _) -> let message = "Invalid attempt to chain assigns" in
-      raise (Semantic_Error message)
+  | Ast.Fdecl(f) -> check_fdecl env id f
   | _ as e -> let env', ew = check_expr env e in
       let Sast.Expr(_, typ) = ew in
       let env', name = add_to_scope env' id typ in
@@ -704,7 +721,7 @@ and check_list env l =
   constrain_list_elems env' [] const l'
 
 (* Function declaration *)
-and check_fdecl env id f anon =
+and check_fdecl env id f =
   (* Add function name to scope with unconstrained param types and return type
    * to allow recursion *)
   let f_type = Func({
@@ -790,7 +807,6 @@ and check_fdecl env id f anon =
     params = param_ssids;
     body = body;
     return = return;
-    is_anon = anon;
   } in
 
   (* Construct function type *)
