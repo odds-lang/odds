@@ -6,4 +6,4 @@ do x <*> x
 do x |+ 2
 do x |* 2
 do x |** 2
-do x <> 2
+do x <> 100
