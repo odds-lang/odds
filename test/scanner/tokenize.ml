@@ -15,7 +15,8 @@ let stringify = function
 
   (* Dist Operators *)
   | DPLUS -> "DPLUS"    | DTIMES -> "DTIMES"
-  | DPOWER -> "DPOWER"
+  | DPOWER -> "DPOWER"  | DSHIFT -> "DSHIFT"
+  | DSTRETCH -> "DSTRETCH"
 
   (* Arithmetic Operators *)
   | PLUS -> "PLUS"     | MINUS -> "MINUS"
