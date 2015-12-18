@@ -37,6 +37,8 @@ def print(*args, **kwargs):
     return str(args[0])
 
 def print_dist(dist):
+    """Opens a new figure (window) for each distribution it prints, removes
+    the y-axis labels, and does not show them all until the end"""
     global PLOT
     PLOT = True
     plt.figure()
