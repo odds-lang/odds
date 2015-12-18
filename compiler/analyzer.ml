@@ -42,51 +42,51 @@ let builtins = VarMap.add "print" {
 } builtins
 
 (* Dist builtins *)
-let builtins = VarMap.add "add_dist" {
-  name = "add_dist";
+let builtins = VarMap.add "dist_add" {
+  name = "dist_add";
   s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "mult_dist" {
-  name = "mult_dist";
+let builtins = VarMap.add "dist_mult" {
+  name = "dist_mult";
   s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "shift_dist" {
-  name = "shift_dist";
+let builtins = VarMap.add "dist_shift" {
+  name = "dist_shift";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "stretch_dist" {
-  name = "stretch_dist";
+let builtins = VarMap.add "dist_stretch" {
+  name = "dist_stretch";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "exp_dist" {
-  name = "exp_dist";
+let builtins = VarMap.add "dist_exp" {
+  name = "dist_exp";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "sample_dist" {
-  name = "sample_dist";
+let builtins = VarMap.add "dist_sample" {
+  name = "dist_sample";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = List(Num); });
   builtin = true;
 } builtins
 
 let builtins = VarMap.add "prob" {
   name = "prob";
-  s_type = Func({ param_types = [Dist_t; Num]; return_type = Num; });
+  s_type = Func({ param_types = [Num; Dist_t]; return_type = Num; });
   builtin = true;
 } builtins
 
 let builtins = VarMap.add "expected" {
   name = "expected";
-  s_type = Func({ param_types = [Dist_t; Num]; return_type = Num; });
+  s_type = Func({ param_types = [Dist_t]; return_type = Num; });
   builtin = true;
 } builtins
 
@@ -551,18 +551,18 @@ and check_unop env op e =
 (* Binary operators *)
 and check_binop env e1 op e2 =
   if is_sugar op then (* Check if binop is sugar. If so unsugar. *)
-    let func_name = match op with
-        | Cons -> "cons"
-        | D_Plus -> "add_dist"
-        | D_Times -> "mult_dist"
-        | D_Shift -> "shift_dist"
-        | D_Stretch -> "stretch_dist"
-        | D_Power -> "exp_dist"
-        | D_Sample -> "sample_dist"
+    let func_name, e1', e2' = match op with
+        | Cons -> "cons", e1, e2
+        | D_Plus -> "dist_add", e1, e2
+        | D_Times -> "dist_mult", e1, e2
+        | D_Shift -> "dist_shift", e2, e1
+        | D_Stretch -> "dist_stretch", e2, e1
+        | D_Power -> "dist_exp", e2, e1
+        | D_Sample -> "dist_sample", e2, e1
         | _ -> dead_code_path_error "check_binop" in
       
     (* Unsugar expression and refeed it to Analyzer *)
-    let unsugared = Ast.Call(Ast.Id(func_name), [e1; e2]) in
+    let unsugared = Ast.Call(Ast.Id(func_name), [e1'; e2']) in
     check_expr env unsugared
   
   else (* binop is not sugar. Check, constrain, and proceed. *)
