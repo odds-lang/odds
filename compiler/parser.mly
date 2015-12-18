@@ -58,7 +58,7 @@
 %left AND
 %left EQ NEQ
 %left LCAR LEQ RCAR GEQ
-%left PLUS MINUS DPLUS
+%left PLUS MINUS DPLUS VBAR
 %left TIMES DIVIDE MOD DTIMES
 %left POWER DPOWER
 %right NOT
@@ -151,7 +151,7 @@ arith:
   | expr DPOWER expr                      { Binop($1, D_Power, $3) }
   | expr RCAR RCAR expr                   { Binop($1, D_Shift, $4) }
   | expr LCAR RCAR expr                   { Binop($1, D_Stretch, $4) }
-  | expr LCAR expr RCAR                   { Binop($1, D_Sample, $3) }
+  | expr VBAR expr VBAR                   { Binop($1, D_Sample, $3) }
 
 boolean:
   | NOT expr                              { Unop(Not, $2) }
