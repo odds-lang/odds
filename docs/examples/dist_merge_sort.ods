@@ -1,0 +1,36 @@
+/* To showcase the Analyzer in a less contrived way, Merge Sort */
+
+do merge_sort = (l) ->
+    
+    do merge = (lists) ->
+        /* get two lists */
+        do l1 = head(lists)
+        do l2 = head(tail(lists))
+        
+        /* if either list is empty, return the list */
+        return if list_empty(l1) then l2 else if list_empty(l2) then l1
+            /* otherwise merge */
+            else (() -> 
+                do h1 = head(l1) do t1 = tail(l1)
+                do h2 = head(l2) do t2 = tail(l2)
+                return if E(h1) <= E(h2) then h1 :: merge([t1, h2 :: t2])
+                    else h2 :: (merge([h1 :: t1, t2]))
+            )()
+
+    do halve = (l) -> return 
+        if len(l) <= 1 then [l, []]
+        else (() ->
+            do h = head(l) do t = tail(l)
+            do halves = halve(t)
+            do t1 = head(halves) do t2 = head(tail(halves))
+            return [h :: t2, t1]
+        )()
+
+    return 
+        if len(l) <= 1 then l 
+        else (() ->
+            do halves = halve(l)
+            do l1 = head(halves) do l2 = head(tail(halves))
+            return merge([merge_sort(l1), merge_sort(l2)])
+        )()
+
