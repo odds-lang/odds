@@ -7,7 +7,7 @@
     - Daniel Echikson
     - Lilly Wang
 """
-from __future__ import print_function
+from __future__ import print_function, division 
 import math
 import random
 import sys
