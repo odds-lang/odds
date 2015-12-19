@@ -1,0 +1,14 @@
+do call = (f, x, y, dummy) ->
+    
+    /* Analyzer now knows f is function that takes two paramters. The first
+     * must be a num, but the second is unknown because the paramter x still has
+     * type unknown */
+    do f(2, x)
+
+    /* Analyzer now knows x is a Num and that the second argument of f is a Num */
+    do f(x, 2)
+
+    /* y must now be a Num and f must now return a Bool */
+    return f(x, y) && f(y, x)
+
+/* dummy can be any type because it is never used within the function */

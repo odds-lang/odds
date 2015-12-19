@@ -1,0 +1,16 @@
+do inf_recursion = () ->
+    do inf_recursion() + 2
+    return true
+
+/* This will fail because:
+    a) inf_recursion expects a Num return value because of the statement,
+       inf_recursion() + 2
+    b) However, the return statement returns true, which is a Bool. The
+       Analyzer recognizes this error and fails
+
+    The function below, however, would pass:
+    
+        do inf_recursion = () ->
+            do inf_recursion() + 2
+            return 2
+*/

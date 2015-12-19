@@ -1,0 +1,3 @@
+do append_hello = (l) -> return "hello" :: l
+
+do success = append_hello(["world"])

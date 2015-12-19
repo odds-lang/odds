@@ -424,7 +424,7 @@ and collect_constraints typ1 typ2 =
   (* Collects possible constraints and returns type that is as constrained as 
    * possible. Any is always converted to Unconst. *)
   let rec overwrite_any typ1 typ2 = match typ1 with
-    | Any | Unconst -> if typ2 <> Any then typ2 else Unconst
+    | Any | Unconst -> any_to_unconst typ2
     | Func(func1) -> 
         begin match typ2 with
           | Any | Unconst -> typ1
@@ -485,6 +485,12 @@ and unconst_to_any = function
       let param_types' = List.map unconst_to_any func.param_types and
         return_type' = unconst_to_any func.return_type in
       Func({ param_types = param_types'; return_type = return_type' })
+  | _ as typ -> typ
+
+(* Turns Any to Unconst - DOES NOT AFFECT FUNCTIONS *)
+and any_to_unconst = function
+  | Any -> Unconst
+  | List(typ) -> let typ' = any_to_unconst typ in List(typ')
   | _ as typ -> typ
 
 (* Returns true if Num or Unconst, otherwise false *)
@@ -638,7 +644,6 @@ and check_func_call_args env id f args =
     | e :: tl -> let env', ew = check_expr env e in
         let Sast.Expr(_, typ) = ew in
         let param_type = List.hd param_types in
-        (* TO DO: What if user passes unconstrained variable to unconstrained function? *)
         let constrained, constrained_w_any = try collect_constraints typ param_type
           with
             | Collect_Constraints_Error -> fcall_argtype_error id typ param_type
@@ -672,29 +677,28 @@ and check_func_call_ret env id args ret_default =
     (* If ret_default is Any, make it Unconst. Else if ret_default is a List
      * or contains lists of Any, make it List of Unconsts or List of Lists of 
      * Unconsts. *)
-    let ret_default' = 
-      let rec any_to_unconst_return = function
-        | Any -> Unconst
-        | List(typ) -> let typ' = any_to_unconst_return typ in List(typ')
-        | _ as typ -> typ in
-      any_to_unconst_return ret_default in
+    let ret_default' = any_to_unconst ret_default in
     env, ret_default'
   
   else (* is builtin *)
-    match id' with
-      | "head" -> let Sast.Expr(_, typ) = List.hd args in
-          begin match typ with
-            | List(t) -> env, t
+    (* helper function - get return type on buitlin list_func call *)
+    let get_ret_type_from_typ = function
+      | List(t) -> any_to_unconst t
+      | Func(func) -> 
+          begin match func.return_type with
+            | List(t) -> any_to_unconst t
             | _ -> dead_code_path_error "check_func_call_ret"
           end
+      | _ -> dead_code_path_error "check_func_call_ret" in
+    
+    match id' with
+      | "head" -> let Sast.Expr(_, typ) = List.hd args in
+          env, get_ret_type_from_typ typ
       | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
       | "cons" ->
           let Sast.Expr(cons, c_typ) = List.hd args and
             Sast.Expr(l, l_typ) = List.hd (List.tl args) in
-          let l_elem_typ = begin match l_typ with
-            | List(t) -> t
-            | _ -> dead_code_path_error "check_func_call_ret"
-          end in
+          let l_elem_typ = get_ret_type_from_typ l_typ in
           let const, _ = try collect_constraints c_typ l_elem_typ
             with
               | Collect_Constraints_Error -> list_cons_mismatch_error c_typ l_typ

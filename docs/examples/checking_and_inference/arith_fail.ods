@@ -1,0 +1,3 @@
+do n = 2
+
+do fail = !n /* !n invalid b/c n as type NUM */

@@ -1,0 +1,4 @@
+do and = (x, y) ->
+    do result = x && y
+    do success = x || y
+    return result
