@@ -56,14 +56,13 @@
 %left CONS
 %left OR
 %left AND
-%left EQ NEQ
-%left LCAR LEQ RCAR GEQ
+%right NOT
+%left LCAR LEQ RCAR GEQ EQ NEQ
 %left DSHIFT DSTRETCH
 %left PLUS MINUS DPLUS
 %left TIMES DIVIDE MOD DTIMES
 %left DPOWER
 %left POWER
-%right NOT
 
 %start program                /* Start symbol */
 %type <Ast.program> program   /* Type returned by a program */
