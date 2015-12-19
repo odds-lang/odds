@@ -11,7 +11,6 @@ from __future__ import print_function
 import math
 import random
 import sys
-import matplotlib.pyplot as plt
 
 # Odds constants
 EUL = math.e
@@ -40,6 +39,7 @@ def print(*args, **kwargs):
 def print_dist(dist):
     """Opens a new figure (window) for each distribution it prints, removes
     the y-axis labels, and does not show them all until the end"""
+    import matplotlib.pyplot as plt
     global PLOT
     PLOT = True
     plt.figure()

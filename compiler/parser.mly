@@ -50,9 +50,9 @@
 %token VOID_LITERAL
 
 /* Precedence and associativity of each operator */
-%nonassoc ELSE
 %nonassoc RETURN
 %right ASN
+%right ELSE
 %left CONS
 %left OR
 %left AND

@@ -18,4 +18,4 @@ let str_of_file file =
     | Some(s) -> aux (s :: acc) in
   aux []
 
-let conclude_program () = "if PLOT:\n\tplt.show()"
+let conclude_program () = "if PLOT:\n\timport matplotlib.pyplot as plt\n\tplt.show()"
