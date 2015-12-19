@@ -1,4 +1,3 @@
 do demonstrate_constraining = (x) ->
     do demonstrate_constraining(2) /* constrains x to Num here */
     return "wow!"
-

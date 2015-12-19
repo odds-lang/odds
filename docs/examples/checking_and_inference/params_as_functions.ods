@@ -1,8 +1,8 @@
 do call = (f, x, y, dummy) ->
     
     /* Analyzer now knows f is function that takes two paramters. The first
-     * must be a num, but the second is unkown because the paramter x still has
-     * type unkown */
+     * must be a num, but the second is unknown because the paramter x still has
+     * type unknown */
     do f(2, x)
 
     /* Analyzer now knows x is a Num and that the second argument of f is a Num */
