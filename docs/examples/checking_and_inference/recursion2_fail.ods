@@ -3,5 +3,5 @@ do demonstrate_constraining = (x) ->
     
     /* will fail below because x is constrained to Num above and cannot be a 
      * list of lists of strings */
-    do fail = ["I'm going to brak things"] :: x
+    do fail = ["I'm going to break things"] :: x
     return "wow!"

@@ -8,9 +8,4 @@ do inf_recursion = () ->
     b) However, the return statement returns true, which is a Bool. The
        Analyzer recognizes this error and fails
 
-    The function below, however, would pass:
-    
-        do inf_recursion = () ->
-            do inf_recursion() + 2
-            return 2
 */
