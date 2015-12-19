@@ -61,7 +61,8 @@
 %left DSHIFT DSTRETCH
 %left PLUS MINUS DPLUS
 %left TIMES DIVIDE MOD DTIMES
-%left POWER DPOWER
+%left DPOWER
+%left POWER
 %right NOT
 
 %start program                /* Start symbol */
