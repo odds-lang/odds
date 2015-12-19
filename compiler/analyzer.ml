@@ -499,7 +499,7 @@ and is_num = function
   | _ -> false 
 
 and is_list_of_num = function
-  | List(Num) | List(Unconst) -> true
+  | List(Num) | List(Unconst) | Unconst -> true
   | _ -> false
 
 (* Check list elements against constraint type, constrain if possible *)
