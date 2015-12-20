@@ -33,4 +33,3 @@ do merge_sort = (l) ->
             do l1 = head(halves) do l2 = head(tail(halves))
             return merge([merge_sort(l1), merge_sort(l2)])
         )()
-

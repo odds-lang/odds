@@ -13,13 +13,17 @@ open Past
 
 exception Python_Error of string
 
+(* Strip private '.' prefix designation for ID if it exists *)
+let private_to_normal id =
+  if id.[0] = '.' then String.sub id 1 (String.length id - 1) else id
+
 (* Expressions *)
 let rec past_expr stmts = function
   | Sast.Num_lit(n) -> stmts, Past.Num_lit(n)
   | Sast.String_lit(s) -> stmts, Past.String_lit(s)
   | Sast.Bool_lit(b) -> stmts, Past.Bool_lit(b)
   | Sast.Void_lit -> stmts, Past.None_lit
-  | Sast.Id(id) -> stmts, Past.Id(id)
+  | Sast.Id(id) -> let id' = private_to_normal id in stmts, Past.Id(id')
   | Sast.Unop(op, we) -> let stmts', e = past_expr_unwrap stmts we in
       stmts', Past.Unop(op, e)
   | Sast.Binop(we1, op, we2) ->
