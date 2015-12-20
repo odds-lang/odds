@@ -1,2 +1,3 @@
-Analyzer Exception: Invalid return type in function 'f':
+[31mSemantic error[0m, line 1:
+  Invalid return type in function 'f':
     type 'Bool' expected to be returned, but type 'Num' returned instead.

@@ -83,7 +83,7 @@ rule token = parse
 
 (* Invalid Token *)
 | _ as char { 
-    let message = "Illegal Character '" ^ Char.escaped char ^ "'" in
+    let message = "illegal character '" ^ Char.escaped char ^ "'" in
     raise (Illegal_Character message)
   }
 

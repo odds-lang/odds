@@ -19,12 +19,20 @@ let get_help =
   "  -r\tCompile odds input_file into raw python output_file\n" ^
   "  -s\tPrint odds input_file as semantically checked ast"
 
+(* Error reporting helper function *)
+let get_pos_and_tok lexbuf = 
+  let cur = lexbuf.Lexing.lex_curr_p in
+  let line_num = cur.Lexing.pos_lnum and
+    column_num = cur.Lexing.pos_cnum - cur.Lexing.pos_bol and
+    token = Lexing.lexeme lexbuf in
+  line_num, column_num, token
+
 let _ =
   let action = List.assoc Sys.argv.(1)
     [("-c", Compile) ; ("-h", Help) ; ("-r", Raw); ("-s", Sast)] in
   if action = Help then print_endline get_help else
-  try
-    let lexbuf = Lexing.from_channel stdin in 
+  let lexbuf = Lexing.from_channel stdin in
+  try 
     let ast = Parser.program Scanner.token lexbuf in
     let sast = Analyzer.check_ast ast in
     let past = Pythonizer.generate_past sast in
@@ -43,5 +51,17 @@ let _ =
       | Sast -> Printer.print_sast sast
       | Help -> print_endline get_help
   with 
-    | Scanner.Illegal_Character(m) -> eprintf "Scanner Exception: %s\n" m
-    | Analyzer.Semantic_Error(m) -> eprintf "Analyzer Exception: %s\n" m
+    | Scanner.Illegal_Character(m) -> 
+        let line_num, column_num, _ = get_pos_and_tok lexbuf in
+        eprintf 
+          "\x1b[31mSyntax error\x1b[0m, line %d at column %d: %s\n" 
+          line_num column_num m 
+    | Analyzer.Semantic_Error(m) -> 
+        let line_num, _, _ = get_pos_and_tok lexbuf in
+        eprintf "\x1b[31mSemantic error\x1b[0m, line %d:\n  %s\n" 
+          line_num m
+    | Parsing.Parse_error -> 
+        let line_num, column_num, token = get_pos_and_tok lexbuf in
+        eprintf 
+        "\x1b[31mSyntax error\x1b[0m, line %d at column %d: '%s'\n"
+        line_num column_num token

@@ -1,1 +1,2 @@
-Analyzer Exception: Function 'call' expected argument of type Func(Any => Bool) but was passed Func( => Bool) instead
+[31mSemantic error[0m, line 1:
+  Function 'call' expected argument of type Func(Any => Bool) but was passed Func( => Bool) instead

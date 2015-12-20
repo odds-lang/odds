@@ -1,1 +1,2 @@
-Analyzer Exception: Invalid element of type Bool in list of type List[String]
+[31mSemantic error[0m, line 1:
+  Invalid element of type Bool in list of type List[String]
