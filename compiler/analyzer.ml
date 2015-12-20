@@ -115,13 +115,6 @@ let builtins = VarMap.add "len" {
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "concat" {
-  name = "concat";
-  s_type = Func({ param_types = [String; String]; return_type = String; });
-  builtin = true;
-} builtins
-
-
 (* Program entry environment *)
 let root_env = {
   params = VarMap.empty;
