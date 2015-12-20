@@ -53,12 +53,15 @@ let _ =
   with 
     | Scanner.Illegal_Character(m) -> 
         let line_num, column_num, _ = get_pos_and_tok lexbuf in
-        eprintf "Syntax Error on line %d at column %d: %s\n" 
+        eprintf 
+          "Error: \x1b[31mSyntax error\x1b[0m, line %d at column %d with %s\n" 
           line_num column_num m 
     | Analyzer.Semantic_Error(m) -> 
         let line_num, _, _ = get_pos_and_tok lexbuf in
-        eprintf "Semantic Error, line %d: %s\n" line_num m
+        eprintf "Error: \x1b[31mSemantic error\x1b[0m, line %d with\n  %s\n" 
+          line_num m
     | Parsing.Parse_error -> 
         let line_num, column_num, token = get_pos_and_tok lexbuf in
-        eprintf "Syntax Error on line %d at column %d with '%s'\n"
+        eprintf 
+        "Error: \x1b[31mSyntax error\x1b[0m, line %d at column %d with '%s'\n"
         line_num column_num token
