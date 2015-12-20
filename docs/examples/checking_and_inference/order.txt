@@ -4,4 +4,3 @@
 4. recursion
 5. recursion2
 6. params_as_functions
-7. merge_sort

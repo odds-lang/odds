@@ -1,0 +1,3 @@
+do d = <0, 400> | return if x <= 10 then 0 else 10 / x ** 2 |
+do print(1 - P(20, d))
+do print(d)
