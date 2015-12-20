@@ -1,2 +1,2 @@
-[31mSemantic error[0m, line 1:
+[31mSemantic error[0m:
   Expected type Bool but got type Num instead

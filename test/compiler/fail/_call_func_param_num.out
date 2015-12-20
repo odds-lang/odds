@@ -1,2 +1,2 @@
-[31mSemantic error[0m, line 1:
+[31mSemantic error[0m:
   Function 'call' expected argument of type Func(Any => Bool) but was passed Func( => Bool) instead
