@@ -7,7 +7,7 @@
     - Daniel Echikson
     - Lilly Wang
 """
-from __future__ import print_function, division 
+from __future__ import print_function
 import math
 import random
 import sys
@@ -122,7 +122,7 @@ def dist_sample(n, d):
 
 def P(n, d):
     """Return the probability that the distribution is less than 
-    the inputted value
+    the inputed value
     """
     return len([i for i in d if i < n]) * 1.0 / DIST_LENGTH
 
