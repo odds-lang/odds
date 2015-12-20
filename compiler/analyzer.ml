@@ -178,6 +178,7 @@ let is_sugar = function
   | Cons | D_Plus | D_Times | D_Shift | D_Stretch | D_Power | D_Sample -> true
   | _ -> false 
 
+(* for debugging *)
 let print_env env =
   let print_var id var =
     let line = sprintf "\t%s --> { name: %s; s_type: %s; }"
@@ -382,14 +383,14 @@ let rec constrain_ew env ew typ =
     | Sast.Fdecl(f) -> update_type env f.f_name typ; env, Sast.Expr(e, typ)
     | Sast.Call(Sast.Expr(Sast.Id(ssid), Sast.Func(f)), _) ->
         let _, Sast.Expr(_, old_type) = check_id env (id_of_ssid ssid) in
-        let old_ret_type = begin match old_type with
+        let old_ret_type = match old_type with
           | Sast.Func(old_f) -> old_f.return_type
-          | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ 
-        end in
+          | _ as typ -> fcall_nonfunc_error (Sast.Id(ssid)) typ in
         if not (has_unconst f.return_type) && f.return_type <> old_ret_type then 
-          constrain_error old_ret_type f.return_type
+            constrain_error old_ret_type f.return_type
         else
-          let f' = Func({ f with return_type = typ }) in
+          if has_any f.return_type then env, Sast.Expr(e, Func(f)) else
+            let f' = Func({ f with return_type = typ }) in
           update_type env ssid f'; env, Sast.Expr(e, f')
     | _ -> env, ew
 
@@ -470,7 +471,7 @@ and collect_constraints typ1 typ2 =
 (* Returns true if has Unconst, otherwise false *)
 and has_unconst = function
   | Unconst -> true
-  | List(l_typ) -> has_unconst l_typ
+  | List(typ) -> has_unconst typ
   | Func(func) -> 
     let is_param_unconst = List.map has_unconst func.param_types and
       is_ret_unconst = has_unconst func.return_type in
@@ -492,6 +493,12 @@ and any_to_unconst = function
   | Any -> Unconst
   | List(typ) -> let typ' = any_to_unconst typ in List(typ')
   | _ as typ -> typ
+
+(* Returns true if has Any, otherwise false - DOES NOT DEAL WITH FUNCTIONS *)
+and has_any = function
+  | Any -> true
+  | List(typ) -> has_any typ
+  | _ -> false
 
 (* Returns true if Num or Unconst, otherwise false *)
 and is_num = function
@@ -595,8 +602,10 @@ and check_binop env e1 op e2 =
             | Less | Leq | Greater | Geq -> Bool
             | _ -> dead_code_path_error "check_binop" in
           (* Constrain variable types to Num if neccessary *)
-          let env', ew1' = constrain_ew env' ew1 Num in
-          let env', ew2' = constrain_ew env' ew2 Num in
+          let env', ew1' = if is_num typ1 then constrain_ew env' ew1 Num else
+            env', ew1 in
+          let env', ew2' = if is_num typ2 then constrain_ew env' ew2 Num else 
+            env', ew2 in
           env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
         else binop_error typ1 op typ2
       
