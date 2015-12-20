@@ -15,11 +15,15 @@
 
 let numeric = ['0'-'9']
 let whitespace = [' ' '\n' '\r' '\t']
+let newline = '\n' | "\r\n"
 
 rule token = parse
 
+(* Newline - for line number on error report to user *)
+| newline   { Lexing.new_line lexbuf; token lexbuf }
+
 (* Whitespace *)
-| whitespace*    { token lexbuf }
+| whitespace    { token lexbuf }
 
 (* Comments *)
 | "/*"    { comment lexbuf }
@@ -89,4 +93,5 @@ rule token = parse
 
 and comment = parse
 | "*/"    { token lexbuf }
+| newline { Lexing.new_line lexbuf; comment lexbuf }
 | _       { comment lexbuf }

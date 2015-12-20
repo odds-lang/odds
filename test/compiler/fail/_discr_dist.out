@@ -1,2 +1,2 @@
-[31mSemantic error[0m, line 1:
+[31mSemantic error[0m:
   Invalid distribution with vals type 'Num' and weights type 'List[Num]'
