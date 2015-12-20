@@ -53,7 +53,7 @@ let _ =
   with 
     | Scanner.Illegal_Character(m) -> 
         let line_num, column_num, _ = get_pos_and_tok lexbuf in
-        eprintf "Syntax Rrror on line %d at column %d: %s\n" 
+        eprintf "Syntax Error on line %d at column %d: %s\n" 
           line_num column_num m 
     | Analyzer.Semantic_Error(m) -> 
         let line_num, _, _ = get_pos_and_tok lexbuf in
