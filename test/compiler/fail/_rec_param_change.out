@@ -1,1 +1,2 @@
-Analyzer Exception: Function 'f' expected argument of type Num but was passed Bool instead
+[31mSemantic error[0m, line 1:
+  Function 'f' expected argument of type Num but was passed Bool instead

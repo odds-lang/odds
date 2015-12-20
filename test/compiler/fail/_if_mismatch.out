@@ -1,1 +1,2 @@
-Analyzer Exception: Invalid attempt to use conditional with mismatched types Num and String
+[31mSemantic error[0m, line 1:
+  Invalid attempt to use conditional with mismatched types Num and String

@@ -1,1 +1,2 @@
-Analyzer Exception: Invalid use of binary operator '||' with types Num and Bool
+[31mSemantic error[0m, line 1:
+  Invalid use of binary operator '||' with types Num and Bool

@@ -1,1 +1,2 @@
-Analyzer Exception: Expected type Bool but got type Num instead
+[31mSemantic error[0m, line 1:
+  Expected type Bool but got type Num instead
