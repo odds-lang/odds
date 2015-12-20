@@ -42,37 +42,37 @@ let builtins = VarMap.add "print" {
 } builtins
 
 (* Dist builtins *)
-let builtins = VarMap.add "dist_add" {
+let builtins = VarMap.add "_dist_add" {
   name = "dist_add";
   s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "dist_mult" {
+let builtins = VarMap.add "_dist_mult" {
   name = "dist_mult";
   s_type = Func({ param_types = [Dist_t; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "dist_shift" {
+let builtins = VarMap.add "_dist_shift" {
   name = "dist_shift";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "dist_stretch" {
+let builtins = VarMap.add "_dist_stretch" {
   name = "dist_stretch";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "dist_exp" {
+let builtins = VarMap.add "_dist_exp" {
   name = "dist_exp";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = Dist_t; });
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "dist_sample" {
+let builtins = VarMap.add "_dist_sample" {
   name = "dist_sample";
   s_type = Func({ param_types = [Num; Dist_t]; return_type = List(Num); });
   builtin = true;
@@ -103,7 +103,7 @@ let builtins = VarMap.add "tail" {
   builtin = true;
 } builtins
 
-let builtins = VarMap.add "cons" {
+let builtins = VarMap.add "_cons" {
   name = "cons";
   s_type = Func({ param_types = [Any ; List(Any)]; return_type = List(Any); });
   builtin = true;
@@ -575,13 +575,13 @@ and check_unop env op e =
 and check_binop env e1 op e2 =
   if is_sugar op then (* Check if binop is sugar. If so unsugar. *)
     let func_name, e1', e2' = match op with
-        | Cons -> "cons", e1, e2
-        | D_Plus -> "dist_add", e1, e2
-        | D_Times -> "dist_mult", e1, e2
-        | D_Shift -> "dist_shift", e2, e1
-        | D_Stretch -> "dist_stretch", e2, e1
-        | D_Power -> "dist_exp", e2, e1
-        | D_Sample -> "dist_sample", e2, e1
+        | Cons -> "_cons", e1, e2
+        | D_Plus -> "_dist_add", e1, e2
+        | D_Times -> "_dist_mult", e1, e2
+        | D_Shift -> "_dist_shift", e2, e1
+        | D_Stretch -> "_dist_stretch", e2, e1
+        | D_Power -> "_dist_exp", e2, e1
+        | D_Sample -> "_dist_sample", e2, e1
         | _ -> dead_code_path_error "check_binop" in
       
     (* Unsugar expression and refeed it to Analyzer *)
@@ -702,7 +702,7 @@ and check_func_call_ret env id args ret_default =
       | "head" -> let Sast.Expr(_, typ) = List.hd args in
           env, get_ret_type_from_typ typ
       | "tail" -> let Sast.Expr(_, typ) = List.hd args in env, typ
-      | "cons" ->
+      | "_cons" ->
           let Sast.Expr(cons, c_typ) = List.hd args and
             Sast.Expr(l, l_typ) = List.hd (List.tl args) in
           let l_elem_typ = get_ret_type_from_typ l_typ in
