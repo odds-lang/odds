@@ -486,7 +486,7 @@ and unconst_to_any = function
       let param_types' = List.map unconst_to_any func.param_types and
         return_type' = unconst_to_any func.return_type in
       Func({ param_types = param_types'; return_type = return_type' })
-  | _ as typ -> typ
+  | _ as typ -> typ 
 
 (* Turns Any to Unconst - DOES NOT AFFECT FUNCTIONS *)
 and any_to_unconst = function
@@ -602,10 +602,8 @@ and check_binop env e1 op e2 =
             | Less | Leq | Greater | Geq -> Bool
             | _ -> dead_code_path_error "check_binop" in
           (* Constrain variable types to Num if neccessary *)
-          let env', ew1' = if is_num typ1 then constrain_ew env' ew1 Num else
-            env', ew1 in
-          let env', ew2' = if is_num typ2 then constrain_ew env' ew2 Num else 
-            env', ew2 in
+          let env', ew1' = constrain_ew env' ew1 Num in
+          let env', ew2' = constrain_ew env' ew2 Num in
           env', Sast.Expr(Sast.Binop(ew1', op, ew2'), result_type)
         else binop_error typ1 op typ2
       
