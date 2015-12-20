@@ -486,7 +486,7 @@ and unconst_to_any = function
       let param_types' = List.map unconst_to_any func.param_types and
         return_type' = unconst_to_any func.return_type in
       Func({ param_types = param_types'; return_type = return_type' })
-  | _ as typ -> typ
+  | _ as typ -> typ 
 
 (* Turns Any to Unconst - DOES NOT AFFECT FUNCTIONS *)
 and any_to_unconst = function
