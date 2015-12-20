@@ -1,2 +1,2 @@
-[31mSemantic error[0m, line 1:
+[31mSemantic error[0m:
   Function 'sum' expected argument of type Num but was passed Bool instead

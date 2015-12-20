@@ -1,2 +1,2 @@
-[31mSemantic error[0m, line 1:
+[31mSemantic error[0m:
   Function 'sum' expects 2 argument(s) but was called with 3 instead
