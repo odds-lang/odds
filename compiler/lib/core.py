@@ -130,10 +130,6 @@ def E(d):
     """ Expected value of the distribution """
     return sum(d) * 1.0 / DIST_LENGTH
 
-def concat_str(s1, s2):
-    """ Return s1 + s2 """
-    return s1 + s2
-
 """
 END ODDS CORE LIBRARY
 BEGIN USER CODE
