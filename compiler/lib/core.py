@@ -124,11 +124,11 @@ def P(n, d):
     """Return the probability that the distribution is less than 
     the inputted value
     """
-    return len([i for i in d if i < n]) / DIST_LENGTH
+    return len([i for i in d if i < n]) * 1.0 / DIST_LENGTH
 
 def E(d):
     """ Expected value of the distribution """
-    return sum(d) / DIST_LENGTH
+    return sum(d) * 1.0 / DIST_LENGTH
 
 def concat_str(s1, s2):
     """ Return s1 + s2 """
