@@ -18,7 +18,7 @@ do list_empty = (l) -> return len(l) == 0
 do list_make = (n, v) ->
     do if n < 0 then exception("list_make: n can not be negtive") else void
     do aux = (acc, n) ->
-        return if n == 0 then acc else aux(cons(v, acc), n - 1)
+        return if n == 0 then acc else aux(v :: acc, n - 1)
     return aux([], n)
 
 /*
@@ -49,7 +49,7 @@ do list_rev = (l) ->
     do aux = (acc, l) ->
         return
             if list_empty(l) then acc
-            else aux(cons(head(l), acc), tail(l))
+            else aux(head(l) :: acc, tail(l))
     return aux([], l)
 
 /* Concatenate lists a and b and return the result */
@@ -57,7 +57,7 @@ do list_concat = (a, b) ->
     do aux = (acc, l) ->
         return
             if list_empty(l) then list_rev(acc)
-            else aux(cons(head(l), acc), tail(l))
+            else aux(head(l) :: acc, tail(l))
     return aux(list_rev(a), b)
 
 /* Returns a new list of l's elements with function f applied */
@@ -67,7 +67,7 @@ do list_map = (f, l) ->
             if list_empty(l) then list_rev(acc)
             else (() ->
                 do applied = f(head(l))
-                return aux(cons(applied, acc), tail(l))
+                return aux(applied :: acc, tail(l))
             )()
     return aux([], l)
 
@@ -89,8 +89,8 @@ do list_insert = (v, i, l) ->
         else void
     do aux = (acc, i, l) ->
         return
-            if i == 0 then list_concat(list_rev(cons(v, acc)), l)
-            else aux(cons(head(l), acc), i - 1, tail(l))
+            if i == 0 then list_concat(list_rev(v :: acc), l)
+            else aux(head(l) :: acc, i - 1, tail(l))
     return aux([], i, l)
 
 /*
@@ -106,5 +106,5 @@ do list_remove = (i, l) ->
     do aux = (acc, i, l) ->
         return
             if i == 0 then list_concat(list_rev(acc), tail(l))
-            else aux(cons(head(l), acc), i - 1, tail(l))
+            else aux(head(l) :: acc, i - 1, tail(l))
     return aux([], i, l)

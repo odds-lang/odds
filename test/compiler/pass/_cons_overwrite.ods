@@ -1,0 +1,4 @@
+do x = [1, 2, 3]
+do cons = 42
+do print(0 :: x)
+do print(cons)
