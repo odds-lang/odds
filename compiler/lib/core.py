@@ -104,7 +104,7 @@ def make_discr_dist(vals, weights):
             cum_i = cum_i + 1
     return dist_list
 
-def shift_dist(d, n):
+def dist_shift(n, d):
     """Shift each element in distribution d by n"""
     return [ x + n for x in d ]
 
