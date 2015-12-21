@@ -5,6 +5,11 @@
 
 The repository for our PLT project, Fall 2015.
 
+Check out the [Final Report][report] for detailed instructions on installation
+and usage.
+
+[report]: docs/Final%20Report.pdf
+
 Contributors:
 - Alexandra Medway (afm2134)
 - Alex Kalicki (avk2116)
